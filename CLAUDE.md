@@ -49,9 +49,11 @@ contracts:
 6. **No secrets in front-end files.** (Currently none; n8n holds credential references only.)
 7. **Inspect first, plan, get approval, implement, test, document.** Work in small milestones.
 
-## Known open items (not yet done)
-- **`smart-follow-up` mismatch:** `module2.1.json` uses `inactiveAfterDays = 0` (treats every lead as inactive) while the front-end uses ≥ 7 days. **Reconcile before the jury demo.** Do not edit any n8n JSON without asking the user first.
-- **Settings "Test connections"** POSTs `{ping:true}` and classifies reachable/timeout/unreachable. The two **mutating** webhooks (lead-capture, smart-follow-up) are only fully Odoo-safe to test once the **workflow ping-guard** is imported (an `IF body.ping` short-circuit before any Odoo node, returning `{ok,pong:true}`); without it the UI flags "ran (no ping-guard)". Guard not yet applied to the JSON.
+## Status & open items
+- **DONE — `smart-follow-up` threshold:** `module2.1.json` now uses `inactiveAfterDays = 7`, matching the front-end (committed). Relevant only to **Live** follow-up; Demo mode computes inactivity in-browser.
+- **DONE — workflow ping-guard:** all four webhook JSONs now have an `IF ($json.body.ping === true)` → `Respond Pong {ok,pong:true}` short-circuit *before* any Odoo node (committed). Existing nodes unchanged; the guard only fires on a `{ping:true}` body — normal requests flow exactly as before.
+- **Front-end Test button:** `probe` flags are now all `true`, so "Test connections" POSTs `{ping:true}` to **all four** endpoints. This is Odoo-safe **only after the four guarded workflows are imported into the running n8n**. Until then, do **not** click "Test connections" in Live mode (the unguarded workflows would execute for real). Normal capture/assistant Live flows do NOT depend on the guard.
+- **Demo mode needs no backend:** follow-up and analytics in Demo mode are computed in-browser from the seed dataset and never call n8n.
 - Optional docs to add: `ARCHITECTURE.md`, `DEMO.md`, `TESTING.md`, `docs/workflows.md`.
 
 ## Repo contents
