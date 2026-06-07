@@ -1456,7 +1456,7 @@ function wireSettings(){
     // Endpoints reachable through an Odoo WRITE path are NOT probed until the workflow ping-guard
     // exists, so a connection test can never create a lead or modify CRM data. crm-summary has no
     // write node, so it is always safe to exercise. Once the ping-guard is imported, flip these to true.
-    const probe={ leadCapture:true, analytics:true, followUp:true, assistant:true };
+    const probe={ leadCapture:false, analytics:true, followUp:false, assistant:false };
     const payload={
       leadCapture:{ ping:true },
       analytics:{ trigger:'connection-test', requested_by:(state.session&&state.session.email)||'console' },

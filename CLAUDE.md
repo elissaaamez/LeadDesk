@@ -52,7 +52,7 @@ contracts:
 ## Status & open items
 - **DONE — `smart-follow-up` threshold:** `module2.1.json` now uses `inactiveAfterDays = 7`, matching the front-end (committed). Relevant only to **Live** follow-up; Demo mode computes inactivity in-browser.
 - **DONE — workflow ping-guard:** all four webhook JSONs now have an `IF ($json.body.ping === true)` → `Respond Pong {ok,pong:true}` short-circuit *before* any Odoo node (committed). Existing nodes unchanged; the guard only fires on a `{ping:true}` body — normal requests flow exactly as before.
-- **Front-end Test button:** `probe` flags are now all `true`, so "Test connections" POSTs `{ping:true}` to **all four** endpoints. This is Odoo-safe **only after the four guarded workflows are imported into the running n8n**. Until then, do **not** click "Test connections" in Live mode (the unguarded workflows would execute for real). Normal capture/assistant Live flows do NOT depend on the guard.
+- **Front-end Test button (construction-safe):** `probe` flags are `crm-summary`-only, so "Test connections" only POSTs to `crm-summary` (which has no Odoo write node). Lead Capture, Smart Follow-Up, and the Assistant show "not tested — would modify Odoo." Safe regardless of n8n state — no footgun. If you later import the four guarded workflows, flip the `probe` flags to `true` to ping all four safely. Normal capture/assistant Live flows do NOT depend on the guard.
 - **Demo mode needs no backend:** follow-up and analytics in Demo mode are computed in-browser from the seed dataset and never call n8n.
 - Optional docs to add: `ARCHITECTURE.md`, `DEMO.md`, `TESTING.md`, `docs/workflows.md`.
 
