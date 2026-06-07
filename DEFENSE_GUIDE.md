@@ -1,4 +1,4 @@
-# PFE Defense Guide — Nexus CRM
+# PFE Defense Guide — AI CRM Platform
 
 This is your private preparation document. It explains the system, the decisions behind it,
 how to demo it, and the questions a jury is likely to ask — with answers you can give in
@@ -29,7 +29,7 @@ Three layers, bottom to top:
 2. **Orchestration layer** — n8n connects everything. Each capability is a workflow exposed
    as an HTTP webhook. n8n handles the LLM calls, the JSON parsing, the Odoo reads/writes,
    and the deduplication logic.
-3. **Presentation layer** — the Nexus console (this website). A single self-contained page
+3. **Presentation layer** — the AI CRM Platform console (this website). A single self-contained page
    that calls the four webhooks and presents results to managers and sales reps.
 
 The four workflows:

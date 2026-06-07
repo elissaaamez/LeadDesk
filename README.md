@@ -1,4 +1,4 @@
-# Nexus CRM — AI Sales Operations Console
+# AI CRM Platform — Sales Operations Console
 
 A single-page operations console that unifies four n8n + Ollama + Odoo workflows into one
 interface a sales team can actually use: capture leads, avoid duplicates, summarize CRM
