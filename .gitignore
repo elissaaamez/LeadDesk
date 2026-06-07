@@ -1,2 +1,7 @@
 node_modules/
 *.bak
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
