@@ -1,0 +1,273 @@
+{
+  "name": "module2.1",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "=crm.lead",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {},
+        "filterRequest": {
+          "filter": [
+            {
+              "fieldName": "type",
+              "value": "opportunity"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        176,
+        0
+      ],
+      "id": "f9a61694-64a2-419d-a44e-0e953761fb10",
+      "name": "Get many items",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const leads = $input.all().map(item => item.json);\nconst now = new Date();\n\nconst inactiveAfterDays = 0;\n\n// Step 1: filter inactive leads\nconst inactiveLeads = leads\n  .filter(lead => lead.type === \"opportunity\")\n  .map(lead => {\n    const lastUpdate = new Date(lead.write_date || lead.create_date);\n    const diffDays = (now - lastUpdate) / (1000 * 60 * 60 * 24);\n\n    return {\n      ...lead,\n      inactive_days: Math.floor(diffDays)\n    };\n  })\n  .filter(lead => lead.inactive_days >= inactiveAfterDays);\n\n// Step 2: remove duplicates by email\nconst uniqueLeadsMap = {};\n\ninactiveLeads.forEach(lead => {\n  const email = (lead.email_from || \"\").toLowerCase();\n\n  if (!email) return;\n\n  // keep the MOST RECENT lead only\n  if (\n    !uniqueLeadsMap[email] ||\n    new Date(lead.write_date) > new Date(uniqueLeadsMap[email].write_date)\n  ) {\n    uniqueLeadsMap[email] = lead;\n  }\n});\n\n// Step 3: return clean list\nconst finalLeads = Object.values(uniqueLeadsMap).map(lead => ({\n  json: {\n    id: lead.id,\n    name: lead.name,\n    email: lead.email_from,\n    phone: lead.phone,\n    inactive_days: lead.inactive_days,\n    status: \"inactive\"\n  }\n}));\n\nreturn finalLeads;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        0
+      ],
+      "id": "7e8f4170-a419-4139-9192-769df40f1738",
+      "name": "Detect Inactive Leads"
+    },
+    {
+      "parameters": {
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        688,
+        0
+      ],
+      "id": "c353f9dc-1535-4c94-8b20-f7f43de17539",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        688,
+        176
+      ],
+      "id": "6921c9e8-bfbd-4257-a500-a9ad448ba028",
+      "name": "Ollama Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "1m5rFaiuChafuLdv",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const raw = item.json.text || item.json.output || item.json.response || \"\";\n\n  let cleaned = raw\n    .replace(/```json/g, \"\")\n    .replace(/```/g, \"\")\n    .trim();\n\n  let data;\n\n  try {\n    data = JSON.parse(cleaned);\n  } catch (error) {\n    data = {\n      lead_id: null,\n      name: \"\",\n      email: \"\",\n      inactive_days: null,\n      follow_up_message: raw\n    };\n  }\n\n  return {\n    json: data\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ],
+      "id": "dcd97d3d-b728-4693-83a5-e077b7fb9d5e",
+      "name": "Format Follow-Up Result"
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const lead = item.json;\n\n  return {\n    json: {\n      ...lead,\n      chatInput:\n`Generate a CRM follow-up message for this inactive lead.\n\nReturn ONLY valid JSON with this exact structure:\n{\n  \"lead_id\": ${lead.id},\n  \"name\": \"${lead.name}\",\n  \"email\": \"${lead.email}\",\n  \"inactive_days\": ${lead.inactive_days},\n  \"follow_up_message\": \"\"\n}\n\nRules:\n- follow_up_message must start with: Dear ${lead.name},\n- Keep it polite and professional.\n- Mention that we are following up regarding their interest.\n- Ask if they would like to continue the discussion.\n- Do not use placeholders like [Name] or [Your Name].\n- Do not invent company details.\n- End with: Best regards, Sales Team\n- Return JSON only.`\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ],
+      "id": "6786be5f-5cda-4508-a4d5-44bb35de8187",
+      "name": "Prepare Follow-Up Prompt"
+    },
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "=crm.lead",
+        "operation": "update",
+        "customResourceId": "={{ $json.lead_id }}",
+        "fieldsToCreateOrUpdate": {
+          "fields": [
+            {
+              "fieldName": "description",
+              "fieldValue": "={{ $json.follow_up_message }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        0
+      ],
+      "id": "fb7f0d77-2b64-4737-a22a-26d295486a3d",
+      "name": "Update an item",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "smart-follow-up",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "2d875ba1-d0f7-4b6d-81e3-165857ca52a0",
+      "name": "Webhook",
+      "webhookId": "f7fdf5b2-0b9e-401c-9d81-825e3c4aa6bf"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1168,
+        160
+      ],
+      "id": "b22ad004-d55b-4c7d-948f-08512c80bede",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get many items": {
+      "main": [
+        [
+          {
+            "node": "Detect Inactive Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Inactive Leads": {
+      "main": [
+        [
+          {
+            "node": "Prepare Follow-Up Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Format Follow-Up Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Follow-Up Prompt": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Follow-Up Result": {
+      "main": [
+        [
+          {
+            "node": "Update an item",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get many items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an item": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1bf74c20-3818-4cc4-96cb-9cc05fe066dc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5576a61ccc5fa33a18217bcace55a423e3e430baa28dacc37bad3c4d0ca47da7"
+  },
+  "id": "ZmIHQRRA76i4h7ZA",
+  "tags": []
+}

@@ -1,0 +1,201 @@
+{
+  "name": "CRM Analytics Summary",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "custom",
+        "customResource": "=crm.lead",
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.odoo",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "dbbda058-a12f-4cd9-9c0b-5992db94eaa9",
+      "name": "Get many items",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const leads = $input.all().map(item => item.json);\n\nconst opportunities = leads.filter(lead => lead.type === \"opportunity\");\n\nconst total = opportunities.length;\nconst withEmail = opportunities.filter(l => l.email_from || l.email_normalized).length;\nconst withPhone = opportunities.filter(l => l.phone).length;\n\nconst now = new Date();\n\nconst inactive = opportunities.filter(lead => {\n  const lastUpdate = new Date(lead.write_date || lead.create_date);\n  const diffDays = (now - lastUpdate) / (1000 * 60 * 60 * 24);\n  return diffDays >= 7;\n}).length;\n\nconst newThisWeek = opportunities.filter(lead => {\n  const created = new Date(lead.create_date);\n  const diffDays = (now - created) / (1000 * 60 * 60 * 24);\n  return diffDays <= 7;\n}).length;\n\nreturn [\n  {\n    json: {\n      total_opportunities: total,\n      opportunities_with_email: withEmail,\n      opportunities_with_phone: withPhone,\n      inactive_opportunities: inactive,\n      new_this_week: newThisWeek\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "23adee11-699c-44e8-93ed-9ec26b5024cd",
+      "name": "Calculate CRM KPIs"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json;\n\nreturn [\n  {\n    json: {\n      ...data,\n      chatInput:\n`Create a short CRM analytics summary for a sales manager.\n\nCRM Data:\n- Total opportunities: ${data.total_opportunities}\n- Opportunities with email: ${data.opportunities_with_email}\n- Opportunities with phone: ${data.opportunities_with_phone}\n- Inactive opportunities: ${data.inactive_opportunities}\n- New opportunities this week: ${data.new_this_week}\n\nReturn the result in this exact format:\n\nCRM Daily Summary:\n<2 short sentences>\n\nKey Observations:\n- <observation based exactly on the numbers>\n- <observation based exactly on the numbers>\n\nRecommended Action:\n<one practical recommendation>\n\nStrict rules:\n- Do not invent numbers.\n- Do not calculate new numbers unless explicitly obvious from the provided data.\n- If email count equals total opportunities, say all opportunities have email.\n- If phone count equals total opportunities, say all opportunities have phone.\n- Mention that inactive opportunities need attention.\n- Do not mention marketing effectiveness unless the data proves it.\n- Use only the provided CRM data.`\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "ebd44492-61b4-496b-a051-49fbaa492ced",
+      "name": "Prepare Summary Prompt"
+    },
+    {
+      "parameters": {
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        800,
+        0
+      ],
+      "id": "944ee9e1-08c8-4fa9-9f4e-5e42f52777cd",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama3.2:3b",
+        "options": {
+          "temperature": 0
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        800,
+        160
+      ],
+      "id": "67e8f8c0-58ff-4dd1-a111-6423ba471d9f",
+      "name": "Ollama Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "1m5rFaiuChafuLdv",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-summary",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ccb3ae9c-49ed-4255-8c50-62d2bd7a10fc",
+      "name": "Webhook",
+      "webhookId": "d85dc3f4-3c8c-4e34-b642-96dcb1982090"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1152,
+        0
+      ],
+      "id": "e0826a54-e921-46f0-8ca9-8dcb5d0d9251",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get many items": {
+      "main": [
+        [
+          {
+            "node": "Calculate CRM KPIs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate CRM KPIs": {
+      "main": [
+        [
+          {
+            "node": "Prepare Summary Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Summary Prompt": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get many items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a2b3a75b-0522-4539-823a-26223cd308de",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5576a61ccc5fa33a18217bcace55a423e3e430baa28dacc37bad3c4d0ca47da7"
+  },
+  "id": "hd0flGIv3GjoDarR",
+  "tags": []
+}

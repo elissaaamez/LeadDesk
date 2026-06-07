@@ -1,0 +1,1464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nexus CRM · AI Sales Operations Console</title>
+<meta name="description" content="Internal AI-assisted CRM operations console — lead capture, deduplication, follow-up generation, analytics, and an Odoo-connected assistant, powered by n8n + Ollama." />
+
+<!-- Distinctive type pairing: Fraunces (editorial display) + Hanken Grotesk (clean body) + JetBrains Mono (data).
+     Falls back to system fonts gracefully when offline. -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================================
+   NEXUS CRM — AI Sales Operations Console
+   Single-file build. No dependencies, no build step. Open index.html directly
+   or serve it. Connects to live n8n webhooks; falls back to honest demo data.
+   ----------------------------------------------------------------------------
+   Design language: "refined operations console" — warm paper canvas, deep
+   aubergine ink for structure, lavender + mist used as solid accents and
+   hairlines (never as full-page gradient washes).
+   ========================================================================== */
+
+:root{
+  /* Surfaces */
+  --paper:#F4EEE4;
+  --paper-2:#FBF7F0;
+  --card:#FFFCF7;
+  --card-2:#FAF5EC;
+
+  /* Ink + text */
+  --ink:#221A2B;
+  --ink-soft:#473E55;
+  --muted:#7B7286;
+  --faint:#A89FB0;
+
+  /* Brand accents (refined from the original lavender/mist) */
+  --lav:#8775B0;
+  --lav-deep:#6A5A95;
+  --mist:#6FA9B4;
+  --mist-deep:#4E8C99;
+  --sand:#E6D7C1;
+
+  /* Semantic */
+  --hot:#C05A52;
+  --warm:#C2913F;
+  --cold:#6E97A0;
+  --ok:#5C8A66;
+  --danger:#B0455A;
+
+  /* Lines + shadow */
+  --line:rgba(34,26,43,.10);
+  --line-2:rgba(34,26,43,.06);
+  --shadow-sm:0 1px 2px rgba(34,26,43,.05), 0 2px 8px rgba(34,26,43,.04);
+  --shadow:0 12px 34px rgba(56,44,82,.10), 0 2px 8px rgba(56,44,82,.05);
+  --shadow-lg:0 30px 70px rgba(56,44,82,.16);
+
+  --radius:18px;
+  --radius-sm:13px;
+  --radius-lg:26px;
+
+  --font-display:'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-body:'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+
+  --rail:300px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--font-body);
+  color:var(--ink);
+  background:var(--paper);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  line-height:1.5;
+}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:inherit}
+::selection{background:rgba(135,117,176,.26)}
+:focus-visible{outline:2px solid var(--lav);outline-offset:2px}
+
+/* Subtle paper grain + two faint accent glows for atmosphere (not a full wash) */
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(820px 540px at 88% -8%, rgba(111,169,180,.13), transparent 60%),
+    radial-gradient(720px 520px at -6% 108%, rgba(135,117,176,.12), transparent 60%);
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
+#root{position:relative;z-index:1}
+
+/* ---------- Scrollbars ---------- */
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:rgba(135,117,176,.32);border-radius:99px;border:2px solid transparent;background-clip:padding-box}
+*::-webkit-scrollbar-thumb:hover{background:rgba(135,117,176,.5);background-clip:padding-box}
+
+/* ============================ LOGIN ============================ */
+.auth{min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr}
+.auth-aside{
+  position:relative;overflow:hidden;color:#F4EEE4;padding:54px 56px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  background:linear-gradient(168deg,#241B2F 0%, #2E2440 55%, #3A2C4F 100%);
+}
+.auth-aside::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(540px 360px at 78% 12%, rgba(111,169,180,.30), transparent 62%),
+    radial-gradient(520px 420px at 10% 96%, rgba(135,117,176,.34), transparent 60%);
+}
+.auth-aside > *{position:relative;z-index:1}
+.auth-mark{display:flex;align-items:center;gap:13px}
+.auth-mark .glyph{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--mist),var(--lav));color:#1c1626;box-shadow:0 14px 30px rgba(0,0,0,.28)}
+.auth-mark b{font-family:var(--font-display);font-weight:600;font-size:20px;letter-spacing:.2px;display:block;line-height:1.05}
+.auth-mark span{font-size:12.5px;color:#C9BFD8;letter-spacing:.16em;text-transform:uppercase}
+.auth-hero h1{font-family:var(--font-display);font-weight:500;font-size:clamp(34px,4.6vw,56px);line-height:1.02;letter-spacing:-.5px;margin:0 0 18px}
+.auth-hero h1 em{font-style:italic;color:#C8B8E6}
+.auth-hero p{max-width:430px;color:#D6CDE2;font-size:16px;line-height:1.65;margin:0}
+.auth-points{display:grid;gap:14px;margin-top:6px}
+.auth-point{display:flex;gap:13px;align-items:flex-start;color:#E7E0F0}
+.auth-point .dot{margin-top:3px;flex:0 0 auto;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+.auth-point b{font-weight:700}
+.auth-point small{display:block;color:#BCB2CF;font-size:13px;margin-top:1px}
+.auth-foot{font-size:12.5px;color:#A99FBC;letter-spacing:.04em}
+
+.auth-main{display:grid;place-items:center;padding:40px}
+.auth-card{width:min(420px,100%)}
+.auth-kicker{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--lav-deep)}
+.auth-card h2{font-family:var(--font-display);font-weight:500;font-size:32px;margin:14px 0 6px;letter-spacing:-.4px}
+.auth-card .sub{color:var(--muted);margin:0 0 26px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:700;color:var(--ink-soft);margin-bottom:7px;letter-spacing:.01em}
+.input{
+  width:100%;background:var(--card);border:1px solid var(--line);border-radius:13px;
+  padding:13px 15px;font-size:15px;transition:border-color .18s, box-shadow .18s, background .18s;
+}
+.input::placeholder{color:var(--faint)}
+.input:focus{border-color:var(--lav);box-shadow:0 0 0 4px rgba(135,117,176,.14);background:#fff;outline:none}
+textarea.input{min-height:120px;resize:vertical;line-height:1.6}
+.input-wrap{position:relative}
+.input-wrap .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none}
+.input-wrap .input{padding-left:42px}
+.auth-error{display:flex;gap:9px;align-items:center;background:rgba(176,69,90,.1);color:#923146;border:1px solid rgba(176,69,90,.2);
+  border-radius:12px;padding:11px 13px;font-size:13.5px;font-weight:600;margin-bottom:14px}
+.demo-creds{margin-top:22px;border-top:1px dashed var(--line);padding-top:18px}
+.demo-creds .t{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.cred{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);
+  border-radius:11px;padding:9px 12px;margin-bottom:8px;cursor:pointer;transition:.16s}
+.cred:hover{border-color:var(--lav);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.cred code{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft)}
+.cred .role{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--lav-deep);
+  background:rgba(135,117,176,.12);padding:4px 9px;border-radius:99px}
+
+/* ============================ APP SHELL ============================ */
+.shell{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh}
+.rail{
+  position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px;
+  padding:24px 18px;color:#EFE9F2;
+  background:linear-gradient(176deg,#241B2F, #2C2240 70%, #322647);
+  box-shadow:inset -1px 0 0 rgba(255,255,255,.04), 14px 0 50px rgba(36,27,47,.10);
+}
+.rail-brand{display:flex;align-items:center;gap:12px;padding:6px 8px 14px}
+.rail-brand .glyph{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--mist),var(--lav));color:#1c1626;box-shadow:0 12px 26px rgba(0,0,0,.30)}
+.rail-brand b{font-family:var(--font-display);font-weight:600;font-size:19px;display:block;line-height:1.05;letter-spacing:.2px}
+.rail-brand span{font-size:11px;color:#B7ADCB;letter-spacing:.15em;text-transform:uppercase}
+
+.rail-mode{margin:4px 6px 12px;display:flex;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  border-radius:11px;padding:4px;gap:4px}
+.rail-mode button{flex:1;border-radius:8px;padding:7px 6px;font-size:12px;font-weight:700;color:#C5BBD7;display:flex;align-items:center;justify-content:center;gap:6px;transition:.16s}
+.rail-mode button.on{background:rgba(255,255,255,.92);color:#241B2F;box-shadow:0 4px 12px rgba(0,0,0,.18)}
+.rail-mode .dotpulse{width:7px;height:7px;border-radius:99px;background:currentColor}
+
+.rail-nav{display:flex;flex-direction:column;gap:3px;margin-top:4px}
+.rail-sec{font-size:10.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8478A0;padding:14px 12px 6px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;color:#CFC6DD;font-weight:600;font-size:14.5px;text-align:left;transition:.16s;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:linear-gradient(100deg,rgba(135,117,176,.32),rgba(111,169,180,.22));color:#fff}
+.nav-item.active::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:99px;background:linear-gradient(var(--mist),var(--lav))}
+.nav-item .ico{flex:0 0 auto;opacity:.92}
+.nav-item .badge{margin-left:auto;font-size:11px;font-weight:800;background:rgba(255,255,255,.12);padding:2px 8px;border-radius:99px}
+
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+.rail-user{display:flex;align-items:center;gap:11px;padding:11px;border-radius:13px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)}
+.rail-user .av{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;
+  background:linear-gradient(135deg,rgba(111,169,180,.4),rgba(135,117,176,.45));font-family:var(--font-display);font-weight:600}
+.rail-user b{display:block;font-size:14px}
+.rail-user span{display:block;font-size:11.5px;color:#B0A6C4}
+.rail-logout{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:10px;border-radius:11px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#D8CFE6;font-weight:700;font-size:13.5px;transition:.16s}
+.rail-logout:hover{background:rgba(176,69,90,.22);border-color:rgba(176,69,90,.35);color:#fff}
+
+/* ============================ CONTENT ============================ */
+.content{padding:30px 38px 60px;max-width:1320px;width:100%}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:26px}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--lav-deep)}
+.page-head h1{font-family:var(--font-display);font-weight:500;font-size:clamp(28px,3.4vw,40px);line-height:1.04;letter-spacing:-.6px;margin:11px 0 8px}
+.page-head p{color:var(--muted);font-size:15.5px;max-width:680px;margin:0;line-height:1.6}
+.head-actions{display:flex;gap:10px;align-items:center;flex-shrink:0}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:13px;padding:11px 17px;font-weight:700;font-size:14px;transition:transform .14s, box-shadow .18s, background .18s, border-color .18s;border:1px solid transparent;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--ink);color:#FBF7F0;box-shadow:0 12px 26px rgba(34,26,43,.22)}
+.btn-primary:hover{background:#332843;box-shadow:0 16px 32px rgba(34,26,43,.28);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-accent{background:linear-gradient(135deg,var(--lav),var(--lav-deep));color:#fff;box-shadow:0 12px 26px rgba(106,90,149,.3)}
+.btn-accent:hover{transform:translateY(-1px);box-shadow:0 16px 34px rgba(106,90,149,.38)}
+.btn-ghost{background:var(--card);border-color:var(--line);color:var(--ink-soft)}
+.btn-ghost:hover{border-color:var(--lav);color:var(--ink);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.btn-sm{padding:8px 13px;font-size:13px;border-radius:10px}
+.btn-block{width:100%}
+
+.chip{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:7px 13px;font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+.modepill{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.04em;padding:6px 11px;border-radius:99px}
+.modepill .d{width:7px;height:7px;border-radius:99px}
+.modepill.demo{background:rgba(194,145,63,.12);color:#946615}
+.modepill.demo .d{background:var(--warm)}
+.modepill.live{background:rgba(92,138,102,.14);color:#3f6b4a}
+.modepill.live .d{background:var(--ok);box-shadow:0 0 0 0 rgba(92,138,102,.5);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(92,138,102,.45)}70%{box-shadow:0 0 0 6px rgba(92,138,102,0)}100%{box-shadow:0 0 0 0 rgba(92,138,102,0)}}
+
+/* Cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:22px}
+.card-lg{border-radius:var(--radius-lg);padding:26px}
+.card-title{display:flex;align-items:center;gap:11px;font-family:var(--font-display);font-weight:600;font-size:18.5px;margin:0 0 4px;letter-spacing:-.2px}
+.card-title .ti{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;background:rgba(135,117,176,.13);color:var(--lav-deep)}
+.card-sub{color:var(--muted);font-size:13.5px;margin:0 0 16px;line-height:1.55}
+
+/* KPI grid */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;transition:transform .18s, box-shadow .18s}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.kpi .accent{position:absolute;left:0;top:0;bottom:0;width:3px}
+.kpi .lbl{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.02em}
+.kpi .val{font-family:var(--font-display);font-weight:600;font-size:36px;line-height:1;margin:12px 0 5px;letter-spacing:-1px}
+.kpi .hint{font-size:12px;color:var(--faint);line-height:1.4}
+.kpi .ico{position:absolute;right:14px;top:14px;color:var(--line);opacity:.7}
+.kpi .ico svg{opacity:.5}
+
+/* Layout grids */
+.grid-2{display:grid;grid-template-columns:1.55fr 1fr;gap:18px}
+.grid-2e{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.stack{display:grid;gap:18px}
+
+/* Chart bits */
+.bars{display:flex;align-items:flex-end;gap:14px;height:230px;padding:8px 4px 0}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:10px;height:100%;justify-content:flex-end}
+.bar{width:100%;max-width:54px;border-radius:9px 9px 4px 4px;background:linear-gradient(var(--lav),var(--lav-deep));position:relative;transition:height 1s cubic-bezier(.22,1,.36,1);min-height:4px}
+.bar .cap{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--ink)}
+.bar-col .lab{font-size:11.5px;font-weight:700;color:var(--muted);text-align:center;line-height:1.25;height:30px;display:flex;align-items:flex-start;justify-content:center}
+
+.donut-wrap{display:flex;align-items:center;gap:22px}
+.donut{position:relative;flex:0 0 auto}
+.donut .center{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.donut .center b{font-family:var(--font-display);font-weight:600;font-size:30px;display:block;line-height:1}
+.donut .center span{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.legend{display:grid;gap:11px}
+.legend .row{display:flex;align-items:center;gap:10px;font-size:13.5px}
+.legend .sw{width:11px;height:11px;border-radius:4px;flex:0 0 auto}
+.legend .row b{margin-left:auto;font-family:var(--font-mono);font-weight:600}
+
+/* Summary text block */
+.summary{white-space:pre-wrap;background:var(--card-2);border:1px solid var(--line);border-radius:14px;padding:18px;line-height:1.7;font-size:14.5px;color:var(--ink-soft)}
+.summary strong{color:var(--ink)}
+
+/* Empty / notice */
+.empty{border:1.5px dashed var(--line);border-radius:16px;padding:34px 24px;text-align:center;color:var(--muted)}
+.empty .ei{width:52px;height:52px;margin:0 auto 12px;border-radius:14px;display:grid;place-items:center;background:rgba(135,117,176,.1);color:var(--lav-deep)}
+.empty b{display:block;color:var(--ink-soft);font-size:16px;margin-bottom:5px;font-family:var(--font-display);font-weight:600}
+.empty p{max-width:380px;margin:0 auto;font-size:13.5px;line-height:1.55}
+.notice{display:flex;gap:11px;align-items:flex-start;border-radius:13px;padding:13px 15px;font-size:13.5px;font-weight:600;line-height:1.5}
+.notice.info{background:rgba(111,169,180,.12);color:#3f6e76}
+.notice.warn{background:rgba(194,145,63,.12);color:#8a6018}
+.notice.soft{background:var(--card-2);color:var(--ink-soft);border:1px solid var(--line)}
+.notice .ni{flex:0 0 auto;margin-top:1px}
+
+/* Process / pipeline strip */
+.flowstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:6px}
+.flownode{position:relative;padding:18px 16px;text-align:center}
+.flownode .n{width:42px;height:42px;margin:0 auto 11px;border-radius:13px;display:grid;place-items:center;background:rgba(135,117,176,.12);color:var(--lav-deep)}
+.flownode b{display:block;font-size:14.5px;margin-bottom:4px}
+.flownode small{color:var(--muted);font-size:12.5px;line-height:1.45;display:block}
+.flownode::after{content:"";position:absolute;right:-1px;top:30px;width:2px;bottom:-1px;background:linear-gradient(rgba(135,117,176,.25),transparent)}
+.flownode:last-child::after{display:none}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;letter-spacing:.03em;padding:5px 10px;border-radius:99px;text-transform:capitalize}
+.badge .d{width:6px;height:6px;border-radius:99px}
+.b-hot{background:rgba(192,90,82,.14);color:#9d3f38}.b-hot .d{background:var(--hot)}
+.b-warm{background:rgba(194,145,63,.16);color:#8a6018}.b-warm .d{background:var(--warm)}
+.b-cold{background:rgba(110,151,160,.16);color:#42727b}.b-cold .d{background:var(--cold)}
+.b-ok{background:rgba(92,138,102,.16);color:#3f6b4a}.b-ok .d{background:var(--ok)}
+.b-dup{background:rgba(176,69,90,.14);color:#923146}.b-dup .d{background:var(--danger)}
+.b-neutral{background:rgba(123,114,134,.14);color:#5f5769}.b-neutral .d{background:var(--muted)}
+
+/* Lead table / workspace */
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.search{position:relative;flex:1;min-width:220px}
+.search .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--faint)}
+.search .input{padding-left:40px}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
+.seg button{padding:8px 13px;border-radius:8px;font-size:13px;font-weight:700;color:var(--muted);transition:.15s}
+.seg button.on{background:var(--ink);color:#FBF7F0}
+
+.lead-table{display:grid;gap:8px}
+.lead-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 16px;cursor:pointer;transition:.16s;text-align:left;width:100%}
+.lead-row:hover{border-color:var(--lav);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.lead-row.sel{border-color:var(--lav);background:linear-gradient(100deg,rgba(135,117,176,.08),rgba(111,169,180,.05))}
+.lead-row .who{display:flex;align-items:center;gap:13px;min-width:0}
+.lead-row .av{width:40px;height:40px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;font-family:var(--font-display);font-weight:600;font-size:16px;color:#fff;background:linear-gradient(135deg,var(--lav),var(--mist))}
+.lead-row .nm{min-width:0}
+.lead-row .nm b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lead-row .nm small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-mono)}
+.lead-row .meta{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.lead-row .days{font-size:12px;color:var(--faint);font-weight:600;min-width:62px;text-align:right}
+
+/* Detail drawer */
+.drawer .dh{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.drawer .dh .av{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-family:var(--font-display);font-weight:600;font-size:21px;color:#fff;background:linear-gradient(135deg,var(--lav),var(--mist))}
+.drawer .dh b{font-family:var(--font-display);font-weight:600;font-size:21px;display:block}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.kv .cell{background:var(--card-2);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+.kv .cell span{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.kv .cell b{font-size:14px;word-break:break-word;font-weight:600}
+.mailbox{background:linear-gradient(140deg,rgba(111,169,180,.1),var(--card-2));border:1px solid var(--line);border-radius:14px;padding:16px;line-height:1.65;white-space:pre-wrap;font-size:14px;color:var(--ink-soft);margin-top:8px}
+
+/* Result block */
+.result{border-radius:16px;padding:18px;border:1px solid var(--line);margin-top:18px;background:var(--card-2)}
+.result.created{border-color:rgba(92,138,102,.3);background:rgba(92,138,102,.07)}
+.result.dup{border-color:rgba(176,69,90,.28);background:rgba(176,69,90,.06)}
+.result.err{border-color:rgba(176,69,90,.3);background:rgba(176,69,90,.07)}
+.result .rh{display:flex;gap:12px;align-items:flex-start;margin-bottom:6px}
+.result .rh .ri{flex:0 0 auto;width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
+.result .rh b{display:block;font-size:16px}
+.result .rh span{display:block;color:var(--muted);font-size:13px;margin-top:1px}
+.raw{font-family:var(--font-mono);font-size:12px;background:#241B2F;color:#E7DFF0;border-radius:11px;padding:13px 15px;overflow:auto;white-space:pre-wrap;margin-top:12px;line-height:1.55;max-height:260px}
+
+/* AI Assistant */
+.chat{display:flex;flex-direction:column;height:min(640px,72vh)}
+.chat-log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:6px 4px 12px}
+.msg{max-width:78%;display:flex;gap:10px}
+.msg .b{border-radius:16px;padding:12px 15px;font-size:14.5px;line-height:1.6}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg.user .b{background:var(--ink);color:#FBF7F0;border-bottom-right-radius:5px}
+.msg.bot{align-self:flex-start}
+.msg.bot .b{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px}
+.msg .ava{width:32px;height:32px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center}
+.msg.bot .ava{background:linear-gradient(135deg,var(--mist),var(--lav));color:#1c1626}
+.msg.user .ava{background:var(--sand);color:var(--ink)}
+.msg .b p{margin:0}
+.reccard{background:var(--card-2);border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-top:8px}
+.reccard:first-child{margin-top:0}
+.reccard .rid{font-family:var(--font-mono);font-size:11px;color:var(--lav-deep);font-weight:600}
+.reccard b{display:block;font-size:14px;margin:2px 0}
+.reccard small{display:block;color:var(--muted);font-size:12.5px;font-family:var(--font-mono)}
+.typing{display:inline-flex;gap:4px;align-items:center;padding:4px 0}
+.typing i{width:7px;height:7px;border-radius:99px;background:var(--lav);display:inline-block;animation:tb 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.18s}.typing i:nth-child(3){animation-delay:.36s}
+@keyframes tb{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+.chat-quick{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.qchip{font-size:12.5px;font-weight:700;color:var(--lav-deep);background:rgba(135,117,176,.1);border:1px solid rgba(135,117,176,.18);border-radius:99px;padding:7px 13px;transition:.15s}
+.qchip:hover{background:rgba(135,117,176,.18);transform:translateY(-1px)}
+.chat-input{display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:4px}
+
+/* Settings */
+.conn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.conn{background:var(--card-2);border:1px solid var(--line);border-radius:14px;padding:16px;position:relative}
+.conn .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.conn .top b{font-size:14.5px}
+.statusdot{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:800}
+.statusdot .d{width:9px;height:9px;border-radius:99px;background:var(--faint)}
+.statusdot.ok .d{background:var(--ok);box-shadow:0 0 0 4px rgba(92,138,102,.16)}
+.statusdot.off .d{background:var(--danger);box-shadow:0 0 0 4px rgba(176,69,90,.14)}
+.statusdot.test .d{background:var(--warm);animation:pulse 1.2s infinite}
+.conn .input{font-family:var(--font-mono);font-size:12.5px}
+
+/* Architecture page */
+.arch{position:relative;background:linear-gradient(160deg,#241B2F,#2C2240);border-radius:var(--radius-lg);padding:30px;color:#EFE9F2;overflow:hidden}
+.arch::before{content:"";position:absolute;inset:0;background:radial-gradient(600px 360px at 85% 0%,rgba(111,169,180,.2),transparent 60%),radial-gradient(520px 380px at 0% 100%,rgba(135,117,176,.22),transparent 60%)}
+.arch > *{position:relative;z-index:1}
+.arch-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:8px}
+.arch-col h4{font-family:var(--font-display);font-weight:600;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:#B7ADCB;margin:0 0 12px}
+.arch-box{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;margin-bottom:11px;backdrop-filter:blur(6px)}
+.arch-box .bh{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.arch-box b{font-size:14.5px}
+.arch-box small{color:#C0B6D2;font-size:12.5px;line-height:1.5;display:block}
+.arch-box .tag{font-family:var(--font-mono);font-size:11px;color:#9BD3DC;margin-top:8px;display:block}
+.wf-list{display:grid;gap:12px}
+.wf{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:16px}
+.wf .num{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-family:var(--font-display);font-weight:600;background:rgba(135,117,176,.13);color:var(--lav-deep)}
+.wf b{font-size:15px;display:block;margin-bottom:3px}
+.wf p{margin:0 0 8px;color:var(--muted);font-size:13.5px;line-height:1.55}
+.wf code{font-family:var(--font-mono);font-size:11.5px;background:var(--card-2);border:1px solid var(--line);padding:3px 8px;border-radius:7px;color:var(--lav-deep)}
+
+/* Toast */
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#FBF7F0;
+  padding:12px 18px;border-radius:13px;font-weight:600;font-size:14px;box-shadow:var(--shadow-lg);z-index:200;opacity:0;transition:.28s;display:flex;align-items:center;gap:9px;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Spinner */
+.spin{animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+
+/* Reveal animation */
+.reveal{opacity:0;transform:translateY(12px);animation:rv .55s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes rv{to{opacity:1;transform:none}}
+
+/* Mobile menu toggle (hidden on desktop) */
+.mtoggle{display:none}
+
+/* ============================ RESPONSIVE ============================ */
+@media(max-width:1180px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .grid-2,.grid-2e{grid-template-columns:1fr}
+  .arch-cols{grid-template-columns:1fr}
+  .flowstrip{grid-template-columns:1fr 1fr}
+  .flownode::after{display:none}
+}
+@media(max-width:900px){
+  :root{--rail:0px}
+  .shell{grid-template-columns:1fr}
+  .rail{position:fixed;left:0;top:0;width:280px;z-index:120;transform:translateX(-100%);transition:transform .3s}
+  .rail.open{transform:none;box-shadow:30px 0 80px rgba(0,0,0,.4)}
+  .scrim{position:fixed;inset:0;background:rgba(20,15,28,.5);z-index:110;opacity:0;pointer-events:none;transition:.25s}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .content{padding:20px 18px 60px}
+  .mtoggle{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink)}
+  .page-head{flex-direction:column;align-items:flex-start}
+  .auth{grid-template-columns:1fr}
+  .auth-aside{display:none}
+  .conn-grid{grid-template-columns:1fr}
+  .kv{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .kpis{grid-template-columns:1fr 1fr}
+  .grid-3{grid-template-columns:1fr}
+  .donut-wrap{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="toast" class="toast"></div>
+<script>
+/* ============================================================================
+   NEXUS CRM — application logic (vanilla JS, no framework)
+   ----------------------------------------------------------------------------
+   Two operating modes:
+     • DEMO  — fully offline. Realistic dataset + local AI simulation so the
+               console can be presented anywhere, even with no n8n running.
+     • LIVE  — calls the real n8n webhooks (lead-capture, crm-summary,
+               smart-follow-up, crm-ai-assistant). Never invents live data.
+   ========================================================================== */
+"use strict";
+
+/* ---------------------------------------------------------------- ICONS --- */
+const ICON = {
+  brain:'<path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 1 4 3 3 0 0 0 4 3 3 3 0 0 0 6 0 3 3 0 0 0 4-3 3 3 0 0 0 1-4 3 3 0 0 0-2-5 3 3 0 0 0-3-3 3 3 0 0 0-6 0Z"/><path d="M12 3v18"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13A4 4 0 0 1 16 11"/>',
+  refresh:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
+  bot:'<rect x="3" y="8" width="18" height="12" rx="3"/><path d="M12 2v4"/><circle cx="8.5" cy="14" r="1.3"/><circle cx="15.5" cy="14" r="1.3"/><path d="M2 13v2M22 13v2"/>',
+  settings:'<path d="M12.2 2h-.4a2 2 0 0 0-2 2 2 2 0 0 1-2.8 1.2 2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7A2 2 0 0 1 4 12a2 2 0 0 1-1.2 1.8 2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7A2 2 0 0 1 7.8 19a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2 2 2 0 0 1 2.8-1.2 2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7A2 2 0 0 1 20 12a2 2 0 0 1 1.2-1.8 2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7A2 2 0 0 1 16.2 4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/>',
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  key:'<circle cx="7.5" cy="15.5" r="3.5"/><path d="m10 13 9-9"/><path d="m16 6 2 2"/><path d="m19 3 2 2"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  sparkles:'<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6Z"/><path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8Z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+  play:'<path d="M6 4v16l13-8Z"/>',
+  copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>',
+  mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/>',
+  phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>',
+  database:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  workflow:'<rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/><path d="M9 6h6a2 2 0 0 1 2 2v7"/>',
+  activity:'<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  pie:'<path d="M12 2v10l8.7 5A10 10 0 1 0 12 2Z"/><path d="M12 12 3.3 7"/>',
+  building:'<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
+  shield:'<path d="M12 2 4 5v6c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V5Z"/><path d="m9 12 2 2 4-4"/>',
+  zap:'<path d="M13 2 4 14h7l-1 8 9-12h-7Z"/>',
+  layers:'<path d="m12 2 9 5-9 5-9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/>',
+  server:'<rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 8h.01M7 17h.01"/>',
+  message:'<path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  demo:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/>',
+  broadcast:'<circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/>',
+  trash:'<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  chevron:'<path d="m9 18 6-6-6-6"/>',
+  cpu:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/>',
+  menu:'<path d="M3 6h18M3 12h18M3 18h18"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  fileText:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/>',
+  pencil:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>'
+};
+function I(name, size=18, stroke=2){
+  return `<svg class="ico" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${stroke}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[name]||''}</svg>`;
+}
+
+/* ----------------------------------------------------------- CONSTANTS --- */
+const DEFAULTS = {
+  leadCapture:'http://localhost:5678/webhook/lead-capture',
+  analytics:  'http://localhost:5678/webhook/crm-summary',
+  followUp:   'http://localhost:5678/webhook/smart-follow-up',
+  assistant:  'http://localhost:5678/webhook/crm-ai-assistant'
+};
+const USERS = [
+  { email:'manager@company.com', password:'admin123', name:'Sales Manager', role:'Manager' },
+  { email:'sales@company.com',   password:'sales123', name:'Sales Employee', role:'Sales' }
+];
+const NAV = [
+  { sec:'Operations' },
+  { tab:'dashboard', label:'Dashboard',        icon:'grid' },
+  { tab:'capture',   label:'Lead Capture',     icon:'send' },
+  { tab:'workspace', label:'Lead Workspace',   icon:'users' },
+  { tab:'followup',  label:'Follow-Up Center', icon:'refresh' },
+  { sec:'Intelligence' },
+  { tab:'assistant', label:'CRM Assistant',    icon:'bot' },
+  { sec:'System' },
+  { tab:'architecture', label:'Architecture',  icon:'layers' },
+  { tab:'settings',  label:'Settings',         icon:'settings' }
+];
+
+/* -------------------------------------------------------- DEMO DATASET --- */
+const DAY = 86400000;
+function isoDaysAgo(d){ return new Date(Date.now() - d*DAY).toISOString(); }
+/* Realistic Odoo crm.lead-shaped opportunities. created/updated offsets in days. */
+const SEED = [
+  ['Amine Trabelsi','amine.trabelsi@medianet.tn','+216 22 145 880','Demo of the automation suite','sales_inquiry','hot',  2, 1, 18000],
+  ['Sofia Bouaziz','s.bouaziz@delice-holding.com','+216 71 860 200','Pricing for 40 sales seats','sales_inquiry','hot', 5, 4, 42000],
+  ['Karim Haddad','karim@vermeg.com','+216 98 332 411','Integration with existing ERP','partnership','warm', 10, 9, 30000],
+  ['Leïla Mansour','leila.mansour@poulina.com.tn','+216 71 200 044','General information request','sales_inquiry','warm', 12, 11, 9000],
+  ['Yassine Gharbi','yassine.gharbi@talan.com','','Asked about onboarding timeline','sales_inquiry','warm', 16, 16, 15000],
+  ['Nadia Cherif','nadia.cherif@sagemcom.com','+216 70 014 220','Renewal discussion','sales_inquiry','hot', 22, 3, 26000],
+  ['Mohamed Ali Khelifi','','+216 55 778 109','Complaint about response delay','complaint','cold', 9, 8, 0],
+  ['Ines Belhadj','ines.belhadj@biat.com.tn','+216 71 340 733','Requested a callback','support_request','warm', 14, 13, 7000],
+  ['Omar Jelassi','omar.jelassi@orange.tn','+216 98 110 540','Comparing vendors','sales_inquiry','warm', 30, 28, 21000],
+  ['Rania Ayari','rania.ayari@sopal.com.tn','','Newsletter signup, low intent','irrelevant','cold', 21, 21, 0],
+  ['Hatem Souissi','hatem@cynapsys.de','+216 36 401 200','Wants a technical workshop','partnership','hot', 1, 1, 38000],
+  ['Fatma Zouari','fatma.zouari@stb.com.tn','+216 71 132 000','Asked for a quote last month','sales_inquiry','warm', 40, 35, 17000],
+  ['Bilel Mejri','bilel.mejri@tunisietelecom.tn','+216 50 220 880','Interested in analytics module','sales_inquiry','hot', 6, 6, 24000],
+  ['Sarra Lahmar','sarra.lahmar@monoprix.tn','+216 71 950 010','Follow-up needed, went quiet','sales_inquiry','warm', 27, 24, 12000]
+];
+function buildDataset(){
+  return SEED.map((r,i)=>({
+    id: 1000 + i,
+    name: r[0],
+    email_from: r[1],
+    phone: r[2],
+    type: 'opportunity',
+    interest: r[3],
+    intent: r[4],
+    priority: r[5],
+    create_date: isoDaysAgo(r[6]),
+    write_date:  isoDaysAgo(r[7]),
+    expected_revenue: r[8]
+  }));
+}
+
+/* -------------------------------------------------------------- STATE --- */
+const LS = {
+  get:(k,f)=>{ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):f; }catch{ return f; } },
+  set:(k,v)=>{ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} },
+  del:(k)=>{ try{ localStorage.removeItem(k); }catch{} }
+};
+const state = {
+  session: LS.get('nx_session', null),
+  config:  Object.assign({}, DEFAULTS, LS.get('nx_config', {})),
+  mode:    LS.get('nx_mode', 'demo'),
+  tab:     'dashboard',
+  dataset: buildDataset(),
+  captured: LS.get('nx_captured', []),
+  chat:    [{ role:'bot', text:'Hi — I am your CRM assistant. Ask me to list opportunities, look one up by ID, count records, or draft a follow-up. In Live mode I query Odoo through n8n; in Demo mode I answer from the local dataset.' }],
+  analytics: null,
+  followup: null,
+  loading: {}
+};
+function persistConfig(){ LS.set('nx_config', state.config); }
+function allLeads(){ return state.captured.concat(state.dataset); }
+
+/* ----------------------------------------------------------- UTILITIES --- */
+const $  = (s, r=document)=> r.querySelector(s);
+const $$ = (s, r=document)=> Array.from(r.querySelectorAll(s));
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function initials(n){ const p=String(n||'?').trim().split(/\s+/); return ((p[0]||'?')[0]+(p[1]||'')[0]||'').toUpperCase(); }
+function daysSince(iso){ if(!iso) return null; return Math.floor((Date.now()-new Date(iso).getTime())/DAY); }
+function fmtDate(iso){ if(!iso) return '—'; const d=new Date(iso); return d.toLocaleDateString(undefined,{day:'2-digit',month:'short',year:'numeric'}); }
+function fmtMoney(n){ if(!n) return '—'; return new Intl.NumberFormat(undefined,{maximumFractionDigits:0}).format(n)+' TND'; }
+function priorityClass(p){ return p==='hot'?'b-hot':p==='warm'?'b-warm':'b-cold'; }
+
+let toastT;
+function toast(msg, icon='check'){
+  const t=$('#toast'); t.innerHTML=I(icon,17)+'<span>'+esc(msg)+'</span>'; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function copyText(txt){ navigator.clipboard?.writeText(txt).then(()=>toast('Copied to clipboard')).catch(()=>toast('Copy failed','alert')); }
+
+async function postJson(url, payload, timeout=8000){
+  if(!url || !url.trim()) throw new Error('Webhook URL is not configured. Add it in Settings.');
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(), timeout);
+  try{
+    const res = await fetch(url.trim(), { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload), signal:ctrl.signal });
+    const raw = await res.text();
+    let data; try{ data = raw ? JSON.parse(raw) : {}; }catch{ data = { text: raw }; }
+    return { ok:res.ok, status:res.status, data };
+  } finally { clearTimeout(t); }
+}
+
+/* Lightweight local "AI" extraction — mirrors the n8n LLM extraction prompt so
+   the Demo mode shows the same rich output the server produces. */
+function localExtract(message){
+  const m=(message||'').toLowerCase();
+  const email=(message.match(/[\w.+-]+@[\w-]+\.[\w.-]+/)||[''])[0];
+  const phone=(message.match(/(\+?\d[\d\s().-]{6,}\d)/)||[''])[0].trim();
+  let intent='irrelevant';
+  if(/price|pricing|quote|cost|demo|meeting|buy|purchase|interested|seats|subscription/.test(m)) intent='sales_inquiry';
+  else if(/partner|integration|reseller|collaborat/.test(m)) intent='partnership';
+  else if(/complain|angry|delay|refund|issue|problem|broken/.test(m)) intent='complaint';
+  else if(/help|support|question|how do|reset|callback/.test(m)) intent='support_request';
+  let priority='cold';
+  if(/price|pricing|quote|demo|meeting|asap|urgent/.test(m) || (email&&phone)) priority='hot';
+  else if(/information|details|learn|tell me|interested/.test(m)) priority='warm';
+  const actionMap={
+    sales_inquiry: priority==='hot'?'Call within 24h and send a tailored demo invite.':'Send pricing overview and qualify the need.',
+    partnership:'Route to partnerships team and schedule a discovery call.',
+    complaint:'Escalate to support lead and respond within 2 hours.',
+    support_request:'Assign to support queue and confirm receipt by email.',
+    irrelevant:'No action — keep for nurturing list.'
+  };
+  return { email, phone, intent, priority, interest:message.trim().slice(0,90), recommended_action:actionMap[intent] };
+}
+
+/* Simple inactivity-aware follow-up draft (used by Demo mode). */
+function draftFollowUp(lead){
+  const name = lead.name || 'there';
+  return `Dear ${name},
+
+I hope you are doing well. I am reaching out to follow up regarding your interest in our CRM automation solution. It has been a little while since we last connected, and I wanted to check whether you would like to continue the discussion.
+
+If it helps, I would be glad to arrange a short call or share more details tailored to your needs.
+
+Best regards,
+Sales Team`;
+}
+
+/* ------------------------------------------------------------- CHARTS --- */
+function barsHTML(data){
+  const max = Math.max(1, ...data.map(d=>d.value));
+  return `<div class="bars" data-bars>${data.map(d=>`
+    <div class="bar-col">
+      <div class="bar" data-h="${Math.round((d.value/max)*100)}" style="height:0%;background:linear-gradient(${d.c1||'var(--lav)'},${d.c2||'var(--lav-deep)'})">
+        <span class="cap">${d.value}</span>
+      </div>
+      <div class="lab">${esc(d.label)}</div>
+    </div>`).join('')}</div>`;
+}
+function animateBars(root){
+  $$('[data-bars] .bar', root).forEach((b,i)=>{ setTimeout(()=>{ b.style.height=b.dataset.h+'%'; }, 80+i*70); });
+}
+function donutHTML(segments, size=150, centerTop='', centerBot=''){
+  const total = segments.reduce((s,x)=>s+x.value,0) || 1;
+  const r = (size/2)-13, cx=size/2, cy=size/2, C=2*Math.PI*r;
+  let off=0;
+  const rings = segments.map(s=>{
+    const len=(s.value/total)*C;
+    const c=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="16"
+      stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" stroke-linecap="butt"
+      transform="rotate(-90 ${cx} ${cy})"/>`;
+    off+=len; return c;
+  }).join('');
+  return `<div class="donut" style="width:${size}px;height:${size}px;animation:rv .6s ease both">
+    <svg width="${size}" height="${size}">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(34,26,43,.06)" stroke-width="16"/>
+      ${rings}
+    </svg>
+    <div class="center"><b>${centerTop}</b><span>${centerBot}</span></div>
+  </div>`;
+}
+function legendHTML(segments){
+  return `<div class="legend">${segments.map(s=>`
+    <div class="row"><span class="sw" style="background:${s.color}"></span>${esc(s.label)}<b>${s.value}</b></div>`).join('')}</div>`;
+}
+function animateCount(el, target, dur=900){
+  const start=performance.now();
+  function step(now){
+    const p=Math.min(1,(now-start)/dur);
+    const e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(target*e);
+    if(p<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ------------------------------------------------------- KPI / METRICS --- */
+function computeKPIs(leads){
+  const ops = leads.filter(l=>l.type==='opportunity');
+  const total=ops.length;
+  const withEmail=ops.filter(l=>l.email_from).length;
+  const withPhone=ops.filter(l=>l.phone).length;
+  const inactive=ops.filter(l=>{ const d=daysSince(l.write_date||l.create_date); return d!=null && d>=7; }).length;
+  const newWeek=ops.filter(l=>{ const d=daysSince(l.create_date); return d!=null && d<=7; }).length;
+  return { total, withEmail, withPhone, inactive, newWeek, active: total-inactive };
+}
+function priorityBreakdown(leads){
+  const ops=leads.filter(l=>l.type==='opportunity');
+  return {
+    hot: ops.filter(l=>l.priority==='hot').length,
+    warm: ops.filter(l=>l.priority==='warm').length,
+    cold: ops.filter(l=>l.priority==='cold').length
+  };
+}
+
+/* =========================================================================
+   RENDER — root router
+   ========================================================================= */
+function render(){
+  const root=$('#root');
+  if(!state.session){ root.innerHTML = viewLogin(); wireLogin(); return; }
+  root.innerHTML = viewShell();
+  wireShell();
+  renderPage();
+}
+function renderPage(){
+  const main=$('#page');
+  const map={ dashboard:viewDashboard, capture:viewCapture, workspace:viewWorkspace,
+    followup:viewFollowup, assistant:viewAssistant, architecture:viewArchitecture, settings:viewSettings };
+  main.innerHTML = (map[state.tab]||viewDashboard)();
+  const wire={ dashboard:wireDashboard, capture:wireCapture, workspace:wireWorkspace,
+    followup:wireFollowup, assistant:wireAssistant, architecture:()=>{}, settings:wireSettings };
+  (wire[state.tab]||(()=>{}))();
+  main.scrollIntoView?.({block:'start'});
+}
+function setTab(t){ state.tab=t; $$('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.tab===t)); renderPage(); closeRail(); }
+function setMode(m){
+  state.mode=m; LS.set('nx_mode', m);
+  $$('.rail-mode button').forEach(b=>b.classList.toggle('on', b.dataset.mode===m));
+  toast(m==='live'?'Live mode — calling n8n webhooks':'Demo mode — using local dataset', m==='live'?'broadcast':'demo');
+  renderPage();
+}
+
+/* =========================================================================
+   LOGIN
+   ========================================================================= */
+function viewLogin(){
+  return `
+  <div class="auth">
+    <aside class="auth-aside">
+      <div class="auth-mark"><div class="glyph">${I('brain',24)}</div>
+        <div><b>Nexus CRM</b><span>Sales Operations</span></div></div>
+      <div class="auth-hero">
+        <h1>Where AI quietly does the <em>busywork</em> of selling.</h1>
+        <p>One console for the sales team to capture leads, kill duplicates, draft follow-ups, and read the pipeline — orchestrated by n8n, reasoned by a local Ollama model, stored in Odoo.</p>
+      </div>
+      <div class="auth-points">
+        <div class="auth-point"><span class="dot">${I('zap',15)}</span><div><b>Capture &amp; classify</b><small>Free-text messages become structured, prioritised opportunities.</small></div></div>
+        <div class="auth-point"><span class="dot">${I('shield',15)}</span><div><b>No duplicates</b><small>Email &amp; phone matching before anything is written to CRM.</small></div></div>
+        <div class="auth-point"><span class="dot">${I('refresh',15)}</span><div><b>Always following up</b><small>Inactive opportunities get a tailored message, automatically.</small></div></div>
+      </div>
+      <div class="auth-foot">Final-year engineering project · n8n · Ollama · Odoo CRM</div>
+    </aside>
+    <main class="auth-main">
+      <div class="auth-card reveal">
+        <span class="auth-kicker">${I('lock',14)} Secure internal access</span>
+        <h2>Sign in to the console</h2>
+        <p class="sub">Use a demo account below, or your team credentials.</p>
+        <form id="loginForm">
+          <div class="field"><label>Work email</label>
+            <div class="input-wrap"><span class="ico">${I('mail',17)}</span>
+              <input class="input" id="li_email" type="email" value="manager@company.com" autocomplete="username"/></div></div>
+          <div class="field"><label>Password</label>
+            <div class="input-wrap"><span class="ico">${I('key',17)}</span>
+              <input class="input" id="li_pass" type="password" value="admin123" autocomplete="current-password"/></div></div>
+          <div id="li_err"></div>
+          <button class="btn btn-primary btn-block" type="submit">${I('arrow',17)} Enter console</button>
+        </form>
+        <div class="demo-creds">
+          <div class="t">Demo accounts — tap to fill</div>
+          ${USERS.map(u=>`<div class="cred" data-email="${u.email}" data-pass="${u.password}">
+            <code>${u.email} · ${u.password}</code><span class="role">${u.role}</span></div>`).join('')}
+        </div>
+      </div>
+    </main>
+  </div>`;
+}
+function wireLogin(){
+  $$('.cred').forEach(c=>c.addEventListener('click',()=>{ $('#li_email').value=c.dataset.email; $('#li_pass').value=c.dataset.pass; }));
+  $('#loginForm').addEventListener('submit', e=>{
+    e.preventDefault();
+    const email=$('#li_email').value.trim().toLowerCase(), pass=$('#li_pass').value;
+    const u=USERS.find(x=>x.email===email && x.password===pass);
+    if(!u){ $('#li_err').innerHTML=`<div class="auth-error">${I('alert',16)} Invalid email or password.</div>`; return; }
+    state.session={ email:u.email, name:u.name, role:u.role, at:Date.now() };
+    LS.set('nx_session', state.session); state.tab='dashboard'; render();
+  });
+}
+
+/* =========================================================================
+   SHELL (rail + topbar)
+   ========================================================================= */
+function viewShell(){
+  const s=state.session;
+  return `
+  <div class="scrim" id="scrim"></div>
+  <div class="shell">
+    <aside class="rail" id="rail">
+      <div class="rail-brand"><div class="glyph">${I('brain',22)}</div>
+        <div><b>Nexus CRM</b><span>Sales Console</span></div></div>
+      <div class="rail-mode">
+        <button data-mode="demo" class="${state.mode==='demo'?'on':''}">${I('demo',14)} Demo</button>
+        <button data-mode="live" class="${state.mode==='live'?'on':''}">${I('broadcast',14)} Live</button>
+      </div>
+      <nav class="rail-nav">
+        ${NAV.map(n=> n.sec ? `<div class="rail-sec">${n.sec}</div>`
+          : `<button class="nav-item ${state.tab===n.tab?'active':''}" data-tab="${n.tab}">${I(n.icon,18)}<span>${n.label}</span></button>`).join('')}
+      </nav>
+      <div class="rail-foot">
+        <div class="rail-user"><div class="av">${initials(s.name)}</div>
+          <div><b>${esc(s.name)}</b><span>${esc(s.role)}</span></div></div>
+        <button class="rail-logout" id="logoutBtn">${I('logout',16)} Sign out</button>
+      </div>
+    </aside>
+    <main class="content"><div id="page"></div></main>
+  </div>`;
+}
+function wireShell(){
+  $$('.nav-item').forEach(n=>n.addEventListener('click',()=>setTab(n.dataset.tab)));
+  $$('.rail-mode button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+  $('#logoutBtn').addEventListener('click',()=>{ state.session=null; LS.del('nx_session'); render(); });
+  $('#scrim')?.addEventListener('click', closeRail);
+}
+function openRail(){ $('#rail')?.classList.add('open'); $('#scrim')?.classList.add('open'); }
+function closeRail(){ $('#rail')?.classList.remove('open'); $('#scrim')?.classList.remove('open'); }
+
+function pageHead(eyebrow, title, sub, actions=''){
+  return `<div class="page-head">
+    <div>
+      <span class="eyebrow"><button class="mtoggle" id="mtoggle" type="button">${I('menu',18)}</button> ${esc(eyebrow)}</span>
+      <h1>${esc(title)}</h1><p>${esc(sub)}</p>
+    </div>
+    <div class="head-actions">${actions}<span class="modepill ${state.mode}"><span class="d"></span>${state.mode==='live'?'Live':'Demo'} mode</span></div>
+  </div>`;
+}
+function afterHead(){ $('#mtoggle')?.addEventListener('click', openRail); }
+
+/* =========================================================================
+   DASHBOARD
+   ========================================================================= */
+function viewDashboard(){
+  const k=computeKPIs(allLeads());
+  const pr=priorityBreakdown(allLeads());
+  const cards=[
+    {lbl:'Opportunities', val:k.total, hint:'Total in pipeline', ic:'database', col:'var(--lav)'},
+    {lbl:'With email', val:k.withEmail, hint:`${Math.round(k.withEmail/(k.total||1)*100)}% reachable by mail`, ic:'mail', col:'var(--mist)'},
+    {lbl:'With phone', val:k.withPhone, hint:`${Math.round(k.withPhone/(k.total||1)*100)}% reachable by phone`, ic:'phone', col:'var(--mist-deep)'},
+    {lbl:'Inactive ≥ 7d', val:k.inactive, hint:'Need a follow-up', ic:'clock', col:'var(--hot)'},
+    {lbl:'New this week', val:k.newWeek, hint:'Captured in last 7 days', ic:'sparkles', col:'var(--ok)'}
+  ];
+  const barData=[
+    {label:'Total', value:k.total, c1:'var(--lav)', c2:'var(--lav-deep)'},
+    {label:'Email', value:k.withEmail, c1:'var(--mist)', c2:'var(--mist-deep)'},
+    {label:'Phone', value:k.withPhone, c1:'#84B0BA', c2:'var(--mist-deep)'},
+    {label:'Inactive', value:k.inactive, c1:'#D08079', c2:'var(--hot)'},
+    {label:'New', value:k.newWeek, c1:'#7FB089', c2:'var(--ok)'}
+  ];
+  const health=[{label:'Active',value:k.active,color:'var(--ok)'},{label:'Inactive',value:k.inactive,color:'var(--hot)'}];
+  const prio=[{label:'Hot',value:pr.hot,color:'var(--hot)'},{label:'Warm',value:pr.warm,color:'var(--warm)'},{label:'Cold',value:pr.cold,color:'var(--cold)'}];
+
+  return `
+  ${pageHead('Manager view','Pipeline at a glance', state.mode==='live'
+      ? 'Run the analytics workflow to pull live Odoo counts and an AI-written summary.'
+      : 'Live counts computed from the local demo dataset, with an on-device AI summary.',
+    `<button class="btn btn-accent" id="runAnalytics">${I('play',16)} Run analytics</button>`)}
+
+  <div class="kpis">
+    ${cards.map((c,i)=>`<div class="kpi reveal" style="animation-delay:${i*60}ms">
+      <div class="accent" style="background:${c.col}"></div>
+      <div class="ico">${I(c.ic,26)}</div>
+      <div class="lbl">${I(c.ic,13)} ${c.lbl}</div>
+      <div class="val" data-count="${c.val}">0</div>
+      <div class="hint">${esc(c.hint)}</div>
+    </div>`).join('')}
+  </div>
+
+  <div class="grid-2">
+    <div class="card card-lg reveal">
+      <div class="card-title"><span class="ti">${I('activity',18)}</span> CRM reachability</div>
+      <p class="card-sub">How many opportunities we can actually act on right now.</p>
+      ${barsHTML(barData)}
+    </div>
+    <div class="stack">
+      <div class="card card-lg reveal">
+        <div class="card-title"><span class="ti">${I('pie',18)}</span> Pipeline health</div>
+        <div class="donut-wrap">
+          ${donutHTML(health,150, k.total?Math.round(k.active/(k.total||1)*100)+'%':'—','Active')}
+          ${legendHTML(health)}
+        </div>
+      </div>
+      <div class="card card-lg reveal">
+        <div class="card-title"><span class="ti">${I('zap',18)}</span> Priority mix</div>
+        <div class="donut-wrap">
+          ${donutHTML(prio,150, (pr.hot)+'', 'Hot leads')}
+          ${legendHTML(prio)}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-lg reveal" style="margin-top:18px">
+    <div class="card-title"><span class="ti">${I('sparkles',18)}</span> AI analytics summary</div>
+    <p class="card-sub">A short, numbers-only briefing for the sales manager — generated by the LLM from the KPIs above.</p>
+    <div id="summaryBox">
+      <div class="empty"><div class="ei">${I('fileText',24)}</div>
+        <b>No summary yet</b><p>Click <b>Run analytics</b> to generate the manager briefing.</p></div>
+    </div>
+  </div>
+
+  <div class="card card-lg reveal" style="margin-top:18px">
+    <div class="card-title"><span class="ti">${I('workflow',18)}</span> How this number is produced</div>
+    <div class="flowstrip">
+      <div class="flownode"><div class="n">${I('database',20)}</div><b>Odoo CRM</b><small>Opportunities &amp; activity dates are read from crm.lead.</small></div>
+      <div class="flownode"><div class="n">${I('workflow',20)}</div><b>n8n workflow</b><small>Filters opportunities and computes the five KPIs.</small></div>
+      <div class="flownode"><div class="n">${I('cpu',20)}</div><b>Ollama LLM</b><small>Turns the KPIs into a plain-language briefing.</small></div>
+      <div class="flownode"><div class="n">${I('grid',20)}</div><b>This console</b><small>Renders the cards, charts and summary you see here.</small></div>
+    </div>
+  </div>`;
+}
+function wireDashboard(){
+  afterHead();
+  const root=$('#page');
+  $$('[data-count]', root).forEach(el=>animateCount(el, +el.dataset.count));
+  animateBars(root);
+  if(state.analytics) renderSummary(state.analytics);
+  $('#runAnalytics').addEventListener('click', runAnalytics);
+}
+function renderSummary(text){
+  const box=$('#summaryBox'); if(!box) return;
+  box.innerHTML = `<div class="summary">${esc(text)}</div>
+    <div class="head-actions" style="margin-top:14px"><button class="btn btn-ghost btn-sm" id="copySum">${I('copy',15)} Copy summary</button></div>`;
+  $('#copySum')?.addEventListener('click',()=>copyText(text));
+}
+async function runAnalytics(){
+  const btn=$('#runAnalytics'); btn.disabled=true; btn.innerHTML=`${I('refresh',16)} Running…`;
+  $('#summaryBox').innerHTML=`<div class="empty"><div class="ei">${I('refresh',24)}</div><b>Generating briefing…</b><p>${state.mode==='live'?'Calling the analytics webhook.':'Composing the on-device summary.'}</p></div>`;
+  try{
+    let text;
+    if(state.mode==='live'){
+      const res=await postJson(state.config.analytics,{trigger:'dashboard',requested_by:state.session.email});
+      const d=res.data||{};
+      text = d.text||d.output||d.summary||(typeof d==='string'?d:JSON.stringify(d,null,2));
+    } else {
+      await new Promise(r=>setTimeout(r,650));
+      text = composeLocalSummary();
+    }
+    state.analytics=text; renderSummary(text); toast('Analytics summary ready');
+  }catch(e){
+    $('#summaryBox').innerHTML=`<div class="notice warn">${I('alert',17)}<span>Could not reach the analytics webhook: ${esc(e.message)}. Check Settings or switch to Demo mode.</span></div>`;
+  }finally{ btn.disabled=false; btn.innerHTML=`${I('play',16)} Run analytics`; }
+}
+function composeLocalSummary(){
+  const k=computeKPIs(allLeads());
+  const emailAll = k.withEmail===k.total;
+  const phoneAll = k.withPhone===k.total;
+  return `CRM Daily Summary:
+The pipeline holds ${k.total} opportunities, of which ${k.newWeek} were captured in the last seven days. ${k.inactive} opportunities have had no activity for a week or more and need attention.
+
+Key Observations:
+- ${emailAll?'All opportunities have an email address':k.withEmail+' of '+k.total+' opportunities have an email address'}, and ${phoneAll?'all have a phone number':k.withPhone+' have a phone number'}.
+- ${k.inactive} inactive opportunities are at risk of going cold and should be followed up first.
+
+Recommended Action:
+Prioritise the ${k.inactive} inactive opportunities today and run the Follow-Up Center to generate tailored outreach for each one.`;
+}
+
+/* =========================================================================
+   LEAD CAPTURE
+   ========================================================================= */
+function viewCapture(){
+  return `
+  ${pageHead('Front desk','Capture a new lead', 'Paste a customer message or fill the fields. The AI extracts the details, classifies intent and priority, and checks for duplicates before creating an Odoo opportunity.')}
+  <div class="grid-2">
+    <div class="card card-lg reveal">
+      <div class="card-title"><span class="ti">${I('send',18)}</span> Customer message</div>
+      <p class="card-sub">Anything the customer wrote — an email, a contact-form note, a WhatsApp message.</p>
+      <form id="capForm">
+        <div class="field"><label>Message</label>
+          <textarea class="input" id="cap_msg" placeholder="e.g. Hi, I'm Amine from Medianet. We'd like a demo of your automation suite for ~20 sales reps. Reach me at amine.trabelsi@medianet.tn or +216 22 145 880."></textarea></div>
+        <div class="grid-2e">
+          <div class="field"><label>Name (optional)</label><input class="input" id="cap_name" placeholder="Auto-detected if blank"/></div>
+          <div class="field"><label>Email (optional)</label><input class="input" id="cap_email" placeholder="Auto-detected if blank"/></div>
+        </div>
+        <div class="field"><label>Phone (optional)</label><input class="input" id="cap_phone" placeholder="Auto-detected if blank"/></div>
+        <button class="btn btn-primary btn-block" type="submit" id="capBtn">${I('zap',16)} Extract &amp; create opportunity</button>
+      </form>
+      <div class="notice soft" style="margin-top:14px">${I('shield',16)}<span>Tip: try an email already in CRM (e.g. <b>karim@vermeg.com</b>) to see duplicate detection in action.</span></div>
+    </div>
+    <div class="stack">
+      <div class="card card-lg reveal" id="capResult">
+        <div class="card-title"><span class="ti">${I('cpu',18)}</span> AI extraction</div>
+        <div class="empty"><div class="ei">${I('bot',24)}</div><b>Waiting for a message</b><p>The structured result — name, email, phone, intent, priority and the recommended action — appears here.</p></div>
+      </div>
+      <div class="card reveal">
+        <div class="card-title" style="font-size:16px"><span class="ti">${I('workflow',16)}</span> Pipeline</div>
+        <div class="flowstrip" style="grid-template-columns:1fr 1fr">
+          <div class="flownode"><div class="n">${I('cpu',18)}</div><b>Extract</b><small>LLM returns structured JSON.</small></div>
+          <div class="flownode"><div class="n">${I('shield',18)}</div><b>Dedupe</b><small>Match email / phone.</small></div>
+          <div class="flownode"><div class="n">${I('database',18)}</div><b>Create</b><small>New Odoo opportunity.</small></div>
+          <div class="flownode"><div class="n">${I('check',18)}</div><b>Respond</b><small>created / duplicate.</small></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function wireCapture(){
+  afterHead();
+  $('#capForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const msg=$('#cap_msg').value.trim();
+    const name=$('#cap_name').value.trim(), email=$('#cap_email').value.trim(), phone=$('#cap_phone').value.trim();
+    if(!msg && !name && !email){ toast('Add a message or at least a name/email','alert'); return; }
+    const finalMsg = msg || `Hello, my name is ${name}. I am interested in your CRM automation solution. My email is ${email} and my phone is ${phone}.`;
+    const btn=$('#capBtn'); btn.disabled=true; btn.innerHTML=`${I('refresh',16)} Processing…`;
+    try{
+      if(state.mode==='live'){
+        const res=await postJson(state.config.leadCapture,{message:finalMsg,source:'Nexus CRM console',submitted_by:state.session.email});
+        const d=res.data||{}; const status=d.status||(res.ok?'created':'error');
+        const ex=localExtract(finalMsg);
+        renderCaptureResult({status, message:d.message||'', extract:{...ex, name:name||ex.name||'(detected server-side)'}, live:true});
+      } else {
+        await new Promise(r=>setTimeout(r,600));
+        const ex=localExtract(finalMsg);
+        const dispName=name|| (finalMsg.match(/my name is ([^.,\n]+)/i)?.[1]?.trim()) || (ex.email?ex.email.split('@')[0]:'New lead');
+        const e1=(email||ex.email||'').toLowerCase(), p1=(phone||ex.phone||'').replace(/\s/g,'');
+        const dup=allLeads().find(l=>l.type==='opportunity' && ((e1 && (l.email_from||'').toLowerCase()===e1) || (p1 && (l.phone||'').replace(/\s/g,'')===p1)));
+        if(dup){
+          renderCaptureResult({status:'duplicate', message:'Lead already exists', extract:{...ex,name:dispName,email:email||ex.email,phone:phone||ex.phone}, dup});
+        } else {
+          const lead={ id:2000+state.captured.length, name:dispName, email_from:email||ex.email, phone:phone||ex.phone, type:'opportunity',
+            interest:ex.interest, intent:ex.intent, priority:ex.priority, create_date:new Date().toISOString(), write_date:new Date().toISOString(), expected_revenue:0 };
+          state.captured.unshift(lead); LS.set('nx_captured', state.captured.slice(0,40));
+          renderCaptureResult({status:'created', message:'Lead created successfully', extract:{...ex,name:dispName,email:email||ex.email,phone:phone||ex.phone}});
+        }
+      }
+    }catch(err){
+      renderCaptureResult({status:'error', message:err.message});
+    }finally{ btn.disabled=false; btn.innerHTML=`${I('zap',16)} Extract &amp; create opportunity`; }
+  });
+}
+function renderCaptureResult({status, message, extract, dup, live}){
+  const box=$('#capResult');
+  if(status==='error'){
+    box.innerHTML=`<div class="card-title"><span class="ti">${I('cpu',18)}</span> AI extraction</div>
+      <div class="result err"><div class="rh"><div class="ri" style="background:rgba(176,69,90,.16);color:var(--danger)">${I('alert',18)}</div>
+      <div><b>Could not process</b><span>${esc(message)}</span></div></div></div>`; return;
+  }
+  const cls = status==='created'?'created':status==='duplicate'?'dup':'';
+  const head = status==='created'
+    ? `<div class="ri" style="background:rgba(92,138,102,.16);color:var(--ok)">${I('check',18)}</div><div><b>Opportunity created</b><span>A new record was written to CRM.</span></div>`
+    : `<div class="ri" style="background:rgba(176,69,90,.14);color:var(--danger)">${I('shield',18)}</div><div><b>Duplicate detected</b><span>${dup?('Matches existing opportunity #'+dup.id+' — '+esc(dup.name)):'A matching opportunity already exists.'} Nothing was created.</span></div>`;
+  const ex=extract||{};
+  box.innerHTML=`
+    <div class="card-title"><span class="ti">${I('cpu',18)}</span> AI extraction ${live?'<span class="chip" style="margin-left:auto">'+I('broadcast',13)+' from server</span>':''}</div>
+    <div class="result ${cls}"><div class="rh">${head}</div></div>
+    <div class="kv">
+      <div class="cell"><span>Name</span><b>${esc(ex.name||'—')}</b></div>
+      <div class="cell"><span>Email</span><b>${esc(ex.email||'—')}</b></div>
+      <div class="cell"><span>Phone</span><b>${esc(ex.phone||'—')}</b></div>
+      <div class="cell"><span>Intent</span><b style="text-transform:capitalize">${esc((ex.intent||'—').replace('_',' '))}</b></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+      <span class="badge ${priorityClass(ex.priority)}"><span class="d"></span>${esc(ex.priority||'—')} priority</span>
+      ${status==='created'?'<span class="badge b-ok"><span class="d"></span>written to CRM</span>':'<span class="badge b-dup"><span class="d"></span>skipped</span>'}
+    </div>
+    <div class="notice info">${I('arrow',16)}<span><b>Recommended action:</b> ${esc(ex.recommended_action||'Manual review.')}</span></div>`;
+  toast(status==='created'?'Opportunity created':'Duplicate — not created', status==='created'?'check':'shield');
+}
+
+/* =========================================================================
+   LEAD WORKSPACE
+   ========================================================================= */
+const wsState={ q:'', filter:'all', selected:null };
+function viewWorkspace(){
+  return `
+  ${pageHead('Sales view','Lead workspace','Search every opportunity, filter by priority or status, and open a record to review details and prepare a follow-up.')}
+  <div class="grid-2">
+    <div>
+      <div class="toolbar">
+        <div class="search">${I('search',17).replace('class="ico"','class="ico"')}<span class="ico">${I('search',17)}</span><input class="input" id="ws_q" placeholder="Search name, email, company…" value="${esc(wsState.q)}"/></div>
+      </div>
+      <div class="seg" style="margin-bottom:14px">
+        ${['all','hot','warm','cold','inactive'].map(f=>`<button data-f="${f}" class="${wsState.filter===f?'on':''}">${f[0].toUpperCase()+f.slice(1)}</button>`).join('')}
+      </div>
+      <div class="lead-table" id="ws_list"></div>
+    </div>
+    <div class="card card-lg reveal" id="ws_detail">
+      <div class="empty"><div class="ei">${I('users',24)}</div><b>Select a lead</b><p>Pick an opportunity from the list to see the full record and draft a follow-up.</p></div>
+    </div>
+  </div>`;
+}
+function wireWorkspace(){
+  afterHead();
+  $('#ws_q').addEventListener('input', e=>{ wsState.q=e.target.value; renderWsList(); });
+  $$('.seg button').forEach(b=>b.addEventListener('click',()=>{ wsState.filter=b.dataset.f; $$('.seg button').forEach(x=>x.classList.toggle('on',x===b)); renderWsList(); }));
+  renderWsList();
+}
+function wsFiltered(){
+  const q=wsState.q.toLowerCase().trim();
+  return allLeads().filter(l=>l.type==='opportunity').filter(l=>{
+    if(q && !(`${l.name} ${l.email_from} ${l.interest}`.toLowerCase().includes(q))) return false;
+    if(wsState.filter==='inactive'){ const d=daysSince(l.write_date||l.create_date); return d!=null && d>=7; }
+    if(['hot','warm','cold'].includes(wsState.filter)) return l.priority===wsState.filter;
+    return true;
+  });
+}
+function renderWsList(){
+  const list=$('#ws_list'); const items=wsFiltered();
+  if(!items.length){ list.innerHTML=`<div class="empty"><div class="ei">${I('search',22)}</div><b>No matches</b><p>Try a different search or filter.</p></div>`; return; }
+  list.innerHTML=items.map(l=>{
+    const d=daysSince(l.write_date||l.create_date);
+    const inactive=d!=null&&d>=7;
+    return `<button class="lead-row ${wsState.selected===l.id?'sel':''}" data-id="${l.id}">
+      <div class="who"><div class="av">${initials(l.name)}</div>
+        <div class="nm"><b>${esc(l.name)}</b><small>${esc(l.email_from||l.phone||'no contact info')}</small></div></div>
+      <div class="meta">
+        <span class="days">${d==null?'':d+'d'}</span>
+        <span class="badge ${inactive?'b-dup':priorityClass(l.priority)}"><span class="d"></span>${inactive?'inactive':esc(l.priority)}</span>
+      </div></button>`;
+  }).join('');
+  $$('.lead-row',list).forEach(r=>r.addEventListener('click',()=>{ wsState.selected=+r.dataset.id; renderWsList(); renderWsDetail(+r.dataset.id); }));
+}
+function renderWsDetail(id){
+  const l=allLeads().find(x=>x.id===id); if(!l) return;
+  const d=daysSince(l.write_date||l.create_date);
+  const box=$('#ws_detail');
+  box.innerHTML=`
+    <div class="drawer">
+      <div class="dh"><div class="av">${initials(l.name)}</div>
+        <div><b>${esc(l.name)}</b>
+          <div style="display:flex;gap:8px;margin-top:6px"><span class="badge ${priorityClass(l.priority)}"><span class="d"></span>${esc(l.priority)}</span>
+          ${d>=7?`<span class="badge b-dup"><span class="d"></span>inactive ${d}d</span>`:`<span class="badge b-ok"><span class="d"></span>active</span>`}</div></div>
+      </div>
+      <div class="kv">
+        <div class="cell"><span>Opportunity ID</span><b>#${l.id}</b></div>
+        <div class="cell"><span>Intent</span><b style="text-transform:capitalize">${esc((l.intent||'—').replace('_',' '))}</b></div>
+        <div class="cell"><span>Email</span><b>${esc(l.email_from||'not provided')}</b></div>
+        <div class="cell"><span>Phone</span><b>${esc(l.phone||'not provided')}</b></div>
+        <div class="cell"><span>Created</span><b>${fmtDate(l.create_date)}</b></div>
+        <div class="cell"><span>Last activity</span><b>${fmtDate(l.write_date)}</b></div>
+        <div class="cell"><span>Expected revenue</span><b>${fmtMoney(l.expected_revenue)}</b></div>
+        <div class="cell"><span>Interest</span><b style="font-weight:500">${esc(l.interest||'—')}</b></div>
+      </div>
+      <button class="btn btn-accent btn-block" id="ws_draft">${I('pencil',16)} Draft follow-up message</button>
+      <div id="ws_mail"></div>
+    </div>`;
+  $('#ws_draft').addEventListener('click', async ()=>{
+    const b=$('#ws_draft'); b.disabled=true; b.innerHTML=`${I('refresh',16)} Drafting…`;
+    let text;
+    if(state.mode==='live' && state.config.assistant){
+      try{ const res=await postJson(state.config.assistant,{message:`Write a short professional follow-up email for opportunity ${l.name} (${l.email_from}). Mention we are following up on their interest and ask to continue the discussion. Sign as Sales Team.`,sessionId:'workspace'}); text=res.data?.answer||res.data?.output||draftFollowUp(l); }
+      catch{ text=draftFollowUp(l); }
+    } else { await new Promise(r=>setTimeout(r,400)); text=draftFollowUp(l); }
+    $('#ws_mail').innerHTML=`<div class="card-sub" style="margin:16px 0 6px;display:flex;align-items:center;gap:8px">${I('mail',15)} Suggested follow-up</div>
+      <div class="mailbox">${esc(text)}</div>
+      <div class="head-actions" style="margin-top:12px"><button class="btn btn-ghost btn-sm" id="ws_copy">${I('copy',15)} Copy</button></div>`;
+    $('#ws_copy').addEventListener('click',()=>copyText(text));
+    b.disabled=false; b.innerHTML=`${I('pencil',16)} Re-draft follow-up message`;
+  });
+}
+
+/* =========================================================================
+   FOLLOW-UP CENTER
+   ========================================================================= */
+function viewFollowup(){
+  const inactive=allLeads().filter(l=>l.type==='opportunity').filter(l=>{const d=daysSince(l.write_date||l.create_date);return d!=null&&d>=7;});
+  return `
+  ${pageHead('Automation','Follow-Up Center', state.mode==='live'
+      ? 'Trigger the batch workflow: it finds inactive opportunities, removes duplicates, writes a tailored message to each, and saves it back to Odoo.'
+      : 'Generate tailored follow-up messages for every inactive opportunity in the demo dataset.',
+    `<button class="btn btn-accent" id="runFollow">${I('refresh',16)} Run batch follow-up</button>`)}
+  <div class="grid-3" style="margin-bottom:18px">
+    <div class="card reveal"><div class="lbl" style="color:var(--muted);font-weight:700;font-size:13px;display:flex;gap:8px;align-items:center">${I('clock',15)} Inactive opportunities</div>
+      <div class="val" style="font-family:var(--font-display);font-size:34px;font-weight:600;margin-top:8px" data-count="${inactive.length}">0</div></div>
+    <div class="card reveal"><div class="lbl" style="color:var(--muted);font-weight:700;font-size:13px;display:flex;gap:8px;align-items:center">${I('mail',15)} Reachable by email</div>
+      <div class="val" style="font-family:var(--font-display);font-size:34px;font-weight:600;margin-top:8px" data-count="${inactive.filter(l=>l.email_from).length}">0</div></div>
+    <div class="card reveal"><div class="lbl" style="color:var(--muted);font-weight:700;font-size:13px;display:flex;gap:8px;align-items:center">${I('zap',15)} Hot &amp; inactive</div>
+      <div class="val" style="font-family:var(--font-display);font-size:34px;font-weight:600;margin-top:8px" data-count="${inactive.filter(l=>l.priority==='hot').length}">0</div></div>
+  </div>
+  <div class="card card-lg reveal" id="followBox">
+    <div class="card-title"><span class="ti">${I('mail',18)}</span> Generated follow-ups</div>
+    <p class="card-sub">Run the batch to produce one message per inactive opportunity. Each can be copied straight into your mail client.</p>
+    <div class="empty"><div class="ei">${I('refresh',24)}</div><b>Nothing generated yet</b><p>Hit <b>Run batch follow-up</b> to draft messages for the ${inactive.length} inactive opportunities.</p></div>
+  </div>`;
+}
+function wireFollowup(){
+  afterHead();
+  $$('[data-count]').forEach(el=>animateCount(el,+el.dataset.count));
+  if(state.followup) renderFollowups(state.followup);
+  $('#runFollow').addEventListener('click', runFollowup);
+}
+async function runFollowup(){
+  const btn=$('#runFollow'); btn.disabled=true; btn.innerHTML=`${I('refresh',16)} Running…`;
+  $('#followBox').innerHTML=`<div class="card-title"><span class="ti">${I('mail',18)}</span> Generated follow-ups</div><div class="empty"><div class="ei">${I('refresh',24)}</div><b>Generating messages…</b><p>${state.mode==='live'?'Calling the smart follow-up webhook.':'Drafting on-device.'}</p></div>`;
+  try{
+    let results;
+    if(state.mode==='live'){
+      const res=await postJson(state.config.followUp,{trigger:'followup_center',requested_by:state.session.email});
+      let d=res.data; const arr=Array.isArray(d)?d:(d&&typeof d==='object'?[d]:[]);
+      results=arr.map(x=>({ name:x.name||'Lead', email:x.email||'', inactive_days:x.inactive_days, message:x.follow_up_message||x.text||'' }));
+      if(!results.length) results=[{name:'Workflow executed',email:'',message:typeof d==='string'?d:JSON.stringify(d,null,2)}];
+    } else {
+      await new Promise(r=>setTimeout(r,750));
+      const inactive=allLeads().filter(l=>l.type==='opportunity').filter(l=>{const dd=daysSince(l.write_date||l.create_date);return dd!=null&&dd>=7;});
+      results=inactive.map(l=>({ name:l.name, email:l.email_from, inactive_days:daysSince(l.write_date||l.create_date), priority:l.priority, message:draftFollowUp(l) }));
+    }
+    state.followup=results; renderFollowups(results); toast(`${results.length} follow-up${results.length>1?'s':''} generated`);
+  }catch(e){
+    $('#followBox').innerHTML=`<div class="card-title"><span class="ti">${I('mail',18)}</span> Generated follow-ups</div><div class="notice warn">${I('alert',17)}<span>Could not reach the follow-up webhook: ${esc(e.message)}. Check Settings or use Demo mode.</span></div>`;
+  }finally{ btn.disabled=false; btn.innerHTML=`${I('refresh',16)} Run batch follow-up`; }
+}
+function renderFollowups(list){
+  const box=$('#followBox');
+  box.innerHTML=`<div class="card-title"><span class="ti">${I('mail',18)}</span> Generated follow-ups <span class="chip" style="margin-left:auto">${list.length} message${list.length>1?'s':''}</span></div>
+    <div class="stack" style="margin-top:8px">
+    ${list.map((r,i)=>`<div class="card reveal" style="animation-delay:${i*50}ms;background:var(--card-2)">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:11px"><div class="av" style="width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-family:var(--font-display);font-weight:600;color:#fff;background:linear-gradient(135deg,var(--lav),var(--mist))">${initials(r.name)}</div>
+        <div><b style="display:block">${esc(r.name)}</b><small style="color:var(--muted);font-family:var(--font-mono);font-size:12px">${esc(r.email||'no email')}</small></div></div>
+        <div style="display:flex;gap:8px;align-items:center">${r.inactive_days!=null?`<span class="badge b-neutral"><span class="d"></span>${r.inactive_days}d quiet</span>`:''}
+        <button class="btn btn-ghost btn-sm" data-copy="${i}">${I('copy',14)} Copy</button></div>
+      </div>
+      <div class="mailbox" style="margin-top:0">${esc(r.message)}</div>
+    </div>`).join('')}
+    </div>`;
+  $$('[data-copy]',box).forEach(b=>b.addEventListener('click',()=>copyText(list[+b.dataset.copy].message)));
+}
+
+/* =========================================================================
+   AI ASSISTANT
+   ========================================================================= */
+function viewAssistant(){
+  return `
+  ${pageHead('Conversational','CRM Assistant', state.mode==='live'
+      ? 'Ask in plain language. In Live mode the assistant uses the Odoo-connected n8n agent to read and act on opportunities.'
+      : 'Ask in plain language. In Demo mode the assistant answers from the local dataset — it never pretends to read Odoo.')}
+  <div class="card card-lg reveal">
+    <div class="chat">
+      <div class="chat-log" id="chatLog"></div>
+      <div class="chat-quick" id="chatQuick">
+        ${['List all opportunities','Show opportunity 1003','How many leads do we have?','Draft a follow-up for Karim Haddad'].map(q=>`<button class="qchip">${q}</button>`).join('')}
+      </div>
+      <form class="chat-input" id="chatForm">
+        <input class="input" id="chatMsg" placeholder="Ask about your CRM…" autocomplete="off"/>
+        <button class="btn btn-primary" type="submit" id="chatSend">${I('send',16)} Send</button>
+      </form>
+    </div>
+  </div>`;
+}
+function wireAssistant(){
+  afterHead();
+  renderChat();
+  $$('#chatQuick .qchip').forEach(c=>c.addEventListener('click',()=>{ $('#chatMsg').value=c.textContent; $('#chatForm').requestSubmit(); }));
+  $('#chatForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const msg=$('#chatMsg').value.trim(); if(!msg) return;
+    $('#chatMsg').value='';
+    state.chat.push({role:'user',text:msg}); renderChat();
+    state.chat.push({role:'bot',typing:true}); renderChat();
+    let reply;
+    try{
+      if(state.mode==='live'){
+        if(!state.config.assistant) reply={text:'Live mode is on but no assistant webhook is configured. Add it in Settings, or switch to Demo mode.'};
+        else { const res=await postJson(state.config.assistant,{message:msg,chatInput:msg,sessionId:'nexus-console',source:'assistant'},15000);
+          const ans=res.data?.answer||res.data?.output||res.data?.text||(typeof res.data==='string'?res.data:'No answer returned.');
+          reply=parseAssistant(ans); }
+      } else { await new Promise(r=>setTimeout(r,500)); reply=localAssistant(msg); }
+    }catch(err){ reply={text:'I could not reach the assistant webhook: '+err.message+'. Try Demo mode.'}; }
+    state.chat.pop(); state.chat.push(Object.assign({role:'bot'},reply)); renderChat();
+  });
+}
+function renderChat(){
+  const log=$('#chatLog'); if(!log) return;
+  log.innerHTML=state.chat.map(m=>{
+    if(m.typing) return `<div class="msg bot"><div class="ava">${I('bot',16)}</div><div class="b"><div class="typing"><i></i><i></i><i></i></div></div></div>`;
+    const av = m.role==='user'?I('user',16):I('bot',16);
+    let body = `<p>${esc(m.text||'')}</p>`;
+    if(m.records&&m.records.length){ body += m.records.map(r=>`<div class="reccard"><span class="rid">ID ${esc(r.id)}</span><b>${esc(r.name)}</b><small>${esc(r.email)} · ${esc(r.phone)}</small></div>`).join(''); }
+    return `<div class="msg ${m.role}"><div class="ava">${av}</div><div class="b">${body}</div></div>`;
+  }).join('');
+  log.scrollTop=log.scrollHeight;
+}
+/* Parse the n8n agent's "ID / Name / Email / Phone" record format into cards. */
+function parseAssistant(ans){
+  if(typeof ans!=='string') return {text:JSON.stringify(ans,null,2)};
+  const blocks=ans.split(/\n\s*\n/).map(b=>b.trim()).filter(Boolean);
+  const records=[];
+  blocks.forEach(b=>{
+    const m={ id:(b.match(/ID:\s*(.+)/i)||[])[1], name:(b.match(/Name:\s*(.+)/i)||[])[1], email:(b.match(/Email:\s*(.+)/i)||[])[1], phone:(b.match(/Phone:\s*(.+)/i)||[])[1] };
+    if(m.id||m.name) records.push({id:m.id||'—',name:m.name||'—',email:m.email||'—',phone:m.phone||'—'});
+  });
+  if(records.length) return {text:`Found ${records.length} record${records.length>1?'s':''}:`, records};
+  return {text:ans};
+}
+/* Demo-mode assistant: answers strictly from local dataset. */
+function localAssistant(msg){
+  const m=msg.toLowerCase();
+  const ops=allLeads().filter(l=>l.type==='opportunity');
+  const idMatch=msg.match(/\b(\d{3,5})\b/);
+  if(idMatch){
+    const l=ops.find(x=>String(x.id)===idMatch[1]);
+    if(!l) return {text:'Lead not found.'};
+    return {text:'Here is the opportunity:', records:[{id:l.id,name:l.name,email:l.email_from||'not provided',phone:l.phone||'not provided'}]};
+  }
+  if(/how many|count|number of/.test(m)){
+    const k=computeKPIs(allLeads());
+    return {text:`There are ${k.total} opportunities in the pipeline — ${k.newWeek} new this week and ${k.inactive} inactive for a week or more.`};
+  }
+  if(/draft|follow.?up|write|message|email/.test(m)){
+    const named=ops.find(l=>m.includes(l.name.toLowerCase().split(' ')[0]));
+    const l=named||ops.find(l=>{const d=daysSince(l.write_date);return d>=7;})||ops[0];
+    return {text:`Suggested follow-up for ${l.name}:\n\n${draftFollowUp(l)}`};
+  }
+  if(/list|show|all|display|find|get|opportun|lead/.test(m)){
+    const subset=ops.slice(0,8);
+    return {text:`Showing ${subset.length} of ${ops.length} opportunities:`, records:subset.map(l=>({id:l.id,name:l.name,email:l.email_from||'not provided',phone:l.phone||'not provided'}))};
+  }
+  if(/hot|priority|urgent/.test(m)){
+    const hot=ops.filter(l=>l.priority==='hot');
+    return {text:`${hot.length} hot opportunities right now:`, records:hot.map(l=>({id:l.id,name:l.name,email:l.email_from||'not provided',phone:l.phone||'not provided'}))};
+  }
+  if(/hello|hi|hey|help|what can you/.test(m)){
+    return {text:'I can list opportunities, look one up by ID (e.g. "show 1003"), count records, find hot leads, or draft a follow-up. What would you like?'};
+  }
+  return {text:'I work on CRM opportunities. Try: "list all opportunities", "show 1004", "how many leads", or "draft a follow-up for Karim".'};
+}
+
+/* =========================================================================
+   ARCHITECTURE
+   ========================================================================= */
+function viewArchitecture(){
+  return `
+  ${pageHead('System design','How Nexus is built','The console is the front end of an event-driven automation system. Four n8n workflows do the heavy lifting; a local Ollama model provides the reasoning; Odoo is the system of record.')}
+  <div class="arch reveal">
+    <div class="card-title" style="color:#EFE9F2;margin-bottom:18px"><span class="ti" style="background:rgba(255,255,255,.08);color:#9BD3DC">${I('layers',18)}</span> Three-layer architecture</div>
+    <div class="arch-cols">
+      <div class="arch-col"><h4>Presentation</h4>
+        <div class="arch-box"><div class="bh">${I('grid',18)}<b>Nexus Console</b></div><small>This single-page app. Sends JSON to webhooks and renders results. No business logic lives here.</small><span class="tag">HTML · CSS · Vanilla JS</span></div>
+      </div>
+      <div class="arch-col"><h4>Orchestration &amp; AI</h4>
+        <div class="arch-box"><div class="bh">${I('workflow',18)}<b>n8n</b></div><small>Receives webhooks, branches logic, calls tools, talks to Odoo and the model.</small><span class="tag">webhook · code · if · agent</span></div>
+        <div class="arch-box"><div class="bh">${I('cpu',18)}<b>Ollama · llama3.2</b></div><small>Local LLM for extraction, summaries, follow-up writing and the agent.</small><span class="tag">temperature 0 · on-prem</span></div>
+      </div>
+      <div class="arch-col"><h4>Data</h4>
+        <div class="arch-box"><div class="bh">${I('database',18)}<b>Odoo CRM</b></div><small>System of record. Opportunities (crm.lead) are read, deduplicated, created and updated.</small><span class="tag">crm.lead · type = opportunity</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-title" style="margin:26px 0 14px"><span class="ti">${I('workflow',18)}</span> The four workflows</div>
+  <div class="wf-list">
+    <div class="wf reveal"><div class="num">1</div><div>
+      <b>Lead Capture &amp; Deduplication</b>
+      <p>A message hits the webhook → the LLM extracts structured fields and classifies intent/priority → existing opportunities are pulled from Odoo → email &amp; phone are matched → the record is either created or flagged as a duplicate.</p>
+      <code>POST /webhook/lead-capture</code></div></div>
+    <div class="wf reveal"><div class="num">2</div><div>
+      <b>Smart Follow-Up (batch)</b>
+      <p>Reads opportunities, detects those inactive for ≥ N days, removes duplicate emails keeping the most recent, asks the LLM to write a polite follow-up per lead, and writes it back to the Odoo record's description.</p>
+      <code>POST /webhook/smart-follow-up</code></div></div>
+    <div class="wf reveal"><div class="num">3</div><div>
+      <b>CRM Analytics Summary</b>
+      <p>Computes five KPIs (total, with-email, with-phone, inactive, new-this-week) and prompts the LLM — under strict "do not invent numbers" rules — to write a short manager briefing.</p>
+      <code>POST /webhook/crm-summary</code></div></div>
+    <div class="wf reveal"><div class="num">4</div><div>
+      <b>CRM AI Assistant (agent)</b>
+      <p>A tool-using agent over Odoo: list, get-by-id, create and update opportunities. Returns clean records in a fixed format, with strict rules against guessing or leaking internal data.</p>
+      <code>POST /webhook/crm-ai-assistant</code></div></div>
+  </div>
+
+  <div class="card card-lg reveal" style="margin-top:18px">
+    <div class="card-title"><span class="ti">${I('shield',18)}</span> Design principles</div>
+    <div class="grid-3" style="margin-top:6px">
+      <div><b style="display:block;margin-bottom:5px">Honest by default</b><p style="color:var(--muted);font-size:13.5px;margin:0;line-height:1.6">The UI never fabricates live CRM data. If a webhook is not connected, it says so and falls back to a clearly-labelled demo dataset.</p></div>
+      <div><b style="display:block;margin-bottom:5px">Privacy-first AI</b><p style="color:var(--muted);font-size:13.5px;margin:0;line-height:1.6">The model runs locally via Ollama — customer data never leaves the company's infrastructure.</p></div>
+      <div><b style="display:block;margin-bottom:5px">Deterministic output</b><p style="color:var(--muted);font-size:13.5px;margin:0;line-height:1.6">temperature 0 plus strict JSON contracts make the AI's behaviour repeatable and safe to automate.</p></div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================================
+   SETTINGS
+   ========================================================================= */
+function viewSettings(){
+  const c=state.config;
+  const rows=[
+    {k:'leadCapture', label:'Lead Capture', icon:'send'},
+    {k:'analytics', label:'Analytics Summary', icon:'activity'},
+    {k:'followUp', label:'Smart Follow-Up', icon:'refresh'},
+    {k:'assistant', label:'AI Assistant', icon:'bot'}
+  ];
+  return `
+  ${pageHead('Configuration','Settings','Point the console at your running n8n instance. URLs are stored locally in this browser only.')}
+  <div class="card card-lg reveal" style="max-width:840px">
+    <div class="card-title"><span class="ti">${I('broadcast',18)}</span> n8n webhook endpoints</div>
+    <p class="card-sub">Default to <code style="font-family:var(--font-mono);font-size:12px">localhost:5678</code>. Switch to <b>Live</b> mode in the sidebar to use these.</p>
+    <div class="conn-grid">
+      ${rows.map(r=>`<div class="conn">
+        <div class="top"><b style="display:flex;align-items:center;gap:8px">${I(r.icon,16)} ${r.label}</b>
+          <span class="statusdot" id="st_${r.k}"><span class="d"></span><span class="t">untested</span></span></div>
+        <input class="input" id="cfg_${r.k}" value="${esc(c[r.k])}" placeholder="https://…/webhook/…"/>
+      </div>`).join('')}
+    </div>
+    <div class="head-actions" style="margin-top:18px;justify-content:flex-start">
+      <button class="btn btn-primary" id="saveCfg">${I('check',16)} Save</button>
+      <button class="btn btn-ghost" id="testCfg">${I('activity',16)} Test connections</button>
+      <button class="btn btn-ghost" id="resetCfg">${I('refresh',16)} Reset to defaults</button>
+    </div>
+    <div class="notice info" style="margin-top:16px">${I('alert',16)}<span>Connection tests POST a small ping. A browser <b>CORS</b> block can make a working webhook look offline — if your demo runs, that warning is harmless.</span></div>
+  </div>
+
+  <div class="card card-lg reveal" style="max-width:840px;margin-top:18px">
+    <div class="card-title"><span class="ti">${I('demo',18)}</span> Demo data</div>
+    <p class="card-sub">The demo dataset lets you present every feature with no backend running. Captured demo leads are kept in this browser.</p>
+    <div class="head-actions" style="justify-content:flex-start">
+      <button class="btn btn-ghost" id="clearCap">${I('trash',16)} Clear captured demo leads (${state.captured.length})</button>
+    </div>
+  </div>`;
+}
+function wireSettings(){
+  afterHead();
+  $('#saveCfg').addEventListener('click',()=>{
+    ['leadCapture','analytics','followUp','assistant'].forEach(k=>state.config[k]=$('#cfg_'+k).value.trim());
+    persistConfig(); toast('Settings saved');
+  });
+  $('#resetCfg').addEventListener('click',()=>{ state.config=Object.assign({},DEFAULTS); persistConfig(); renderPage(); toast('Reset to defaults'); });
+  $('#clearCap').addEventListener('click',()=>{ state.captured=[]; LS.set('nx_captured',[]); renderPage(); toast('Captured demo leads cleared','trash'); });
+  $('#testCfg').addEventListener('click', async ()=>{
+    ['leadCapture','analytics','followUp','assistant'].forEach(k=>state.config[k]=$('#cfg_'+k).value.trim());
+    for(const k of ['leadCapture','analytics','followUp','assistant']){
+      const dot=$('#st_'+k); dot.className='statusdot test'; $('.t',dot).textContent='testing…';
+      try{ await postJson(state.config[k],{ping:true},5000); dot.className='statusdot ok'; $('.t',dot).textContent='reachable'; }
+      catch(e){ dot.className='statusdot off'; $('.t',dot).textContent= e.name==='AbortError'?'timeout':'unreachable'; }
+    }
+  });
+}
+
+/* ----------------------------------------------------------------- BOOT --- */
+render();
+
+</script>
+</body>
+</html>
