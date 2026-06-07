@@ -324,6 +324,55 @@
       ],
       "id": "1ece4b89-b678-4fbd-9241-64c90e8050ac",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a755bf84-fe25-4979-b132-372674feb2fb",
+              "leftValue": "={{ ($json.body || {}).ping === true }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -108,
+        -80
+      ],
+      "id": "99714ecc-3a28-4a44-93de-f0810a024650",
+      "name": "Ping Guard"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"ok\": true,\n  \"pong\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        72,
+        -220
+      ],
+      "id": "eec446cb-bb84-4c5c-b618-18723ca21c2a",
+      "name": "Respond Pong"
     }
   ],
   "pinData": {},
@@ -420,7 +469,7 @@
       "main": [
         [
           {
-            "node": "Prepare Website Message",
+            "node": "Ping Guard",
             "type": "main",
             "index": 0
           }
@@ -443,6 +492,24 @@
         [
           {
             "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ping Guard": {
+      "main": [
+        [
+          {
+            "node": "Respond Pong",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Website Message",
             "type": "main",
             "index": 0
           }

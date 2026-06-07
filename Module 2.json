@@ -258,6 +258,55 @@
       "id": "048b3721-a00e-41f1-a56f-dd16f5349053",
       "name": "Debug Response",
       "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "325211ab-1a75-49a2-a807-dfb2d5b8723a",
+              "leftValue": "={{ ($json.body || {}).ping === true }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        212,
+        0
+      ],
+      "id": "2892c7f4-2777-46d5-a8d9-66bed9946130",
+      "name": "Ping Guard"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"ok\": true,\n  \"pong\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        392,
+        -140
+      ],
+      "id": "c33b4a67-6110-484b-9d8c-a5ea4f389bdf",
+      "name": "Respond Pong"
     }
   ],
   "pinData": {
@@ -1846,7 +1895,7 @@
       "main": [
         [
           {
-            "node": "set",
+            "node": "Ping Guard",
             "type": "main",
             "index": 0
           }
@@ -1953,6 +2002,24 @@
         [
           {
             "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ping Guard": {
+      "main": [
+        [
+          {
+            "node": "Respond Pong",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "set",
             "type": "main",
             "index": 0
           }

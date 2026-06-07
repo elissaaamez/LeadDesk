@@ -165,6 +165,55 @@
       ],
       "id": "b22ad004-d55b-4c7d-948f-08512c80bede",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "294afd69-a1d3-43d1-81ef-73ac285595a5",
+              "leftValue": "={{ ($json.body || {}).ping === true }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        164,
+        0
+      ],
+      "id": "05ced931-127a-42e3-825a-b872e281085c",
+      "name": "Ping Guard"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"ok\": true,\n  \"pong\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        344,
+        -140
+      ],
+      "id": "4e3b28e4-bb07-4ba8-899e-03b029b57cbb",
+      "name": "Respond Pong"
     }
   ],
   "pinData": {},
@@ -244,7 +293,7 @@
       "main": [
         [
           {
-            "node": "Get many items",
+            "node": "Ping Guard",
             "type": "main",
             "index": 0
           }
@@ -254,6 +303,24 @@
     "Update an item": {
       "main": [
         []
+      ]
+    },
+    "Ping Guard": {
+      "main": [
+        [
+          {
+            "node": "Respond Pong",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many items",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },

@@ -114,6 +114,55 @@
       ],
       "id": "e0826a54-e921-46f0-8ca9-8dcb5d0d9251",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "117c9d3e-0e5a-4057-be1c-8a618d1c836d",
+              "leftValue": "={{ ($json.body || {}).ping === true }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        180,
+        0
+      ],
+      "id": "2d7d0139-954e-41c8-b611-1577885b9381",
+      "name": "Ping Guard"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"ok\": true,\n  \"pong\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        360,
+        -140
+      ],
+      "id": "53a2e5a7-b59a-4238-9555-0526f778e8ce",
+      "name": "Respond Pong"
     }
   ],
   "pinData": {},
@@ -175,6 +224,24 @@
     },
     "Webhook": {
       "main": [
+        [
+          {
+            "node": "Ping Guard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ping Guard": {
+      "main": [
+        [
+          {
+            "node": "Respond Pong",
+            "type": "main",
+            "index": 0
+          }
+        ],
         [
           {
             "node": "Get many items",
