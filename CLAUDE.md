@@ -20,7 +20,7 @@ architecture for a final-year-project (PFE) jury.
 
 ## Current identity (as of Milestone 1)
 - **Product name:** `AI CRM Platform`. No "Nexus CRM" or "LeadDesk" text anywhere.
-- **Palette:** grounded **teal/slate** (no purple). The CSS `--lav*` token *names* are kept but hold **teal** values — TODO(M2+): rename `--lav*` → `--accent*`.
+- **Palette:** grounded **teal/slate** (no purple). Accent tokens are `--accent` / `--accent-deep` (teal).
 - **Fonts:** IBM Plex Sans (display + body) + IBM Plex Mono (data).
 - **Browser-storage keys:** `acp_session`, `acp_config`, `acp_mode`, `acp_captured`.
 - **Currency:** TND. **Inactive lead (front-end):** no activity ≥ 7 days.
@@ -51,7 +51,7 @@ contracts:
 
 ## Known open items (not yet done)
 - **`smart-follow-up` mismatch:** `module2.1.json` uses `inactiveAfterDays = 0` (treats every lead as inactive) while the front-end uses ≥ 7 days. **Reconcile before the jury demo.** Do not edit any n8n JSON without asking the user first.
-- **Settings "Test connections"** still POSTs `{ping:true}` to all four endpoints — in Live mode this has side effects (can create a junk Odoo lead / write descriptions). Replace with realistic, Odoo-safe payloads (planned M2).
+- **Settings "Test connections"** POSTs `{ping:true}` and classifies reachable/timeout/unreachable. The two **mutating** webhooks (lead-capture, smart-follow-up) are only fully Odoo-safe to test once the **workflow ping-guard** is imported (an `IF body.ping` short-circuit before any Odoo node, returning `{ok,pong:true}`); without it the UI flags "ran (no ping-guard)". Guard not yet applied to the JSON.
 - Optional docs to add: `ARCHITECTURE.md`, `DEMO.md`, `TESTING.md`, `docs/workflows.md`.
 
 ## Repo contents
