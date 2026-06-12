@@ -1,0 +1,6 @@
+
+> ai-crm-platform@1.0.0 start
+> node server/index.js
+
+AI CRM Platform (backend + static) → http://localhost:3000/
+API base: http://localhost:3000/api   ·   data: embedded NeDB (server/data)

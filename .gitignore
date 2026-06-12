@@ -1,6 +1,9 @@
 node_modules/
 *.bak
 
+# Local NeDB datastore files (created at runtime)
+server/data/
+
 # Secrets — never commit
 .env
 .env.*

@@ -13,6 +13,7 @@ const LS = {
 };
 const state = {
   session: LS.get('acp_session', null),
+  authView: 'landing',          // which pre-login screen shows: landing | login | signup
   config:  Object.assign({}, DEFAULTS, LS.get('acp_config', {})),
   mode:    LS.get('acp_mode', 'demo'),
   tab:     'dashboard',
@@ -21,6 +22,7 @@ const state = {
   chat:    [{ role:'bot', text:'Hi — I am your CRM assistant. Ask me to list opportunities, look one up by ID, count records, or draft a follow-up. In Live mode I query Odoo through n8n; in Demo mode I answer from the local dataset.' }],
   analytics: null,
   followup: null,
+  serverOpps: [],               // opportunities fetched from the local backend (Local mode)
   loading: {}
 };
 /* Workspace view state (search query, active filter, selected lead). */
@@ -28,3 +30,5 @@ const wsState={ q:'', filter:'all', selected:null };
 
 function persistConfig(){ LS.set('acp_config', state.config); }
 function allLeads(){ return state.captured.concat(state.dataset); }
+/* Leads the views/analytics read from, by mode: Local → backend cache; Demo/Live → in-browser dataset. */
+function viewData(){ return state.mode==='local' ? (state.serverOpps||[]) : allLeads(); }

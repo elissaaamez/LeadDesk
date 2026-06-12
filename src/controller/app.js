@@ -12,11 +12,22 @@
    ========================================================================= */
 function render(){
   const root=$('#root');
-  if(!state.session){ root.innerHTML = viewLogin(); wireLogin(); return; }
+  if(!state.session){
+    const view={ landing:viewLanding, login:viewLogin, signup:viewSignup };
+    const wire={ landing:wireAuthNav, login:wireLogin, signup:wireSignup };
+    root.innerHTML = (view[state.authView]||viewLanding)();
+    (wire[state.authView]||wireAuthNav)();
+    return;
+  }
   root.innerHTML = viewShell();
   wireShell();
   renderPage();
+  // Local mode reads opportunities from the backend — fetch, then re-render with data.
+  if(state.mode==='local'){ loadServerOpps().then(()=>renderPage()).catch(()=>{}); }
 }
+/* Pre-login navigation between landing / login / signup. */
+function setAuth(v){ state.authView=v; render(); }
+function wireAuthNav(){ $$('[data-go]').forEach(b=>b.addEventListener('click',()=>setAuth(b.dataset.go))); }
 function renderPage(){
   const main=$('#page');
   const map={ dashboard:viewDashboard, capture:viewCapture, workspace:viewWorkspace,
@@ -28,10 +39,12 @@ function renderPage(){
   main.scrollIntoView?.({block:'start'});
 }
 function setTab(t){ state.tab=t; $$('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.tab===t)); renderPage(); closeRail(); }
-function setMode(m){
+async function setMode(m){
   state.mode=m; LS.set('acp_mode', m);
   $$('.rail-mode button').forEach(b=>b.classList.toggle('on', b.dataset.mode===m));
-  toast(m==='live'?'Live mode — calling n8n webhooks':'Demo mode — using local dataset', m==='live'?'broadcast':'demo');
+  const msg={demo:'Demo mode — using local dataset', local:'Local mode — using the local database', live:'Live mode — calling n8n webhooks'}[m];
+  toast(msg, {demo:'demo', local:'database', live:'broadcast'}[m]);
+  if(m==='local'){ try{ await loadServerOpps(); }catch(e){ toast('Backend not reachable: '+e.message,'alert'); } }
   renderPage();
 }
 
@@ -39,14 +52,51 @@ function setMode(m){
    LOGIN
    ========================================================================= */
 function wireLogin(){
+  wireAuthNav();
   $$('.cred').forEach(c=>c.addEventListener('click',()=>{ $('#li_email').value=c.dataset.email; $('#li_pass').value=c.dataset.pass; }));
-  $('#loginForm').addEventListener('submit', e=>{
+  $('#loginForm').addEventListener('submit', async e=>{
     e.preventDefault();
     const email=$('#li_email').value.trim().toLowerCase(), pass=$('#li_pass').value;
-    const u=USERS.find(x=>x.email===email && x.password===pass);
-    if(!u){ $('#li_err').innerHTML=`<div class="flex gap-[9px] items-center bg-[rgba(176,69,90,.1)] text-[#923146] border border-[rgba(176,69,90,.2)] rounded-[12px] px-[13px] py-[11px] text-[13.5px] font-semibold mb-[14px]">${I('alert',16)} Invalid email or password.</div>`; return; }
-    state.session={ email:u.email, name:u.name, role:u.role, at:Date.now() };
-    LS.set('acp_session', state.session); state.tab='dashboard'; render();
+    const showErr=(m)=>$('#li_err').innerHTML=`<div class="flex gap-[9px] items-center bg-[rgba(176,69,90,.1)] text-[#923146] border border-[rgba(176,69,90,.2)] rounded-[12px] px-[13px] py-[11px] text-[13.5px] font-semibold mb-[14px]">${I('alert',16)} ${esc(m)}</div>`;
+    const enter=async(sess)=>{ state.session=sess; LS.set('acp_session', state.session); if(state.mode==='local'){ try{ await loadServerOpps(); }catch{} } state.tab='dashboard'; render(); };
+    try{
+      // Prefer real auth against the local backend.
+      const { token, user }=await api.login(email, pass);
+      await enter({ email:user.email, name:user.name, role:user.role, token, at:Date.now() });
+    }catch(err){
+      if(isNetworkError(err)){
+        // No backend (e.g. opened as a static file) — fall back to offline demo accounts.
+        const u=USERS.find(x=>x.email===email && x.password===pass);
+        if(u){ await enter({ email:u.email, name:u.name, role:u.role, at:Date.now() }); }
+        else showErr('Invalid email or password.');
+      } else { showErr(err.message||'Invalid email or password.'); }
+    }
+  });
+}
+
+/* =========================================================================
+   SIGN UP — creates a real account in the backend when available; falls back
+   to the demo hand-off (route to sign-in) when no backend is reachable.
+   ========================================================================= */
+function wireSignup(){
+  wireAuthNav();
+  $('#signupForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const name=$('#su_name').value.trim(), email=$('#su_email').value.trim().toLowerCase(), pass=$('#su_pass').value, pass2=$('#su_pass2').value;
+    const showErr=(m)=>$('#su_err').innerHTML=`<div class="flex gap-[9px] items-center bg-[rgba(176,69,90,.1)] text-[#923146] border border-[rgba(176,69,90,.2)] rounded-[12px] px-[13px] py-[11px] text-[13.5px] font-semibold mb-[14px]">${I('alert',16)} ${esc(m)}</div>`;
+    if(!name||!email||!pass){ showErr('Please fill in name, email and password.'); return; }
+    if(pass!==pass2){ showErr('Passwords do not match.'); return; }
+    try{
+      const { token, user }=await api.signup(name, email, pass);
+      state.session={ email:user.email, name:user.name, role:user.role, token, at:Date.now() };
+      LS.set('acp_session', state.session);
+      toast('Account created — welcome','check');
+      if(state.mode==='local'){ try{ await loadServerOpps(); }catch{} }
+      state.tab='dashboard'; render();
+    }catch(err){
+      if(isNetworkError(err)){ toast('Demo sign-up — continue with a demo account to sign in','user'); setAuth('login'); }
+      else showErr(err.message||'Could not create account.');
+    }
   });
 }
 
@@ -56,7 +106,7 @@ function wireLogin(){
 function wireShell(){
   $$('.nav-item').forEach(n=>n.addEventListener('click',()=>setTab(n.dataset.tab)));
   $$('.rail-mode button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
-  $('#logoutBtn').addEventListener('click',()=>{ state.session=null; LS.del('acp_session'); render(); });
+  $('#logoutBtn').addEventListener('click',()=>{ if(state.session&&state.session.token) api.logout(); state.session=null; state.serverOpps=[]; LS.del('acp_session'); state.authView='landing'; render(); });
   $('#scrim')?.addEventListener('click', closeRail);
 }
 function openRail(){ $('#rail')?.classList.add('open'); $('#scrim')?.classList.add('open'); }
@@ -84,6 +134,9 @@ async function runAnalytics(){
       const res=await postJson(state.config.analytics,{trigger:'dashboard',requested_by:state.session.email});
       const d=res.data||{};
       text = d.text||d.output||d.summary||(typeof d==='string'?d:JSON.stringify(d,null,2));
+    } else if(state.mode==='local'){
+      const d=await api.analytics();
+      text = d.text;
     } else {
       await new Promise(r=>setTimeout(r,650));
       text = composeLocalSummary();
@@ -112,6 +165,10 @@ function wireCapture(){
         const d=res.data||{}; const status=d.status||(res.ok?'created':'error');
         const ex=localExtract(finalMsg);
         renderCaptureResult({status, message:d.message||'', extract:{...ex, name:name||ex.name||'(detected server-side)'}, live:true});
+      } else if(state.mode==='local'){
+        const r=await api.capture({ message:finalMsg, name, email, phone });
+        await loadServerOpps();
+        renderCaptureResult({ status:r.status, message:'', extract:r.extract, dup:r.duplicate||undefined });
       } else {
         await new Promise(r=>setTimeout(r,600));
         const ex=localExtract(finalMsg);
@@ -164,6 +221,12 @@ async function runFollowup(){
       if(!results.length){
         const note=(typeof d==='string' && d.trim()) ? esc(d) : 'No opportunities are inactive for ≥ 7 days, so the workflow returned nothing to send.';
         $('#followBox').innerHTML=`<div class="${UI.cardTitle}"><span class="${UI.ti}">${I('mail',18)}</span> Generated follow-ups</div><div class="${UI.empty}"><div class="${UI.ei}">${I('check',24)}</div><b class="${UI.emptyTitle}">No follow-ups generated</b><p class="${UI.emptyP}">${note}</p></div>`;
+        state.followup=null; return;
+      }
+    } else if(state.mode==='local'){
+      results=await api.followups();
+      if(!results.length){
+        $('#followBox').innerHTML=`<div class="${UI.cardTitle}"><span class="${UI.ti}">${I('mail',18)}</span> Generated follow-ups</div><div class="${UI.empty}"><div class="${UI.ei}">${I('check',24)}</div><b class="${UI.emptyTitle}">No follow-ups generated</b><p class="${UI.emptyP}">No opportunities are inactive for ≥ 7 days.</p></div>`;
         state.followup=null; return;
       }
     } else {

@@ -1,0 +1,54 @@
+[
+  {
+    "file": "01-landing.png",
+    "bytes": 1629637
+  },
+  {
+    "file": "02-signup.png",
+    "bytes": 2055524
+  },
+  {
+    "file": "03-login.png",
+    "bytes": 2041133
+  },
+  {
+    "file": "04-dashboard.png",
+    "bytes": 913507
+  },
+  {
+    "file": "05-dashboard-analytics.png",
+    "bytes": 1362882
+  },
+  {
+    "file": "06-capture-created.png",
+    "bytes": 1286365
+  },
+  {
+    "file": "07-capture-duplicate.png",
+    "bytes": 1281389
+  },
+  {
+    "file": "08-workspace.png",
+    "bytes": 1347924
+  },
+  {
+    "file": "09-workspace-detail.png",
+    "bytes": 1936324
+  },
+  {
+    "file": "10-followup.png",
+    "bytes": 4781356
+  },
+  {
+    "file": "11-assistant.png",
+    "bytes": 1068230
+  },
+  {
+    "file": "12-architecture.png",
+    "bytes": 1663427
+  },
+  {
+    "file": "13-settings.png",
+    "bytes": 1369055
+  }
+]

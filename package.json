@@ -1,0 +1,19 @@
+{
+  "name": "ai-crm-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI CRM Platform — local sales operations console (static front-end: HTML/CSS/Tailwind CDN + vanilla JS in an MVC layout). No build step.",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "static": "node server.js",
+    "screenshots": "node scripts/shots.cjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.60.0"
+  },
+  "dependencies": {
+    "@seald-io/nedb": "^4.1.2",
+    "express": "^5.2.1"
+  }
+}

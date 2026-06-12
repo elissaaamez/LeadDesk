@@ -9,6 +9,122 @@
 "use strict";
 
 /* =========================================================================
+   LANDING — the public entry page. Markets the console honestly (no invented
+   numbers; the preview uses the real demo dataset) and routes to login/signup
+   via [data-go] buttons wired by the controller.
+   ========================================================================= */
+function viewLanding(){
+  const k=computeKPIs(allLeads());
+  const pr=priorityBreakdown(allLeads());
+  const feat=[
+    {ic:'send',    t:'Lead capture & classify', d:'Paste any customer message — email, form note, WhatsApp. The model extracts name, contact, intent and priority into a structured opportunity.'},
+    {ic:'shield',  t:'Duplicate-safe',          d:'Email and phone are matched against existing opportunities before anything is written, so your CRM stays clean.'},
+    {ic:'refresh', t:'Smart follow-ups',         d:'Find opportunities that have gone quiet and draft a tailored, professional follow-up for each in one batch.'},
+    {ic:'activity',t:'Pipeline analytics',       d:'Five KPIs and a short, numbers-only manager briefing — generated from your live counts, never invented.'},
+    {ic:'bot',     t:'CRM assistant',            d:'Ask in plain language to list, look up, count or act on opportunities through an Odoo-connected agent.'},
+    {ic:'demo',    t:'Honest demo mode',         d:'Present every feature offline from a labelled local dataset — the UI never pretends to read a CRM that is not connected.'}
+  ];
+  const steps=[
+    {ic:'message', t:'Message in',     d:'A customer reaches out on any channel.'},
+    {ic:'cpu',     t:'Extract & score', d:'The local model structures and prioritises it.'},
+    {ic:'shield',  t:'Duplicate check', d:'Existing records are matched on email & phone.'},
+    {ic:'database',t:'Created in Odoo', d:'A clean opportunity lands in your CRM.'}
+  ];
+  const ghostDark='inline-flex items-center justify-center gap-[9px] rounded-[13px] px-[17px] py-[11px] font-bold text-[14px] border border-white/[.14] bg-white/[.06] text-[#E8EEEE] transition hover:bg-white/[.12] hover:-translate-y-px';
+  const sectionPad='max-w-[1180px] mx-auto px-6 py-[clamp(48px,7vw,84px)]';
+  const h2='font-display font-medium text-[clamp(26px,3.4vw,38px)] tracking-[-.3px] mt-3 mb-3';
+  return `
+  <div class="bg-paper">
+    <header class="sticky top-0 z-30 backdrop-blur-md bg-paper/80 border-b border-[color:var(--line)]">
+      <div class="max-w-[1180px] mx-auto px-6 h-[68px] flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-[38px] h-[38px] rounded-[12px] grid place-items-center shrink-0 bg-gradient-to-br from-mist to-accent text-[#0F1E22] shadow-[0_8px_20px_rgba(58,111,121,.25)]">${I('brain',20)}</div>
+          <div><b class="font-display font-semibold text-[16px] block leading-none">AI CRM Platform</b><span class="text-[10.5px] text-faint tracking-[.16em] uppercase">Sales Operations</span></div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="${UI.btnGhost} ${UI.btnSm}" data-go="login">Sign in</button>
+          <button class="${UI.btnPrimary} ${UI.btnSm}" data-go="signup">Get started</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="relative overflow-hidden text-[#F4EEE4] bg-[linear-gradient(168deg,#16262A_0%,#1C2E33_55%,#264248_100%)]">
+      <div class="absolute inset-0 bg-[radial-gradient(640px_420px_at_82%_-6%,rgba(111,169,180,.28),transparent_60%),radial-gradient(560px_460px_at_-4%_108%,rgba(111,169,180,.26),transparent_60%)]"></div>
+      <div class="relative z-[1] max-w-[1180px] mx-auto px-6 py-[clamp(56px,9vw,104px)] grid grid-cols-[1.1fr_.9fr] gap-12 items-center max-[900px]:grid-cols-1 max-[900px]:gap-10">
+        <div>
+          <span class="inline-flex items-center gap-2 text-[11.5px] font-extrabold tracking-[.14em] uppercase text-[#9BD3DC]">${I('sparkles',14)} Lead operations, automated</span>
+          <h1 class="font-display font-medium text-[clamp(36px,5vw,60px)] leading-[1.02] tracking-[-.4px] mt-4 mb-5">Turn every customer message into a <span class="text-[#9BD3DC]">qualified opportunity</span>.</h1>
+          <p class="max-w-[520px] text-[#CBD6D6] text-[17px] leading-[1.65] m-0">Capture leads from any channel, block duplicates before they reach your CRM, draft tailored follow-ups, and read your pipeline at a glance — orchestrated by n8n, reasoned by a local Ollama model, stored in Odoo.</p>
+          <div class="flex gap-3 mt-8 flex-wrap">
+            <button class="${UI.btnAccent}" data-go="signup">${I('arrow',16)} Get started</button>
+            <button class="${ghostDark}" data-go="login">Sign in to console</button>
+          </div>
+          <div class="flex items-center gap-2 mt-8 text-[12.5px] text-[#9FB0B1]">${I('shield',14)} Runs locally · n8n · Ollama · Odoo CRM</div>
+        </div>
+        <div class="relative">
+          <div class="bg-white/[.06] border border-white/[.12] rounded-[20px] p-5 backdrop-blur-md shadow-[0_30px_70px_rgba(0,0,0,.3)]">
+            <div class="flex items-center justify-between mb-4">
+              <b class="font-display font-semibold text-[15px]">Pipeline at a glance</b>
+              <span class="text-[10.5px] font-extrabold tracking-[.08em] uppercase text-[#E6C98A] bg-white/[.07] px-2 py-1 rounded-full">Demo data</span>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+              ${[['Opportunities',k.total],['Inactive ≥ 7d',k.inactive],['Hot leads',pr.hot]].map(x=>`<div class="bg-white/[.05] border border-white/[.1] rounded-[13px] p-3"><div class="text-[10.5px] text-[#9FB0B1] font-bold leading-tight">${x[0]}</div><div class="font-display font-semibold text-[24px] mt-1">${x[1]}</div></div>`).join('')}
+            </div>
+            <div class="mt-3 grid gap-2">
+              ${[['send','Lead captured & classified'],['shield','Duplicate blocked'],['refresh','Follow-up drafted']].map(x=>`<div class="flex items-center gap-3 bg-white/[.04] border border-white/[.08] rounded-[12px] px-3 py-[10px]"><span class="text-[#9BD3DC]">${I(x[0],16)}</span><span class="text-[13px] text-[#E2EAEA]">${x[1]}</span><span class="ml-auto text-[#7FB089]">${I('check',15)}</span></div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="${sectionPad}">
+      <div class="max-w-[640px] mx-auto text-center">
+        <span class="${UI.eyebrow}">${I('layers',14)} What it does</span>
+        <h2 class="${h2}">Five tools, one console</h2>
+        <p class="text-muted text-[15.5px] leading-[1.6] m-0">Everything a small sales team needs to work its pipeline faster — without replacing Odoo.</p>
+      </div>
+      <div class="grid grid-cols-3 max-[900px]:grid-cols-1 gap-5 mt-12">
+        ${feat.map(f=>`<div class="${UI.card} reveal transition hover:-translate-y-[3px] hover:shadow-card"><div class="${UI.ti} mb-3">${I(f.ic,18)}</div><b class="font-display font-semibold text-[16.5px] block mb-[6px]">${f.t}</b><p class="text-muted text-[13.5px] leading-[1.6] m-0">${f.d}</p></div>`).join('')}
+      </div>
+    </section>
+
+    <section class="bg-paper-2 border-y border-[color:var(--line)]">
+      <div class="${sectionPad}">
+        <div class="max-w-[640px] mx-auto text-center">
+          <span class="${UI.eyebrow}">${I('workflow',14)} How it works</span>
+          <h2 class="${h2}">How a message becomes an opportunity</h2>
+        </div>
+        <div class="${UI.flowstrip} mt-10">
+          ${steps.map(s=>`<div class="${UI.flownode}"><div class="${UI.flownodeN}">${I(s.ic,20)}</div><b class="block text-[14.5px] mb-1">${s.t}</b><small class="text-muted text-[12.5px] leading-[1.45] block">${s.d}</small></div>`).join('')}
+        </div>
+      </div>
+    </section>
+
+    <section class="${sectionPad} grid grid-cols-2 max-[900px]:grid-cols-1 gap-6">
+      <div class="${UI.card}"><div class="${UI.ti} mb-3">${I('shield',18)}</div><b class="font-display font-semibold text-[17px] block mb-2">Private by design</b><p class="text-muted text-[14px] leading-[1.65] m-0">The language model runs locally through Ollama. Customer data is processed on your own infrastructure and never sent to a third-party AI service.</p></div>
+      <div class="${UI.card}"><div class="${UI.ti} mb-3">${I('check',18)}</div><b class="font-display font-semibold text-[17px] block mb-2">Honest by default</b><p class="text-muted text-[14px] leading-[1.65] m-0">Demo mode is clearly labelled and computed from a local sample. The console never fabricates live CRM data or shows results it cannot back up.</p></div>
+    </section>
+
+    <section class="max-w-[1180px] mx-auto px-6 pb-[clamp(48px,7vw,90px)]">
+      <div class="relative overflow-hidden rounded-[26px] p-[clamp(28px,5vw,52px)] text-center text-[#F4EEE4] bg-[linear-gradient(135deg,#16262A,#264248)]">
+        <div class="absolute inset-0 bg-[radial-gradient(520px_320px_at_50%_-20%,rgba(111,169,180,.3),transparent_60%)]"></div>
+        <div class="relative z-[1]">
+          <h2 class="font-display font-medium text-[clamp(24px,3.2vw,34px)] tracking-[-.3px] m-0 mb-3">Ready to streamline your lead operations?</h2>
+          <p class="text-[#CBD6D6] text-[15.5px] max-w-[520px] mx-auto m-0 mb-7">Sign in with a demo account, or create one to explore the full console.</p>
+          <div class="flex gap-3 justify-center flex-wrap">
+            <button class="${UI.btnAccent}" data-go="signup">${I('arrow',16)} Get started</button>
+            <button class="${ghostDark}" data-go="login">Sign in</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="border-t border-[color:var(--line)]"><div class="max-w-[1180px] mx-auto px-6 py-7 flex items-center justify-between gap-4 flex-wrap text-[12.5px] text-faint"><span>AI CRM Platform — internal sales operations console</span><span>Final-year engineering project · n8n · Ollama · Odoo CRM</span></div></footer>
+  </div>`;
+}
+
+/* =========================================================================
    LOGIN
    ========================================================================= */
 function viewLogin(){
@@ -31,6 +147,7 @@ function viewLogin(){
     </aside>
     <main class="grid place-items-center p-10">
       <div class="w-[min(420px,100%)] reveal">
+        <button class="inline-flex items-center gap-2 text-[13px] font-bold text-muted mb-5 hover:text-accent transition" data-go="landing"><span class="text-[16px] leading-none">←</span> Back to home</button>
         <span class="${UI.eyebrow}">${I('lock',14)} Secure internal access</span>
         <h2 class="font-display font-medium text-[32px] mt-[14px] mb-[6px] tracking-[-.2px]">Sign in to the console</h2>
         <p class="text-muted m-0 mb-[26px]">Use a demo account below, or your team credentials.</p>
@@ -49,6 +166,56 @@ function viewLogin(){
           ${USERS.map(u=>`<div class="cred flex justify-between items-center gap-[10px] bg-card border border-[color:var(--line)] rounded-[11px] px-[12px] py-[9px] mb-2 cursor-pointer transition hover:border-accent hover:-translate-y-px hover:shadow-soft" data-email="${u.email}" data-pass="${u.password}">
             <code class="font-mono text-[12.5px] text-ink-soft">${u.email} · ${u.password}</code><span class="text-[11px] font-extrabold tracking-[.06em] uppercase text-accent-deep bg-[rgba(111,169,180,.12)] px-[9px] py-1 rounded-full">${u.role}</span></div>`).join('')}
         </div>
+        <p class="text-center text-[13px] text-muted mt-6">New to AI CRM Platform? <button class="font-bold text-accent-deep hover:underline" data-go="signup">Create an account</button></p>
+      </div>
+    </main>
+  </div>`;
+}
+
+/* =========================================================================
+   SIGN UP (demo only — creates no account; the controller routes it to login)
+   ========================================================================= */
+function viewSignup(){
+  const lbl='block text-[13px] font-bold text-ink-soft mb-[7px] tracking-[.01em]';
+  const ic='absolute left-[14px] top-1/2 -translate-y-1/2 text-faint pointer-events-none';
+  return `
+  <div class="min-h-screen grid grid-cols-[1.05fr_.95fr] max-[900px]:grid-cols-1">
+    <aside class="relative overflow-hidden text-[#F4EEE4] px-[56px] py-[54px] flex flex-col justify-between bg-[linear-gradient(168deg,#16262A_0%,#1C2E33_55%,#264248_100%)] max-[900px]:hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(540px_360px_at_78%_12%,rgba(111,169,180,.30),transparent_62%),radial-gradient(520px_420px_at_10%_96%,rgba(111,169,180,.34),transparent_60%)]"></div>
+      <div class="relative z-[1] flex items-center gap-[13px]"><div class="w-[46px] h-[46px] rounded-[14px] grid place-items-center bg-gradient-to-br from-mist to-accent text-[#0F1E22] shadow-[0_14px_30px_rgba(0,0,0,.28)]">${I('brain',24)}</div>
+        <div><b class="font-display font-semibold text-[20px] tracking-[.2px] block leading-[1.05]">AI CRM Platform</b><span class="text-[12.5px] text-[#BCCBCB] tracking-[.16em] uppercase">Sales Operations</span></div></div>
+      <div class="relative z-[1]">
+        <h1 class="font-display font-medium text-[clamp(34px,4.6vw,56px)] leading-[1.02] tracking-[-.2px] m-0 mb-[18px]">Set up in seconds, work your <em class="italic text-[#BCCBCB]">pipeline in minutes</em>.</h1>
+        <p class="max-w-[430px] text-[#CBD6D6] text-[16px] leading-[1.65] m-0">One console for capturing leads, blocking duplicates, drafting follow-ups, and reading the pipeline — backed by n8n, a local Ollama model, and Odoo CRM.</p>
+      </div>
+      <div class="relative z-[1] grid gap-[14px] mt-[6px]">
+        <div class="flex gap-[13px] items-start text-[#E2EAEA]"><span class="mt-[3px] shrink-0 w-[26px] h-[26px] rounded-[8px] grid place-items-center bg-white/[.08] border border-white/[.12]">${I('zap',15)}</span><div><b class="font-bold">Fast to start</b><small class="block text-[#AEBFC0] text-[13px] mt-px">No setup needed for the demo — explore every feature offline.</small></div></div>
+        <div class="flex gap-[13px] items-start text-[#E2EAEA]"><span class="mt-[3px] shrink-0 w-[26px] h-[26px] rounded-[8px] grid place-items-center bg-white/[.08] border border-white/[.12]">${I('shield',15)}</span><div><b class="font-bold">Private &amp; local</b><small class="block text-[#AEBFC0] text-[13px] mt-px">The model runs on-prem; customer data never leaves your infrastructure.</small></div></div>
+      </div>
+      <div class="relative z-[1] text-[12.5px] text-[#9FB0B1] tracking-[.04em]">Final-year engineering project · n8n · Ollama · Odoo CRM</div>
+    </aside>
+    <main class="grid place-items-center p-10">
+      <div class="w-[min(440px,100%)] reveal">
+        <button class="inline-flex items-center gap-2 text-[13px] font-bold text-muted mb-5 hover:text-accent transition" data-go="landing"><span class="text-[16px] leading-none">←</span> Back to home</button>
+        <span class="${UI.eyebrow}">${I('user',14)} Create your account</span>
+        <h2 class="font-display font-medium text-[32px] mt-[14px] mb-[6px] tracking-[-.2px]">Get started</h2>
+        <p class="text-muted m-0 mb-[26px]">Set up access to the sales operations console.</p>
+        <form id="signupForm">
+          <div class="mb-4"><label class="${lbl}">Full name</label>
+            <div class="relative"><span class="${ic}">${I('user',17)}</span><input class="${UI.input} !pl-[42px]" id="su_name" type="text" placeholder="Your name" autocomplete="name"/></div></div>
+          <div class="mb-4"><label class="${lbl}">Work email</label>
+            <div class="relative"><span class="${ic}">${I('mail',17)}</span><input class="${UI.input} !pl-[42px]" id="su_email" type="email" placeholder="you@company.com" autocomplete="email"/></div></div>
+          <div class="grid grid-cols-2 max-[560px]:grid-cols-1 gap-[14px]">
+            <div class="mb-4"><label class="${lbl}">Password</label>
+              <div class="relative"><span class="${ic}">${I('key',17)}</span><input class="${UI.input} !pl-[42px]" id="su_pass" type="password" placeholder="Create a password" autocomplete="new-password"/></div></div>
+            <div class="mb-4"><label class="${lbl}">Confirm</label>
+              <div class="relative"><span class="${ic}">${I('lock',17)}</span><input class="${UI.input} !pl-[42px]" id="su_pass2" type="password" placeholder="Re-enter" autocomplete="new-password"/></div></div>
+          </div>
+          <div id="su_err"></div>
+          <button class="${UI.btnPrimary} w-full" type="submit">${I('arrow',17)} Create account</button>
+        </form>
+        <div class="${UI.notice} ${UI.noticeSoft} mt-4">${I('alert',16)}<span>This is a demonstration project — sign-up does not create a real account. You'll be taken to sign-in, where a demo account gets you into the console.</span></div>
+        <p class="text-center text-[13px] text-muted mt-6">Already have an account? <button class="font-bold text-accent-deep hover:underline" data-go="login">Sign in</button></p>
       </div>
     </main>
   </div>`;
@@ -65,9 +232,8 @@ function viewShell(){
     <aside class="rail sticky top-0 h-screen flex flex-col gap-[6px] px-[18px] py-6 text-[#E8EEEE] bg-[linear-gradient(176deg,#16262A,#1C2E33_70%,#21363B)] shadow-[inset_-1px_0_0_rgba(255,255,255,.04),14px_0_50px_rgba(22,38,42,.10)]" id="rail">
       <div class="flex items-center gap-3 px-2 pt-[6px] pb-[14px]"><div class="w-[42px] h-[42px] rounded-[13px] grid place-items-center shrink-0 bg-gradient-to-br from-mist to-accent text-[#0F1E22] shadow-[0_12px_26px_rgba(0,0,0,.30)]">${I('brain',22)}</div>
         <div><b class="font-display font-semibold text-[19px] block leading-[1.05] tracking-[.2px]">AI CRM Platform</b><span class="text-[11px] text-[#9DB8BC] tracking-[.15em] uppercase">Sales Console</span></div></div>
-      <div class="mx-[6px] mt-1 mb-3 flex bg-white/[.06] border border-white/[.08] rounded-[11px] p-1 gap-1">
-        <button data-mode="demo" class="flex-1 rounded-[8px] px-[6px] py-[7px] text-[12px] font-bold text-[#B8C8C9] flex items-center justify-center gap-[6px] transition ${state.mode==='demo'?'on':''}">${I('demo',14)} Demo</button>
-        <button data-mode="live" class="flex-1 rounded-[8px] px-[6px] py-[7px] text-[12px] font-bold text-[#B8C8C9] flex items-center justify-center gap-[6px] transition ${state.mode==='live'?'on':''}">${I('broadcast',14)} Live</button>
+      <div class="rail-mode mx-[6px] mt-1 mb-3 flex bg-white/[.06] border border-white/[.08] rounded-[11px] p-1 gap-1">
+        ${[['demo','demo','Demo'],['local','database','Local'],['live','broadcast','Live']].map(m=>`<button data-mode="${m[0]}" class="flex-1 rounded-[8px] px-[5px] py-[7px] text-[11.5px] font-bold text-[#B8C8C9] flex items-center justify-center gap-[5px] transition ${state.mode===m[0]?'on':''}">${I(m[1],13)} ${m[2]}</button>`).join('')}
       </div>
       <nav class="flex flex-col gap-[3px] mt-1">
         ${NAV.map(n=> n.sec ? `<div class="text-[10.5px] font-extrabold tracking-[.16em] uppercase text-[#4E8C99] px-3 pt-[14px] pb-[6px]">${n.sec}</div>`
@@ -89,7 +255,7 @@ function pageHead(eyebrow, title, sub, actions=''){
       <span class="${UI.eyebrow}"><button class="${UI.mtoggle}" id="mtoggle" type="button">${I('menu',18)}</button> ${esc(eyebrow)}</span>
       <h1 class="font-display font-medium text-[clamp(28px,3.4vw,40px)] leading-[1.04] tracking-[-.2px] mt-[11px] mb-2">${esc(title)}</h1><p class="text-muted text-[15.5px] max-w-[680px] m-0 leading-[1.6]">${esc(sub)}</p>
     </div>
-    <div class="${UI.headActions}">${actions}<span class="modepill ${UI.modepill} ${state.mode}"><span class="d"></span>${state.mode==='live'?'Live':'Demo'} mode</span></div>
+    <div class="${UI.headActions}">${actions}<span class="modepill ${UI.modepill} ${state.mode}"><span class="d"></span>${({demo:'Demo',local:'Local',live:'Live'}[state.mode]||'Demo')} mode</span></div>
   </div>`;
 }
 
@@ -97,8 +263,8 @@ function pageHead(eyebrow, title, sub, actions=''){
    DASHBOARD
    ========================================================================= */
 function viewDashboard(){
-  const k=computeKPIs(allLeads());
-  const pr=priorityBreakdown(allLeads());
+  const k=computeKPIs(viewData());
+  const pr=priorityBreakdown(viewData());
   const cards=[
     {lbl:'Opportunities', val:k.total, hint:'Total in pipeline', ic:'database', col:'var(--accent)'},
     {lbl:'With email', val:k.withEmail, hint:`${Math.round(k.withEmail/(k.total||1)*100)}% reachable by mail`, ic:'mail', col:'var(--mist)'},
@@ -273,7 +439,7 @@ function viewWorkspace(){
 }
 function wsFiltered(){
   const q=wsState.q.toLowerCase().trim();
-  return allLeads().filter(l=>l.type==='opportunity').filter(l=>{
+  return viewData().filter(l=>l.type==='opportunity').filter(l=>{
     if(q && !(`${l.name} ${l.email_from} ${l.interest}`.toLowerCase().includes(q))) return false;
     if(wsState.filter==='inactive'){ const d=daysSince(l.write_date||l.create_date); return d!=null && d>=7; }
     if(['hot','warm','cold'].includes(wsState.filter)) return l.priority===wsState.filter;
@@ -297,7 +463,7 @@ function renderWsList(){
   $$('.lead-row',list).forEach(r=>r.addEventListener('click',()=>{ wsState.selected=+r.dataset.id; renderWsList(); renderWsDetail(+r.dataset.id); }));
 }
 function renderWsDetail(id){
-  const l=allLeads().find(x=>x.id===id); if(!l) return;
+  const l=viewData().find(x=>x.id===id); if(!l) return;
   const d=daysSince(l.write_date||l.create_date);
   const box=$('#ws_detail');
   box.innerHTML=`
@@ -339,7 +505,7 @@ function renderWsDetail(id){
    FOLLOW-UP CENTER
    ========================================================================= */
 function viewFollowup(){
-  const inactive=allLeads().filter(l=>l.type==='opportunity').filter(l=>{const d=daysSince(l.write_date||l.create_date);return d!=null&&d>=7;});
+  const inactive=viewData().filter(l=>l.type==='opportunity').filter(l=>{const d=daysSince(l.write_date||l.create_date);return d!=null&&d>=7;});
   const statLbl='text-muted font-bold text-[13px] flex gap-2 items-center';
   const statVal='font-display text-[34px] font-semibold mt-2';
   return `

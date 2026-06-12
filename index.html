@@ -140,6 +140,8 @@ body::after{
 .modepill.demo .d{background:var(--warm)}
 .modepill.live{background:rgba(92,138,102,.14);color:#3f6b4a}
 .modepill.live .d{background:var(--ok);animation:pulse 2s infinite}
+.modepill.local{background:rgba(111,169,180,.16);color:#3a6f79}
+.modepill.local .d{background:var(--accent)}
 
 /* Result block tints (markup sets .created/.dup/.err) */
 .result.created{border-color:rgba(92,138,102,.3)!important;background:rgba(92,138,102,.07)!important}
@@ -190,6 +192,7 @@ body::after{
 <script src="src/model/dataset.js"></script>
 <script src="src/model/store.js"></script>
 <script src="src/model/api.js"></script>
+<script src="src/model/apiClient.js"></script>
 <script src="src/model/domain.js"></script>
 
 <!-- View: charts + screens -->

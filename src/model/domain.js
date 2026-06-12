@@ -63,7 +63,7 @@ function priorityBreakdown(leads){
 }
 
 function composeLocalSummary(){
-  const k=computeKPIs(allLeads());
+  const k=computeKPIs(viewData());
   const emailAll = k.withEmail===k.total;
   const phoneAll = k.withPhone===k.total;
   return `CRM Daily Summary:
@@ -92,7 +92,7 @@ function parseAssistant(ans){
 /* Demo-mode assistant: answers strictly from local dataset. */
 function localAssistant(msg){
   const m=msg.toLowerCase();
-  const ops=allLeads().filter(l=>l.type==='opportunity');
+  const ops=viewData().filter(l=>l.type==='opportunity');
   const idMatch=msg.match(/\b(\d{3,5})\b/);
   if(idMatch){
     const l=ops.find(x=>String(x.id)===idMatch[1]);
@@ -100,7 +100,7 @@ function localAssistant(msg){
     return {text:'Here is the opportunity:', records:[{id:l.id,name:l.name,email:l.email_from||'not provided',phone:l.phone||'not provided'}]};
   }
   if(/how many|count|number of/.test(m)){
-    const k=computeKPIs(allLeads());
+    const k=computeKPIs(viewData());
     return {text:`There are ${k.total} opportunities in the pipeline — ${k.newWeek} new this week and ${k.inactive} inactive for a week or more.`};
   }
   if(/draft|follow.?up|write|message|email/.test(m)){
