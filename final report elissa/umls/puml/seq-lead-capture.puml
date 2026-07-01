@@ -1,0 +1,38 @@
+@startuml seq-lead-capture
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+skinparam sequence {
+  ArrowColor #000000
+  ArrowFontColor #000000
+  LifeLineBorderColor #333333
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #000000
+  ParticipantBorderColor #333333
+  ActorBackgroundColor #FFFFFF
+  ActorBorderColor #333333
+  DatabaseBackgroundColor #FFFFFF
+  DatabaseBorderColor #333333
+}
+actor User
+participant "Web Console" as Console
+participant "Backend" as Backend
+participant "n8n" as N8N
+participant "AI Model" as AI
+database "Odoo CRM" as Odoo
+
+User -> Console : paste customer message
+Console -> Backend : send message
+Backend -> N8N : lead-capture webhook
+N8N -> AI : read fields (strict prompt)
+AI --> N8N : structured fields
+N8N -> N8N : validate fields
+N8N -> Odoo : read existing opportunities
+Odoo --> N8N : current records
+N8N -> N8N : check email and phone
+N8N -> Odoo : create opportunity (if new)
+N8N --> Backend : created or duplicate
+Backend --> Console : result
+Console --> User : show lead or duplicate notice
+@enduml

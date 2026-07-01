@@ -43,6 +43,52 @@ Best regards,
 Sales Team`;
 }
 
+/* ------------------------------------------------ LIVE (ODOO) MAPPING --- */
+/* The Live workspace reads real Odoo crm.lead records returned by the
+   crm-list-leads n8n workflow. These helpers map whatever field names n8n
+   returns onto the same shape Demo/Local leads use, so every view is identical. */
+
+/* Pull the records array out of whatever envelope n8n returns. */
+function extractLeadArray(data){
+  if(Array.isArray(data)) return data;
+  if(!data || typeof data!=='object') return [];
+  return data.leads || data.records || data.opportunities || data.data || data.items || [];
+}
+/* Map Odoo's priority (0–3) or a word onto the console's hot/warm/cold. */
+function normPriority(p){
+  const s=String(p==null?'':p).toLowerCase();
+  if(s==='hot'||s==='warm'||s==='cold') return s;
+  if(s==='3'||s==='very high'||s==='high') return 'hot';
+  if(s==='2'||s==='medium') return 'warm';
+  return 'cold';
+}
+/* Normalise an Odoo datetime ("2024-01-15 10:30:00", naive UTC) to ISO. */
+function normDate(v){
+  if(!v) return '';
+  const s=String(v).trim();
+  const m=/^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2}:\d{2})/.exec(s);
+  if(m && !/[Z+]|-\d{2}:\d{2}$/.test(s.slice(10))) return `${m[1]}T${m[2]}Z`;
+  return s.replace(' ','T');
+}
+/* Map one Odoo crm.lead record onto the canonical lead shape. Tolerant of
+   missing fields and of however the n8n workflow names them. */
+function mapLiveLead(r, i){
+  r = r || {};
+  return {
+    id: r.id != null ? r.id : (r.lead_id != null ? r.lead_id : (9000 + (i||0))),
+    name: r.contact_name || r.partner_name || r.name || r.display_name || 'Unnamed lead',
+    email_from: r.email_from || r.email || '',
+    phone: r.phone || r.mobile || '',
+    type: 'opportunity',
+    interest: r.interest || r.description || r.name || '',
+    intent: r.intent || r.type || 'sales_inquiry',
+    priority: normPriority(r.priority),
+    create_date: normDate(r.create_date || r.created_at),
+    write_date:  normDate(r.write_date || r.updated_at || r.create_date || r.created_at),
+    expected_revenue: Number(r.expected_revenue || r.revenue || 0) || 0
+  };
+}
+
 /* ------------------------------------------------------- KPI / METRICS --- */
 function computeKPIs(leads){
   const ops = leads.filter(l=>l.type==='opportunity');
@@ -89,35 +135,67 @@ function parseAssistant(ans){
   if(records.length) return {text:`Found ${records.length} record${records.length>1?'s':''}:`, records};
   return {text:ans};
 }
-/* Demo-mode assistant: answers strictly from local dataset. */
-function localAssistant(msg){
+/* Deterministic answers to the structured data questions (the quick-action chips:
+   list all, count, inactive, hot — plus look-up by ID). Computes over viewData(),
+   so it is exact in EVERY mode (Demo dataset, Local backend, or Live Odoo records).
+   Returns null for anything else, so Demo/Local fall through to drafting/help and
+   Live falls through to the conversational n8n agent. */
+function structuredAnswer(msg){
   const m=msg.toLowerCase();
   const ops=viewData().filter(l=>l.type==='opportunity');
-  const idMatch=msg.match(/\b(\d{3,5})\b/);
-  if(idMatch){
-    const l=ops.find(x=>String(x.id)===idMatch[1]);
-    if(!l) return {text:'Lead not found.'};
-    return {text:'Here is the opportunity:', records:[{id:l.id,name:l.name,email:l.email_from||'not provided',phone:l.phone||'not provided'}]};
+  const card=l=>({id:l.id,name:l.name,email:l.email_from||'not provided',phone:l.phone||'not provided'});
+
+  // In Live mode, if the real opportunities could not be loaded, say so plainly
+  // instead of answering "0" — that would look like Odoo is empty.
+  const dataIntent=/how many|how much|count|number of|\btotal\b|inactive|unactive|quiet|stale|idle|dormant|\bhot\b|priorit|urgent|\blist\b|show|\ball\b|display|find|\bget\b|opportun|\blead|pipeline|\b\d{1,6}\b/.test(m);
+  if(dataIntent && typeof state!=='undefined' && state.mode==='live' && state.liveError && !ops.length){
+    return {text:`I couldn't load live opportunities from Odoo (${state.liveError}). Open Settings to check the Lead List webhook, or switch to Demo or Local mode.`};
   }
-  if(/how many|count|number of/.test(m)){
+
+  const idMatch=msg.match(/\b(\d{1,6})\b/);
+  if(idMatch && /opportunit|\blead|record|\bid\b|show|\bget\b|open|look ?up|number/.test(m)){
+    const l=ops.find(x=>String(x.id)===idMatch[1]);
+    return l ? {text:'Here is the opportunity:', records:[card(l)]}
+             : {text:`No opportunity with ID ${idMatch[1]} in the current pipeline.`};
+  }
+  if(/how many|how much|count|number of|\btotal\b/.test(m)){
     const k=computeKPIs(viewData());
     return {text:`There are ${k.total} opportunities in the pipeline — ${k.newWeek} new this week and ${k.inactive} inactive for a week or more.`};
   }
+  if(/inactive|unactive|quiet|stale|idle|dormant|no activity/.test(m)){
+    const inactive=ops.filter(l=>{ const d=daysSince(l.write_date||l.create_date); return d!=null && d>=7; });
+    return inactive.length ? {text:`${inactive.length} inactive opportunit${inactive.length>1?'ies':'y'} (no activity for 7+ days):`, records:inactive.map(card)}
+                           : {text:'Good news — no opportunities have been inactive for 7 days or more.'};
+  }
+  if(/\bhot\b|high.?priority|urgent|priorit/.test(m)){
+    const hot=ops.filter(l=>l.priority==='hot');
+    return hot.length ? {text:`${hot.length} hot opportunit${hot.length>1?'ies':'y'} right now:`, records:hot.map(card)}
+                      : {text:'No hot opportunities right now.'};
+  }
+  if(/\blist\b|show|\ball\b|display|find|\bget\b|opportun|\blead|pipeline|everything/.test(m)){
+    if(!ops.length) return {text:'There are no opportunities in the pipeline yet.'};
+    const CAP=50, subset=ops.slice(0,CAP);
+    const head = ops.length>CAP ? `Showing the first ${CAP} of ${ops.length} opportunities:`
+                                 : `All ${ops.length} opportunit${ops.length>1?'ies':'y'}:`;
+    return {text:head, records:subset.map(card)};
+  }
+  return null;
+}
+
+/* Demo/Local-mode assistant: structured data answers first, then drafting / help. */
+function localAssistant(msg){
+  const direct=structuredAnswer(msg);
+  if(direct) return direct;
+  const m=msg.toLowerCase();
+  const ops=viewData().filter(l=>l.type==='opportunity');
   if(/draft|follow.?up|write|message|email/.test(m)){
     const named=ops.find(l=>m.includes(l.name.toLowerCase().split(' ')[0]));
     const l=named||ops.find(l=>{const d=daysSince(l.write_date);return d>=7;})||ops[0];
+    if(!l) return {text:'There are no opportunities to draft a follow-up for yet.'};
     return {text:`Suggested follow-up for ${l.name}:\n\n${draftFollowUp(l)}`};
   }
-  if(/list|show|all|display|find|get|opportun|lead/.test(m)){
-    const subset=ops.slice(0,8);
-    return {text:`Showing ${subset.length} of ${ops.length} opportunities:`, records:subset.map(l=>({id:l.id,name:l.name,email:l.email_from||'not provided',phone:l.phone||'not provided'}))};
-  }
-  if(/hot|priority|urgent/.test(m)){
-    const hot=ops.filter(l=>l.priority==='hot');
-    return {text:`${hot.length} hot opportunities right now:`, records:hot.map(l=>({id:l.id,name:l.name,email:l.email_from||'not provided',phone:l.phone||'not provided'}))};
-  }
   if(/hello|hi|hey|help|what can you/.test(m)){
-    return {text:'I can list opportunities, look one up by ID (e.g. "show 1003"), count records, find hot leads, or draft a follow-up. What would you like?'};
+    return {text:'I can list opportunities, look one up by ID, count records, find hot or inactive leads, or draft a follow-up. What would you like?'};
   }
-  return {text:'I work on CRM opportunities. Try: "list all opportunities", "show 1004", "how many leads", or "draft a follow-up for Karim".'};
+  return {text:'I work on CRM opportunities. Try: "list all opportunities", "how many leads", "list inactive leads", or "show hot leads".'};
 }

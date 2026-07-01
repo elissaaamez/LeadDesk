@@ -11,6 +11,8 @@ const authService = require("./services/auth.service");
 const opportunityService = require("./services/opportunity.service");
 const captureService = require("./services/capture.service");
 const analyticsService = require("./services/analytics.service");
+const assistantService = require("./services/assistant.service");
+const liveService = require("./services/live.service");
 const { settingsRepo } = require("./repositories");
 
 router.get("/health", (req, res) => res.json({ ok: true }));
@@ -45,6 +47,15 @@ router.get("/captures", requireAuth, async (req, res) => res.json(await captureS
 /* ---- Analytics + follow-ups ---- */
 router.get("/analytics/summary", requireAuth, async (req, res) => res.json(await analyticsService.summary()));
 router.post("/followups/run", requireAuth, async (req, res) => res.json(await analyticsService.followups()));
+
+/* ---- Assistant (Local mode) ---- */
+router.post("/assistant", requireAuth, async (req, res) => {
+  const body = req.body || {};
+  res.json(await assistantService.handleQuery(body.message || ""));
+});
+
+/* ---- Live mode (server-side proxy to the n8n webhooks; avoids browser CORS) ---- */
+router.post("/live/:target", requireAuth, async (req, res) => res.json(await liveService.forward(req.params.target, req.body || {})));
 
 /* ---- Settings (webhook endpoints, persisted) ---- */
 router.get("/settings", requireAuth, async (req, res) => res.json(await settingsRepo.get() || {}));

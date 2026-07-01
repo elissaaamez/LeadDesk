@@ -1,0 +1,37 @@
+@startuml seq-followup
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+skinparam sequence {
+  ArrowColor #000000
+  ArrowFontColor #000000
+  LifeLineBorderColor #333333
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #000000
+  ParticipantBorderColor #333333
+  ActorBackgroundColor #FFFFFF
+  ActorBorderColor #333333
+  DatabaseBackgroundColor #FFFFFF
+  DatabaseBorderColor #333333
+}
+actor User
+participant "Web Console" as Console
+participant "Backend" as Backend
+participant "n8n" as N8N
+database "Odoo CRM" as Odoo
+participant "AI Model" as AI
+
+User -> Console : open follow-up center
+Console -> Backend : request follow-ups
+Backend -> N8N : smart-follow-up webhook
+N8N -> Odoo : read opportunities
+Odoo --> N8N : opportunity records
+N8N -> N8N : detect inactive (7+ days)
+N8N -> AI : draft follow-up message
+AI --> N8N : follow-up text
+N8N -> Odoo : save message to the lead
+N8N --> Backend : follow-up results
+Backend --> Console : messages
+Console --> User : show the drafts
+@enduml

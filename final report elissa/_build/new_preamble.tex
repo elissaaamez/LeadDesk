@@ -1,0 +1,182 @@
+\documentclass[12pt,a4paper,oneside]{report}
+\usepackage[table]{xcolor}
+\usepackage[a4paper,top=2.6cm,bottom=2.4cm,left=2.7cm,right=2.3cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{mathptmx}
+\usepackage[scaled=0.92]{helvet}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{eso-pic}
+\definecolor{IITBlue}{HTML}{004389}
+\definecolor{SoftBlue}{HTML}{EAF2F8}
+\definecolor{Accent}{HTML}{1F497D}
+\definecolor{SoftGray}{HTML}{F4F6F7}
+\definecolor{DarkGray}{HTML}{3A3A3A}
+\definecolor{TabHead}{gray}{0.85}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,shapes.multipart,calc,shapes.geometric,shadows,chains}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=Accent}
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{3}
+\setlength{\parindent}{0.65cm}
+\setlength{\parskip}{0.20em}
+\setlength{\headheight}{15pt}
+\renewcommand{\arraystretch}{1.30}
+\setlist[itemize]{label=\textemdash, topsep=0.25em, itemsep=0.2em, leftmargin=1.25cm}
+\setlist[enumerate]{topsep=0.25em, itemsep=0.2em, leftmargin=1.25cm}
+\sloppy
+\hbadness=10000
+\hfuzz=30pt
+\vbadness=10000
+\vfuzz=400pt
+\emergencystretch=3em
+\raggedbottom
+
+% ---------- Content clustering: avoid orphan/widow lines and stranded headings ----------
+\usepackage{needspace}
+\clubpenalty=10000
+\widowpenalty=10000
+\displaywidowpenalty=10000
+\brokenpenalty=10000
+\setlength{\textfloatsep}{16pt plus 4pt minus 4pt}
+\setlength{\intextsep}{16pt plus 4pt minus 4pt}
+\setlength{\floatsep}{14pt plus 3pt minus 3pt}
+\usepackage{etoolbox}
+\pretocmd{\section}{\Needspace*{4\baselineskip}}{}{}
+\pretocmd{\subsection}{\Needspace*{3\baselineskip}}{}{}
+
+% ---------- Per-chapter Summary helper ----------
+\newcommand{\chsummaryitem}[3]{\noindent\makebox[1.15cm][l]{#1}#2\,\dotfill\,\pageref{#3}\par}
+\newcommand{\chsummarysub}[3]{\noindent\hspace*{1.0cm}\makebox[1.4cm][l]{#1}#2\,\dotfill\,\pageref{#3}\par}
+
+% ---------- Running header / footer (monochrome, mirrors reference) ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\rmfamily\nouppercase{}\leftmark}
+\fancyfoot[L]{\small\rmfamily IIT SFAX}
+\fancyfoot[R]{\small\rmfamily Page \thepage}
+\renewcommand{\headrulewidth}{0.8pt}
+\renewcommand{\footrulewidth}{0.6pt}
+\renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{#1}}{}}
+\renewcommand{\sectionmark}[1]{}
+% chapter-opening / front-matter pages keep the IIT SFAX footer (mirror reference)
+\fancypagestyle{plain}{%
+  \fancyhf{}%
+  \fancyfoot[L]{\small\rmfamily IIT SFAX}%
+  \fancyfoot[R]{\small\rmfamily Page \thepage}%
+  \renewcommand{\headrulewidth}{0pt}%
+  \renewcommand{\footrulewidth}{0.6pt}%
+}
+
+% ---------- Caption style: FIGURE/TABLE X.Y -- text, small caps, below ----------
+\DeclareCaptionLabelSeparator{dashsep}{ \textendash\ }
+\captionsetup{labelsep=dashsep, labelfont={sc,bf,small}, textfont={sc,small}, justification=centering, singlelinecheck=true, skip=6pt}
+
+% ---------- Chapter heading: black square + number + rule + title ----------
+\newcommand{\chsquare}[1]{%
+  {\setlength{\fboxsep}{0pt}\colorbox{black}{\parbox[c][1.15cm][c]{1.15cm}{\centering\color{white}\fontsize{30}{30}\selectfont\bfseries #1}}}%
+}
+\titleformat{\chapter}[display]
+  {\rmfamily}
+  {\normalsize\itshape Chapter\\[3pt]\chsquare{\thechapter}}
+  {6pt}
+  {\titlerule[1.2pt]\vspace{4pt}\raggedright\huge\bfseries}
+  []
+\titleformat{name=\chapter,numberless}[display]
+  {\rmfamily}
+  {\chsquare{\rule{0pt}{0pt}}}
+  {6pt}
+  {\titlerule[1.2pt]\vspace{4pt}\raggedright\huge\bfseries}
+  []
+\titlespacing*{\chapter}{0pt}{6pt}{18pt}
+
+% ---------- Section headings: serif, bold, black (mirrors reference) ----------
+\titleformat{\section}{\rmfamily\Large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\rmfamily\large\bfseries}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\rmfamily\normalsize\bfseries}{\thesubsubsection}{0.6em}{}
+
+% ---------- Code listing style ----------
+\lstdefinestyle{codeStyle}{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{SoftBlue},
+    rulecolor=\color{IITBlue},
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false
+}
+\lstset{style=codeStyle}
+
+\newcommand{\projecttitle}{Design and Implementation of an AI-Assisted CRM Automation Platform}
+\newcommand{\shortproject}{AI CRM Platform}
+\newcommand{\studentname}{Elissa Mezghani}
+\newcommand{\university}{International Institute of Technology (IIT)}
+\newcommand{\chapterintro}[1]{\vspace{0.5cm}\noindent#1\vspace{0.4cm}}
+\newcommand{\screenshot}[2]{%
+\begin{figure}[p]
+\centering
+\includegraphics[width=0.97\textwidth,height=0.78\textheight,keepaspectratio]{#1}
+\caption{#2}
+\end{figure}
+}
+
+% ---- Sequence diagram styling (UML-style lifelines and messages) ----
+\tikzset{
+  lifehead/.style={draw=IITBlue, fill=IITBlue, text=white, rounded corners=2pt,
+                   minimum width=2.5cm, minimum height=0.72cm, font=\small\bfseries, align=center},
+  lifeline/.style={dashed, gray!70},
+  smsg/.style={-{Latex[length=2.2mm]}, semithick, IITBlue},
+  rmsg/.style={-{Latex[length=2.2mm]}, semithick, dashed, Accent},
+  snote/.style={draw=Accent, fill=SoftBlue, rounded corners=2pt, font=\scriptsize,
+                align=center, inner sep=2.5pt}
+}
+% ---- Use case diagram styling (standard UML style) ----
+\definecolor{UCfill}{HTML}{FBF6DD}
+\tikzset{
+  uc/.style={draw=gray!65, ellipse, fill=UCfill, minimum width=3.2cm, minimum height=0.95cm,
+             align=center, font=\scriptsize},
+  ucsys/.style={draw=gray!70, rectangle, inner sep=14pt},
+  ucedge/.style={gray!70}
+}
+% ---- Workflow node-flow styling ----
+\tikzset{
+  wfnode/.style={draw=IITBlue, fill=SoftBlue, rounded corners=2pt, align=center,
+                 font=\footnotesize, minimum height=0.9cm, text width=2.5cm, inner sep=3pt},
+  wfbranch/.style={draw=Accent, fill=SoftGray, rounded corners=2pt, align=center,
+                 font=\footnotesize, minimum height=0.9cm, text width=2.5cm, inner sep=3pt},
+  wfarr/.style={-{Latex[length=2.2mm]}, semithick, IITBlue}
+}
+% UML actor: stick figure with a connectable head node (#1) and a label (#3) below
+\newcommand{\umlactor}[3]{%
+  \node[draw, thick, circle, minimum size=6mm, inner sep=0pt] (#1) at (#2) {};
+  \draw[thick] (#1.south) -- ++(0,-0.5);
+  \draw[thick] ([yshift=-0.16cm]#1.south) ++(-0.33,0) -- ++(0.66,0);
+  \draw[thick] ([yshift=-0.5cm]#1.south) -- ++(-0.3,-0.42);
+  \draw[thick] ([yshift=-0.5cm]#1.south) -- ++(0.3,-0.42);
+  \node[font=\small\bfseries] at ([yshift=-1.3cm]#1.south) {#3};
+}
+% Title-page full background image (applied to one page only)
+\newcommand{\titlebackground}[1]{\AddToShipoutPictureBG*{\put(0,0){\includegraphics[width=\paperwidth,height=\paperheight]{#1}}}}

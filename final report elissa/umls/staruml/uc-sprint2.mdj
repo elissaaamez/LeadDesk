@@ -1,0 +1,224 @@
+{
+  "_type": "Project",
+  "_id": "id-e30b8dc4bdd8c9b9",
+  "name": "AICRM_uc-sprint2",
+  "ownedElements": [
+    {
+      "_type": "UMLModel",
+      "_id": "id-04a24710508a70dd",
+      "_parent": {
+        "$ref": "id-e30b8dc4bdd8c9b9"
+      },
+      "name": "Model",
+      "ownedElements": [
+        {
+          "_type": "UMLActor",
+          "_id": "id-be7a79ae73a5d3c5",
+          "_parent": {
+            "$ref": "id-04a24710508a70dd"
+          },
+          "name": "Sales user",
+          "ownedElements": [
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-843284ddee60f81d",
+              "_parent": {
+                "$ref": "id-be7a79ae73a5d3c5"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-be35b94ddfab8283",
+                "_parent": {
+                  "$ref": "id-843284ddee60f81d"
+                },
+                "reference": {
+                  "$ref": "id-be7a79ae73a5d3c5"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-49573604425fbf96",
+                "_parent": {
+                  "$ref": "id-843284ddee60f81d"
+                },
+                "reference": {
+                  "$ref": "id-0d1eac26cda0cb9a"
+                },
+                "navigable": "unspecified"
+              }
+            },
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-df4c47fe8489bc49",
+              "_parent": {
+                "$ref": "id-be7a79ae73a5d3c5"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-1157cc85608ea342",
+                "_parent": {
+                  "$ref": "id-df4c47fe8489bc49"
+                },
+                "reference": {
+                  "$ref": "id-be7a79ae73a5d3c5"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-99d0b0ef9e7eb9a0",
+                "_parent": {
+                  "$ref": "id-df4c47fe8489bc49"
+                },
+                "reference": {
+                  "$ref": "id-2b217a6b66edd49e"
+                },
+                "navigable": "unspecified"
+              }
+            }
+          ]
+        },
+        {
+          "_type": "UMLPackage",
+          "_id": "id-30393ff863bd58bf",
+          "_parent": {
+            "$ref": "id-04a24710508a70dd"
+          },
+          "name": "Lead Capture Module",
+          "ownedElements": [
+            {
+              "_type": "UMLUseCase",
+              "_id": "id-af0515573c927a19",
+              "_parent": {
+                "$ref": "id-30393ff863bd58bf"
+              },
+              "name": "Authenticate"
+            },
+            {
+              "_type": "UMLUseCase",
+              "_id": "id-0d1eac26cda0cb9a",
+              "_parent": {
+                "$ref": "id-30393ff863bd58bf"
+              },
+              "name": "Submit customer message",
+              "ownedElements": [
+                {
+                  "_type": "UMLInclude",
+                  "_id": "id-24020c86a33a725f",
+                  "_parent": {
+                    "$ref": "id-0d1eac26cda0cb9a"
+                  },
+                  "source": {
+                    "$ref": "id-0d1eac26cda0cb9a"
+                  },
+                  "target": {
+                    "$ref": "id-af0515573c927a19"
+                  }
+                },
+                {
+                  "_type": "UMLInclude",
+                  "_id": "id-5676016bf3a1f1c6",
+                  "_parent": {
+                    "$ref": "id-0d1eac26cda0cb9a"
+                  },
+                  "source": {
+                    "$ref": "id-0d1eac26cda0cb9a"
+                  },
+                  "target": {
+                    "$ref": "id-4e80b29c6e72ce34"
+                  }
+                },
+                {
+                  "_type": "UMLInclude",
+                  "_id": "id-fe014b2bbb863f7d",
+                  "_parent": {
+                    "$ref": "id-0d1eac26cda0cb9a"
+                  },
+                  "source": {
+                    "$ref": "id-0d1eac26cda0cb9a"
+                  },
+                  "target": {
+                    "$ref": "id-e1488b22786d94d3"
+                  }
+                }
+              ]
+            },
+            {
+              "_type": "UMLUseCase",
+              "_id": "id-4e80b29c6e72ce34",
+              "_parent": {
+                "$ref": "id-30393ff863bd58bf"
+              },
+              "name": "View extracted fields"
+            },
+            {
+              "_type": "UMLUseCase",
+              "_id": "id-e1488b22786d94d3",
+              "_parent": {
+                "$ref": "id-30393ff863bd58bf"
+              },
+              "name": "Create opportunity",
+              "ownedElements": [
+                {
+                  "_type": "UMLInclude",
+                  "_id": "id-f24d590e74d9a6c6",
+                  "_parent": {
+                    "$ref": "id-e1488b22786d94d3"
+                  },
+                  "source": {
+                    "$ref": "id-e1488b22786d94d3"
+                  },
+                  "target": {
+                    "$ref": "id-4fa444cca1b385c5"
+                  }
+                }
+              ]
+            },
+            {
+              "_type": "UMLUseCase",
+              "_id": "id-4fa444cca1b385c5",
+              "_parent": {
+                "$ref": "id-30393ff863bd58bf"
+              },
+              "name": "Detect duplicate"
+            },
+            {
+              "_type": "UMLUseCase",
+              "_id": "id-2b217a6b66edd49e",
+              "_parent": {
+                "$ref": "id-30393ff863bd58bf"
+              },
+              "name": "View capture history",
+              "ownedElements": [
+                {
+                  "_type": "UMLInclude",
+                  "_id": "id-8c3afdb0f530d149",
+                  "_parent": {
+                    "$ref": "id-2b217a6b66edd49e"
+                  },
+                  "source": {
+                    "$ref": "id-2b217a6b66edd49e"
+                  },
+                  "target": {
+                    "$ref": "id-af0515573c927a19"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_type": "UMLUseCaseDiagram",
+          "_id": "id-fbefd175168ad25d",
+          "_parent": {
+            "$ref": "id-04a24710508a70dd"
+          },
+          "name": "Lead Capture Module",
+          "defaultDiagram": true,
+          "ownedViews": []
+        }
+      ]
+    }
+  ]
+}

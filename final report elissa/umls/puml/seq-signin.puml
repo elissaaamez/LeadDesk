@@ -1,0 +1,30 @@
+@startuml seq-signin
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+skinparam sequence {
+  ArrowColor #000000
+  ArrowFontColor #000000
+  LifeLineBorderColor #333333
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #000000
+  ParticipantBorderColor #333333
+  ActorBackgroundColor #FFFFFF
+  ActorBorderColor #333333
+  DatabaseBackgroundColor #FFFFFF
+  DatabaseBorderColor #333333
+}
+actor User
+participant "Web Console" as Console
+participant "Backend" as Backend
+database "Local Database" as DB
+
+User -> Console : enter email and password
+Console -> Backend : send sign-in request
+Backend -> DB : look up user by email
+DB --> Backend : stored user and hash
+Backend -> Backend : check password (scrypt)
+Backend --> Console : session token
+Console --> User : open the dashboard
+@enduml

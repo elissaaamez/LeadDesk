@@ -1,7 +1,8 @@
 /* ============================================================================
    AI CRM Platform — application server. Serves the static front-end AND the
    /api backend from a single origin (so the in-browser app calls the API with
-   no CORS), backed by embedded NeDB. The n8n/Odoo Live path is unaffected.
+   no CORS), backed by embedded NeDB. Live mode's n8n calls are proxied through
+   /api/live/* (see services/live.service.js) so the browser also stays same-origin.
      npm start          → this server (full: static + API + DB) on PORT (3000)
      npm run static     → server.js (pure static, no backend)
    ========================================================================== */

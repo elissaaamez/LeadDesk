@@ -15,7 +15,9 @@ const state = {
   session: LS.get('acp_session', null),
   authView: 'landing',          // which pre-login screen shows: landing | login | signup
   config:  Object.assign({}, DEFAULTS, LS.get('acp_config', {})),
-  mode:    LS.get('acp_mode', 'demo'),
+  // 'local' is hidden from the UI (see viewShell). Coerce a saved 'local' preference
+  // to 'demo' so the app never opens in a mode that has no button to switch out of.
+  mode:    (LS.get('acp_mode','demo')==='local' ? 'demo' : LS.get('acp_mode','demo')),
   tab:     'dashboard',
   dataset: buildDataset(),
   captured: LS.get('acp_captured', []),
@@ -23,6 +25,9 @@ const state = {
   analytics: null,
   followup: null,
   serverOpps: [],               // opportunities fetched from the local backend (Local mode)
+  liveOpps: [],                 // opportunities fetched from Odoo via n8n (Live mode)
+  liveLoading: false,
+  liveError: null,
   loading: {}
 };
 /* Workspace view state (search query, active filter, selected lead). */
@@ -30,5 +35,11 @@ const wsState={ q:'', filter:'all', selected:null };
 
 function persistConfig(){ LS.set('acp_config', state.config); }
 function allLeads(){ return state.captured.concat(state.dataset); }
-/* Leads the views/analytics read from, by mode: Local → backend cache; Demo/Live → in-browser dataset. */
-function viewData(){ return state.mode==='local' ? (state.serverOpps||[]) : allLeads(); }
+/* Leads the views/analytics read from, by mode:
+   Local → backend (NeDB) cache · Live → Odoo-via-n8n cache · Demo → in-browser dataset.
+   Live mode never shows the demo dataset — only the real opportunities fetched from Odoo. */
+function viewData(){
+  if(state.mode==='local') return state.serverOpps||[];
+  if(state.mode==='live')  return state.liveOpps||[];
+  return allLeads();
+}

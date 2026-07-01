@@ -7,6 +7,7 @@
 /* ----------------------------------------------------------- CONSTANTS --- */
 const DEFAULTS = {
   leadCapture:'http://localhost:5678/webhook/lead-capture',
+  leadList:   'http://localhost:5678/webhook/crm-list-leads',
   analytics:  'http://localhost:5678/webhook/crm-summary',
   followUp:   'http://localhost:5678/webhook/smart-follow-up',
   assistant:  'http://localhost:5678/webhook/crm-ai-assistant'

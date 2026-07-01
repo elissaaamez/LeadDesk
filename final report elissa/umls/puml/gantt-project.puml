@@ -1,0 +1,38 @@
+@startgantt
+skinparam backgroundColor transparent
+skinparam defaultFontName Times New Roman
+skinparam shadowing false
+<style>
+ganttDiagram {
+  task {
+    BackGroundColor #EAF2F8
+    LineColor #004389
+    FontColor #1A1A1A
+  }
+  milestone { BackGroundColor #004389 LineColor #003063 }
+  note { BackGroundColor #FBF6DD LineColor #9A8C4A }
+}
+</style>
+Project starts 2026-02-02
+saturday are closed
+sunday are closed
+
+[Sprint 0: Setup and Planning] as [S0] lasts 5 days
+[Sprint 1: Platform Foundation and UI] as [S1] lasts 10 days
+[S1] starts at [S0]'s end
+[Sprint 2: Lead Capture and Duplicate Detection] as [S2] lasts 10 days
+[S2] starts at [S1]'s end
+[Sprint 3: Analytics and Smart Follow-Up] as [S3] lasts 10 days
+[S3] starts at [S2]'s end
+[Sprint 4: CRM Assistant and Live Integration] as [S4] lasts 10 days
+[S4] starts at [S3]'s end
+[Testing, Deployment and Report] as [TR] lasts 8 days
+[TR] starts at [S4]'s end
+
+[S0] is colored in #D6E4F0/#004389
+[S1] is colored in #EAF2F8/#004389
+[S2] is colored in #EAF2F8/#004389
+[S3] is colored in #EAF2F8/#004389
+[S4] is colored in #EAF2F8/#004389
+[TR] is colored in #FBF6DD/#9A8C4A
+@endgantt

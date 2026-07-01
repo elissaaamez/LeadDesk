@@ -1,0 +1,37 @@
+@startuml seq-assistant
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+skinparam sequence {
+  ArrowColor #000000
+  ArrowFontColor #000000
+  LifeLineBorderColor #333333
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #000000
+  ParticipantBorderColor #333333
+  ActorBackgroundColor #FFFFFF
+  ActorBorderColor #333333
+  DatabaseBackgroundColor #FFFFFF
+  DatabaseBorderColor #333333
+}
+actor User
+participant "Web Console" as Console
+participant "Backend\n(live proxy)" as Backend
+participant "n8n agent" as N8N
+participant "AI Model" as AI
+database "Odoo CRM" as Odoo
+
+User -> Console : ask a CRM question
+Console -> Backend : live request
+Backend -> N8N : forward (with timeout)
+N8N -> AI : question and tool list
+AI --> N8N : choose a tool
+N8N -> Odoo : run tool (read or update)
+Odoo --> N8N : tool result
+N8N -> AI : tool result
+AI --> N8N : final answer
+N8N --> Backend : answer
+Backend --> Console : clean response
+Console --> User : display the answer
+@enduml

@@ -1,0 +1,36 @@
+@startuml seq-analytics
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Times New Roman
+skinparam sequence {
+  ArrowColor #000000
+  ArrowFontColor #000000
+  LifeLineBorderColor #333333
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #000000
+  ParticipantBorderColor #333333
+  ActorBackgroundColor #FFFFFF
+  ActorBorderColor #333333
+  DatabaseBackgroundColor #FFFFFF
+  DatabaseBorderColor #333333
+}
+actor Manager
+participant "Web Console" as Console
+participant "Backend" as Backend
+participant "n8n" as N8N
+database "Odoo CRM" as Odoo
+participant "AI Model" as AI
+
+Manager -> Console : open dashboard
+Console -> Backend : request summary
+Backend -> N8N : crm-summary webhook
+N8N -> Odoo : read opportunities
+Odoo --> N8N : opportunity records
+N8N -> N8N : compute indicators
+N8N -> AI : write summary from numbers
+AI --> N8N : readable summary
+N8N --> Backend : indicators and summary
+Backend --> Console : summary
+Console --> Manager : show cards and summary
+@enduml

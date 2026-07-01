@@ -50,9 +50,25 @@ contracts:
 7. **Inspect first, plan, get approval, implement, test, document.** Work in small milestones.
 
 ## Status & open items
+- **DONE — Live mode is proxied through the backend (June 2026):** the browser no
+  longer calls n8n directly. It POSTs same-origin to `POST /api/live/:target`
+  (`server/services/live.service.js`), which forwards to the n8n webhook with a
+  server-side timeout and returns `{ ok, status, data }`. This removes the CORS
+  fragility and the silent hang when n8n is down. The old direct transport
+  (`src/model/api.js` / `postJson`) was deleted. See `docs/LIVE-MODE.md`.
+- **DONE — assistant runs on Groq (June 2026):** `crm-ai-assistant` is now served by
+  the tool-using agent in `AI Assistant Webhook.json` on Groq `llama-3.3-70b-versatile`
+  (was a no-LLM workflow that dumped the full list for every question). Verified:
+  count / single-lookup / list all answer correctly. **Known gap:** a non-existent ID
+  ("show opportunity 99999") returns an empty answer (the Odoo *get* tool errors on a
+  missing record) → UI shows "No answer returned." Valid IDs are fine.
+- **NOTE — architecture moved past "single `index.html`":** the front end is an MVC app
+  in `src/` (model/view/controller) served by a Node + NeDB backend (`server/`). Modes
+  are now **demo** (in-browser), **local** (backend `/api`), **live** (n8n via the proxy).
+  `index.html` is the shell that loads `src/`.
 - **DONE — `smart-follow-up` threshold:** `module2.1.json` now uses `inactiveAfterDays = 7`, matching the front-end (committed). Relevant only to **Live** follow-up; Demo mode computes inactivity in-browser.
 - **DONE — workflow ping-guard:** all four webhook JSONs now have an `IF ($json.body.ping === true)` → `Respond Pong {ok,pong:true}` short-circuit *before* any Odoo node (committed). Existing nodes unchanged; the guard only fires on a `{ping:true}` body — normal requests flow exactly as before.
-- **Front-end Test button (construction-safe):** `probe` flags are `crm-summary`-only, so "Test connections" only POSTs to `crm-summary` (which has no Odoo write node). Lead Capture, Smart Follow-Up, and the Assistant show "not tested — would modify Odoo." Safe regardless of n8n state — no footgun. If you later import the four guarded workflows, flip the `probe` flags to `true` to ping all four safely. Normal capture/assistant Live flows do NOT depend on the guard.
+- **Front-end Test button (construction-safe):** the connection test now goes through the proxy and probes only the **read-safe** targets — `analytics` (crm-summary) and `assistant` (a read-only query). `leadCapture` and `followUp` still show "not tested — would modify Odoo" because their active workflows can write to Odoo. No footgun regardless of n8n state.
 - **Demo mode needs no backend:** follow-up and analytics in Demo mode are computed in-browser from the seed dataset and never call n8n.
 - Optional docs to add: `ARCHITECTURE.md`, `DEMO.md`, `TESTING.md`, `docs/workflows.md`.
 

@@ -18,23 +18,23 @@
     },
     {
       "parameters": {
-        "model": "qwen2.5:3b",
+        "model": "llama-3.3-70b-versatile",
         "options": {
           "temperature": 0
         }
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
         64,
         112
       ],
       "id": "05983764-7426-4075-925d-d855343377aa",
-      "name": "Ollama Chat Model",
+      "name": "Groq Chat Model",
       "credentials": {
-        "ollamaApi": {
-          "id": "1m5rFaiuChafuLdv",
-          "name": "Ollama account"
+        "groqApi": {
+          "id": "GroqAcctLocal001",
+          "name": "Groq account"
         }
       }
     },
@@ -73,7 +73,13 @@
         256
       ],
       "id": "63c703d4-c1b5-4317-9cad-56c49085af20",
-      "name": "List Opportunities"
+      "name": "List Opportunities",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
     },
     {
       "parameters": {
@@ -109,7 +115,13 @@
         400
       ],
       "id": "ee449d06-0234-4a0e-bbac-fa7ed3970402",
-      "name": "Create Opportunity"
+      "name": "Create Opportunity",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
     },
     {
       "parameters": {
@@ -155,7 +167,13 @@
         48
       ],
       "id": "3938481a-07f8-4892-9a75-c380b7074ebc",
-      "name": "Get CRM Notes"
+      "name": "Get CRM Notes",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
     },
     {
       "parameters": {
@@ -184,7 +202,13 @@
         32
       ],
       "id": "78dfc888-6892-4014-9503-477a7eb6af8f",
-      "name": "Get Opportunity"
+      "name": "Get Opportunity",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
     },
     {
       "parameters": {
@@ -210,7 +234,13 @@
         272
       ],
       "id": "b006582c-928b-42b1-ac7f-33b46d8fad3a",
-      "name": "Update Opportunity Phone"
+      "name": "Update Opportunity Phone",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
     },
     {
       "parameters": {
@@ -236,7 +266,13 @@
         272
       ],
       "id": "dc01358e-6f1a-4269-baba-640470dd6a2c",
-      "name": "Update Opportunity Name"
+      "name": "Update Opportunity Name",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
     },
     {
       "parameters": {
@@ -262,7 +298,13 @@
         256
       ],
       "id": "a5cc7238-bc5a-4732-a1d1-6b43e44a82dc",
-      "name": "Update Opportunity Email"
+      "name": "Update Opportunity Email",
+      "credentials": {
+        "odooApi": {
+          "id": "Sv6udoSjCErFqjcV",
+          "name": "Odoo account"
+        }
+      }
     },
     {
       "parameters": {
@@ -313,7 +355,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{\n  {\n    ok: true,\n    answer: $json.output || $json.text || $json.response || $json\n  }\n}}",
+        "responseBody": "={{\n  {\n    ok: true,\n    answer: $json.output || $json.text || $json.response || \"Sorry, I could not produce an answer.\"\n  }\n}}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
@@ -377,7 +419,7 @@
   ],
   "pinData": {},
   "connections": {
-    "Ollama Chat Model": {
+    "Groq Chat Model": {
       "ai_languageModel": [
         [
           {
@@ -517,7 +559,7 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",

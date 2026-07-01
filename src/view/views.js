@@ -232,8 +232,11 @@ function viewShell(){
     <aside class="rail sticky top-0 h-screen flex flex-col gap-[6px] px-[18px] py-6 text-[#E8EEEE] bg-[linear-gradient(176deg,#16262A,#1C2E33_70%,#21363B)] shadow-[inset_-1px_0_0_rgba(255,255,255,.04),14px_0_50px_rgba(22,38,42,.10)]" id="rail">
       <div class="flex items-center gap-3 px-2 pt-[6px] pb-[14px]"><div class="w-[42px] h-[42px] rounded-[13px] grid place-items-center shrink-0 bg-gradient-to-br from-mist to-accent text-[#0F1E22] shadow-[0_12px_26px_rgba(0,0,0,.30)]">${I('brain',22)}</div>
         <div><b class="font-display font-semibold text-[19px] block leading-[1.05] tracking-[.2px]">AI CRM Platform</b><span class="text-[11px] text-[#9DB8BC] tracking-[.15em] uppercase">Sales Console</span></div></div>
+      <!-- Mode switcher: 'Local' is hidden from the UI (Demo + Live only) to keep the
+           story clear for the defense. The Local code path is intact — to restore the
+           button, add ['local','database','Local'] back to the array below. -->
       <div class="rail-mode mx-[6px] mt-1 mb-3 flex bg-white/[.06] border border-white/[.08] rounded-[11px] p-1 gap-1">
-        ${[['demo','demo','Demo'],['local','database','Local'],['live','broadcast','Live']].map(m=>`<button data-mode="${m[0]}" class="flex-1 rounded-[8px] px-[5px] py-[7px] text-[11.5px] font-bold text-[#B8C8C9] flex items-center justify-center gap-[5px] transition ${state.mode===m[0]?'on':''}">${I(m[1],13)} ${m[2]}</button>`).join('')}
+        ${[['demo','demo','Demo'],['live','broadcast','Live']].map(m=>`<button data-mode="${m[0]}" class="flex-1 rounded-[8px] px-[5px] py-[7px] text-[11.5px] font-bold text-[#B8C8C9] flex items-center justify-center gap-[5px] transition ${state.mode===m[0]?'on':''}">${I(m[1],13)} ${m[2]}</button>`).join('')}
       </div>
       <nav class="flex flex-col gap-[3px] mt-1">
         ${NAV.map(n=> n.sec ? `<div class="text-[10.5px] font-extrabold tracking-[.16em] uppercase text-[#4E8C99] px-3 pt-[14px] pb-[6px]">${n.sec}</div>`
@@ -255,7 +258,7 @@ function pageHead(eyebrow, title, sub, actions=''){
       <span class="${UI.eyebrow}"><button class="${UI.mtoggle}" id="mtoggle" type="button">${I('menu',18)}</button> ${esc(eyebrow)}</span>
       <h1 class="font-display font-medium text-[clamp(28px,3.4vw,40px)] leading-[1.04] tracking-[-.2px] mt-[11px] mb-2">${esc(title)}</h1><p class="text-muted text-[15.5px] max-w-[680px] m-0 leading-[1.6]">${esc(sub)}</p>
     </div>
-    <div class="${UI.headActions}">${actions}<span class="modepill ${UI.modepill} ${state.mode}"><span class="d"></span>${({demo:'Demo',local:'Local',live:'Live'}[state.mode]||'Demo')} mode</span></div>
+    <div class="${UI.headActions}">${actions}<span class="modepill ${UI.modepill} ${state.mode}"><span class="d"></span>${({demo:'Demo',local:'Local',live:'Live'}[state.mode]||'Demo')} mode</span><button class="${UI.btnGhost} ${UI.btnSm}" id="headLogout" type="button">${I('logout',15)} Sign out</button></div>
   </div>`;
 }
 
@@ -420,8 +423,12 @@ function renderCaptureResult({status, message, extract, dup, live}){
    LEAD WORKSPACE
    ========================================================================= */
 function viewWorkspace(){
+  const actions = state.mode==='live'
+    ? `<button class="${UI.btnGhost}" id="ws_refresh">${I('refresh',15)} Refresh</button>` : '';
   return `
-  ${pageHead('Sales view','Lead workspace','Search every opportunity, filter by priority or status, and open a record to review details and prepare a follow-up.')}
+  ${pageHead('Sales view','Lead workspace', state.mode==='live'
+      ? 'Live opportunities read from Odoo through n8n — not demo data. Open a record to review details and prepare a follow-up.'
+      : 'Search every opportunity, filter by priority or status, and open a record to review details and prepare a follow-up.', actions)}
   <div class="grid grid-cols-[1.55fr_1fr] max-[1180px]:grid-cols-1 gap-[18px]">
     <div>
       <div class="flex gap-[10px] items-center flex-wrap mb-4">
@@ -447,8 +454,22 @@ function wsFiltered(){
   });
 }
 function renderWsList(){
-  const list=$('#ws_list'); const items=wsFiltered();
-  if(!items.length){ list.innerHTML=`<div class="${UI.empty}"><div class="${UI.ei}">${I('search',22)}</div><b class="${UI.emptyTitle}">No matches</b><p class="${UI.emptyP}">Try a different search or filter.</p></div>`; return; }
+  const list=$('#ws_list');
+  if(state.mode==='live' && state.liveLoading){
+    list.innerHTML=`<div class="${UI.empty}"><div class="${UI.ei}">${I('refresh',22)}</div><b class="${UI.emptyTitle}">Loading opportunities…</b><p class="${UI.emptyP}">Reading live opportunities from Odoo through n8n.</p></div>`; return;
+  }
+  if(state.mode==='live' && state.liveError){
+    list.innerHTML=`<div class="${UI.notice} ${UI.noticeWarn}">${I('alert',17)}<span>Could not load live leads: ${esc(state.liveError)}. Check the Lead List webhook in Settings, or switch to Demo / Local mode.</span></div>
+      <div class="${UI.headActions} mt-[10px] justify-start"><button class="${UI.btnGhost}" id="ws_retry">${I('refresh',15)} Retry</button></div>`;
+    $('#ws_retry')?.addEventListener('click',()=>refreshLiveOpps());
+    return;
+  }
+  const items=wsFiltered();
+  if(!items.length){
+    const sub = state.mode==='live'
+      ? 'No opportunities came back from Odoo. Create one in Lead Capture, then Refresh — or adjust your search.'
+      : 'Try a different search or filter.';
+    list.innerHTML=`<div class="${UI.empty}"><div class="${UI.ei}">${I('search',22)}</div><b class="${UI.emptyTitle}">No matches</b><p class="${UI.emptyP}">${sub}</p></div>`; return; }
   list.innerHTML=items.map(l=>{
     const d=daysSince(l.write_date||l.create_date);
     const inactive=d!=null&&d>=7;
@@ -489,8 +510,8 @@ function renderWsDetail(id){
   $('#ws_draft').addEventListener('click', async ()=>{
     const b=$('#ws_draft'); b.disabled=true; b.innerHTML=`${I('refresh',16)} Drafting…`;
     let text;
-    if(state.mode==='live' && state.config.assistant){
-      try{ const res=await postJson(state.config.assistant,{message:`Write a short professional follow-up email for opportunity ${l.name} (${l.email_from}). Mention we are following up on their interest and ask to continue the discussion. Sign as Sales Team.`,sessionId:'workspace'}); text=res.data?.answer||res.data?.output||draftFollowUp(l); }
+    if(state.mode==='live'){
+      try{ const res=await api.live('assistant',{message:`Write a short professional follow-up email for opportunity ${l.name} (${l.email_from}). Mention we are following up on their interest and ask to continue the discussion. Sign as Sales Team.`,sessionId:'workspace'}); text=(res.ok && (res.data?.answer||res.data?.output))||draftFollowUp(l); }
       catch{ text=draftFollowUp(l); }
     } else { await new Promise(r=>setTimeout(r,400)); text=draftFollowUp(l); }
     $('#ws_mail').innerHTML=`<div class="${UI.cardSub} !mt-4 !mb-[6px] flex items-center gap-2">${I('mail',15)} Suggested follow-up</div>
@@ -556,7 +577,7 @@ function viewAssistant(){
     <div class="flex flex-col h-[min(640px,72vh)]">
       <div class="flex-1 overflow-auto flex flex-col gap-[14px] px-1 pt-[6px] pb-3" id="chatLog"></div>
       <div class="flex gap-2 flex-wrap my-3" id="chatQuick">
-        ${['List all opportunities','Show opportunity 1003','How many leads do we have?','Draft a follow-up for Karim Haddad'].map(q=>`<button class="qchip text-[12.5px] font-bold text-accent-deep bg-[rgba(111,169,180,.1)] border border-[rgba(111,169,180,.18)] rounded-full px-[13px] py-[7px] transition hover:bg-[rgba(111,169,180,.18)] hover:-translate-y-px">${q}</button>`).join('')}
+        ${['List all opportunities','How many leads do we have?','List inactive leads','Show hot leads'].map(q=>`<button class="qchip text-[12.5px] font-bold text-accent-deep bg-[rgba(111,169,180,.1)] border border-[rgba(111,169,180,.18)] rounded-full px-[13px] py-[7px] transition hover:bg-[rgba(111,169,180,.18)] hover:-translate-y-px">${q}</button>`).join('')}
       </div>
       <form class="grid grid-cols-[1fr_auto] gap-[10px] mt-1" id="chatForm">
         <input class="${UI.input}" id="chatMsg" placeholder="Ask about your CRM…" autocomplete="off"/>
@@ -643,6 +664,7 @@ function viewSettings(){
   const c=state.config;
   const rows=[
     {k:'leadCapture', label:'Lead Capture', icon:'send'},
+    {k:'leadList', label:'Lead List (workspace)', icon:'users'},
     {k:'analytics', label:'Analytics Summary', icon:'activity'},
     {k:'followUp', label:'Smart Follow-Up', icon:'refresh'},
     {k:'assistant', label:'AI Assistant', icon:'bot'}

@@ -22,8 +22,18 @@ function render(){
   root.innerHTML = viewShell();
   wireShell();
   renderPage();
-  // Local mode reads opportunities from the backend — fetch, then re-render with data.
+  // Local mode reads opportunities from the backend; Live mode reads the real
+  // Odoo records via n8n — fetch, then re-render with data.
   if(state.mode==='local'){ loadServerOpps().then(()=>renderPage()).catch(()=>{}); }
+  else if(state.mode==='live'){ refreshLiveOpps(); }
+}
+/* Fetch the live Odoo opportunities, showing a loading state and an honest error
+   if the workflow is unreachable. Used wherever Local mode calls loadServerOpps. */
+async function refreshLiveOpps(){
+  state.liveLoading=true; state.liveError=null; renderPage();
+  try{ await loadLiveOpps(); }
+  catch(e){ state.liveOpps=[]; state.liveError=e.message||'Could not reach the leads workflow'; }
+  finally{ state.liveLoading=false; renderPage(); }
 }
 /* Pre-login navigation between landing / login / signup. */
 function setAuth(v){ state.authView=v; render(); }
@@ -44,8 +54,9 @@ async function setMode(m){
   $$('.rail-mode button').forEach(b=>b.classList.toggle('on', b.dataset.mode===m));
   const msg={demo:'Demo mode — using local dataset', local:'Local mode — using the local database', live:'Live mode — calling n8n webhooks'}[m];
   toast(msg, {demo:'demo', local:'database', live:'broadcast'}[m]);
-  if(m==='local'){ try{ await loadServerOpps(); }catch(e){ toast('Backend not reachable: '+e.message,'alert'); } }
-  renderPage();
+  if(m==='local'){ try{ await loadServerOpps(); }catch(e){ toast('Backend not reachable: '+e.message,'alert'); } renderPage(); }
+  else if(m==='live'){ renderPage(); refreshLiveOpps(); }
+  else renderPage();
 }
 
 /* =========================================================================
@@ -103,16 +114,22 @@ function wireSignup(){
 /* =========================================================================
    SHELL (rail + topbar)
    ========================================================================= */
+function logoutUser(){
+  if(state.session&&state.session.token) api.logout();
+  state.session=null; state.serverOpps=[]; state.liveOpps=[]; state.liveError=null;
+  LS.del('acp_session'); state.authView='landing'; render();
+}
 function wireShell(){
   $$('.nav-item').forEach(n=>n.addEventListener('click',()=>setTab(n.dataset.tab)));
   $$('.rail-mode button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
-  $('#logoutBtn').addEventListener('click',()=>{ if(state.session&&state.session.token) api.logout(); state.session=null; state.serverOpps=[]; LS.del('acp_session'); state.authView='landing'; render(); });
+  $('#logoutBtn')?.addEventListener('click', logoutUser);
   $('#scrim')?.addEventListener('click', closeRail);
 }
 function openRail(){ $('#rail')?.classList.add('open'); $('#scrim')?.classList.add('open'); }
 function closeRail(){ $('#rail')?.classList.remove('open'); $('#scrim')?.classList.remove('open'); }
 
-function afterHead(){ $('#mtoggle')?.addEventListener('click', openRail); }
+/* Per-page header wiring: the mobile menu toggle and the always-visible Sign out button. */
+function afterHead(){ $('#mtoggle')?.addEventListener('click', openRail); $('#headLogout')?.addEventListener('click', logoutUser); }
 
 /* =========================================================================
    DASHBOARD
@@ -131,7 +148,8 @@ async function runAnalytics(){
   try{
     let text;
     if(state.mode==='live'){
-      const res=await postJson(state.config.analytics,{trigger:'dashboard',requested_by:state.session.email});
+      const res=await api.live('analytics',{trigger:'dashboard',requested_by:state.session.email});
+      if(!res.ok) throw new Error(res.data?.text || ('Analytics workflow returned HTTP '+res.status));
       const d=res.data||{};
       text = d.text||d.output||d.summary||(typeof d==='string'?d:JSON.stringify(d,null,2));
     } else if(state.mode==='local'){
@@ -161,10 +179,12 @@ function wireCapture(){
     const btn=$('#capBtn'); btn.disabled=true; btn.innerHTML=`${I('refresh',16)} Processing…`;
     try{
       if(state.mode==='live'){
-        const res=await postJson(state.config.leadCapture,{message:finalMsg,source:'AI CRM Platform console',submitted_by:state.session.email});
-        const d=res.data||{}; const status=d.status||(res.ok?'created':'error');
+        const res=await api.live('leadCapture',{message:finalMsg,source:'AI CRM Platform console',submitted_by:state.session.email});
+        if(!res.ok) throw new Error(res.data?.text || ('Lead capture workflow returned HTTP '+res.status));
+        const d=res.data||{}; const status=d.status||'created';
         const ex=localExtract(finalMsg);
         renderCaptureResult({status, message:d.message||'', extract:{...ex, name:name||ex.name||'(detected server-side)'}, live:true});
+        if(status!=='error' && status!=='duplicate') loadLiveOpps().catch(()=>{});  // re-pull from Odoo so the workspace shows the new lead
       } else if(state.mode==='local'){
         const r=await api.capture({ message:finalMsg, name, email, phone });
         await loadServerOpps();
@@ -195,6 +215,7 @@ function wireCapture(){
    ========================================================================= */
 function wireWorkspace(){
   afterHead();
+  $('#ws_refresh')?.addEventListener('click',()=>refreshLiveOpps());
   $('#ws_q').addEventListener('input', e=>{ wsState.q=e.target.value; renderWsList(); });
   $$('.seg button').forEach(b=>b.addEventListener('click',()=>{ wsState.filter=b.dataset.f; $$('.seg button').forEach(x=>x.classList.toggle('on',x===b)); renderWsList(); }));
   renderWsList();
@@ -215,7 +236,8 @@ async function runFollowup(){
   try{
     let results;
     if(state.mode==='live'){
-      const res=await postJson(state.config.followUp,{trigger:'followup_center',requested_by:state.session.email});
+      const res=await api.live('followUp',{trigger:'followup_center',requested_by:state.session.email});
+      if(!res.ok) throw new Error(res.data?.text || ('Follow-up workflow returned HTTP '+res.status));
       let d=res.data; const arr=Array.isArray(d)?d:(d&&typeof d==='object'?[d]:[]);
       results=arr.map(x=>({ name:x.name||'Lead', email:x.email||'', inactive_days:x.inactive_days, message:x.follow_up_message||x.text||'' })).filter(r=>r.message);
       if(!results.length){
@@ -256,12 +278,21 @@ function wireAssistant(){
     let reply;
     try{
       if(state.mode==='live'){
-        if(!state.config.assistant) reply={text:'Live mode is on but no assistant webhook is configured. Add it in Settings, or switch to Demo mode.'};
-        else { const res=await postJson(state.config.assistant,{message:msg,chatInput:msg,sessionId:'acp-console',source:'assistant'},15000);
-          const ans=res.data?.answer||res.data?.output||res.data?.text||(typeof res.data==='string'?res.data:'No answer returned.');
-          reply=parseAssistant(ans); }
+        // Structured questions (list / count / inactive / hot / id) are answered
+        // exactly from the same live Odoo data the workspace shows. Only free-form
+        // questions go to the conversational n8n agent.
+        const direct=structuredAnswer(msg);
+        if(direct){ reply=direct; }
+        else {
+          const res=await api.live('assistant',{message:msg,chatInput:msg,sessionId:'acp-console',source:'assistant'});
+          if(!res.ok){ reply={text: res.data?.text || ('The assistant workflow returned HTTP '+res.status+'.')}; }
+          else {
+            const ans=res.data?.answer||res.data?.output||res.data?.text||(typeof res.data==='string'?res.data:'No answer returned.');
+            reply=parseAssistant(ans);
+          }
+        }
       } else { await new Promise(r=>setTimeout(r,500)); reply=localAssistant(msg); }
-    }catch(err){ reply={text:'I could not reach the assistant webhook: '+err.message+'. Try Demo mode.'}; }
+    }catch(err){ reply={text:'I could not reach the assistant: '+err.message+'. Try Demo mode.'}; }
     state.chat.pop(); state.chat.push(Object.assign({role:'bot'},reply)); renderChat();
   });
 }
@@ -271,36 +302,42 @@ function wireAssistant(){
    ========================================================================= */
 function wireSettings(){
   afterHead();
-  $('#saveCfg').addEventListener('click',()=>{
-    ['leadCapture','analytics','followUp','assistant'].forEach(k=>state.config[k]=$('#cfg_'+k).value.trim());
-    persistConfig(); toast('Settings saved');
+  $('#saveCfg').addEventListener('click',async ()=>{
+    ['leadCapture','leadList','analytics','followUp','assistant'].forEach(k=>state.config[k]=$('#cfg_'+k).value.trim());
+    persistConfig();
+    // Mirror the endpoints to the backend so the Live proxy resolves the same URLs.
+    try{ await api.saveSettings(state.config); }catch{}
+    if(state.mode==='live') state.liveOpps=[];  // re-pull with the new endpoint next time the workspace opens
+    toast('Settings saved');
   });
-  $('#resetCfg').addEventListener('click',()=>{ state.config=Object.assign({},DEFAULTS); persistConfig(); renderPage(); toast('Reset to defaults'); });
+  $('#resetCfg').addEventListener('click',async ()=>{ state.config=Object.assign({},DEFAULTS); persistConfig(); try{ await api.saveSettings(state.config); }catch{} renderPage(); toast('Reset to defaults'); });
   $('#clearCap').addEventListener('click',()=>{ state.captured=[]; LS.set('acp_captured',[]); renderPage(); toast('Captured demo leads cleared','trash'); });
   $('#testCfg').addEventListener('click', async ()=>{
-    ['leadCapture','analytics','followUp','assistant'].forEach(k=>state.config[k]=$('#cfg_'+k).value.trim());
-    // Endpoints reachable through an Odoo WRITE path are NOT probed until the workflow ping-guard
-    // exists, so a connection test can never create a lead or modify CRM data. crm-summary has no
-    // write node, so it is always safe to exercise. Once the ping-guard is imported, flip these to true.
-    const probe={ leadCapture:false, analytics:true, followUp:false, assistant:false };
+    ['leadCapture','leadList','analytics','followUp','assistant'].forEach(k=>state.config[k]=$('#cfg_'+k).value.trim());
+    persistConfig();
+    try{ await api.saveSettings(state.config); }catch{}
+    // Probes go through the backend proxy (same origin, no CORS). Only read-safe
+    // webhooks are auto-probed: crm-list-leads, crm-summary and the assistant have
+    // no Odoo WRITE path, so a request cannot create or modify a lead. lead-capture
+    // and smart-follow-up can write to Odoo, so they are left untested.
+    const probe={ leadCapture:false, leadList:true, analytics:true, followUp:false, assistant:true };
     const payload={
-      leadCapture:{ ping:true },
+      leadList:{ action:'list' },
       analytics:{ trigger:'connection-test', requested_by:(state.session&&state.session.email)||'console' },
-      followUp:{ ping:true },
       assistant:{ ping:true }
     };
-    for(const k of ['leadCapture','analytics','followUp','assistant']){
+    for(const k of ['leadCapture','leadList','analytics','followUp','assistant']){
       const dot=$('#st_'+k); const t=$('.t',dot);
       if(!probe[k]){ dot.className='statusdot warn'; t.textContent='not tested — would modify Odoo'; continue; }
       if(!state.config[k]){ dot.className='statusdot off'; t.textContent='not set'; continue; }
       dot.className='statusdot test'; t.textContent='testing…';
       try{
-        const res=await postJson(state.config[k], payload[k], 8000);
+        const res=await api.live(k, payload[k]);
         if(res.ok){ dot.className='statusdot ok'; t.textContent='reachable'; }
-        else { dot.className='statusdot warn'; t.textContent='HTTP '+res.status; }
+        else { dot.className='statusdot off'; t.textContent = res.status ? ('HTTP '+res.status) : 'unreachable'; }
       }catch(e){
         dot.className='statusdot off';
-        t.textContent = e.name==='AbortError' ? 'timeout' : 'unreachable';
+        t.textContent='unreachable';
       }
     }
   });

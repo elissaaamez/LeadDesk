@@ -1,0 +1,38 @@
+@startwbs
+skinparam backgroundColor transparent
+skinparam defaultFontName Times New Roman
+skinparam shadowing false
+<style>
+wbsDiagram {
+  node {
+    BackGroundColor #EAF2F8
+    LineColor #004389
+    FontColor #1A1A1A
+    RoundCorner 6
+  }
+  arrow { LineColor #9AA7B4 }
+  :depth(0) { BackGroundColor #004389 FontColor #FFFFFF }
+}
+</style>
+* AI CRM Platform
+** Sprint 1\nFoundation and UI
+*** Interface shell and navigation
+*** Authentication
+*** Local and Live environments
+** Sprint 2\nLead Capture
+*** Capture form
+*** Field extraction
+*** Duplicate detection
+** Sprint 3\nAnalytics and Follow-Up
+*** KPI dashboard
+*** Manager summary
+*** Inactive detection and drafts
+** Sprint 4\nAssistant and Live
+*** CRM assistant (tools)
+*** Backend live proxy
+*** Settings and connection test
+** Testing and Deployment
+*** Functional and integration tests
+*** Security and reliability
+*** Deployment
+@endwbs
