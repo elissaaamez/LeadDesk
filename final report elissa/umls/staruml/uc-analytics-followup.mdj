@@ -1,0 +1,425 @@
+{
+  "_type": "Project",
+  "_id": "id-d40fcdf362badb58",
+  "name": "LeadDesk — Analytics and Smart Follow-Up",
+  "ownedElements": [
+    {
+      "_type": "UMLModel",
+      "_id": "id-b9f2699c87219a8f",
+      "_parent": {
+        "$ref": "id-d40fcdf362badb58"
+      },
+      "name": "Model",
+      "ownedElements": [
+        {
+          "_type": "UMLActor",
+          "_id": "id-d1f44ba27efcfbcf",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "Manager",
+          "ownedElements": [
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-ce1a8a77e3b603c3",
+              "_parent": {
+                "$ref": "id-d1f44ba27efcfbcf"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-8a827c990f4aac7b",
+                "_parent": {
+                  "$ref": "id-ce1a8a77e3b603c3"
+                },
+                "reference": {
+                  "$ref": "id-d1f44ba27efcfbcf"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-9f1e9f6fd85aa152",
+                "_parent": {
+                  "$ref": "id-ce1a8a77e3b603c3"
+                },
+                "reference": {
+                  "$ref": "id-3232717ece3ee184"
+                },
+                "navigable": "unspecified"
+              }
+            },
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-60b162a3c070997a",
+              "_parent": {
+                "$ref": "id-d1f44ba27efcfbcf"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-f6613558c4579952",
+                "_parent": {
+                  "$ref": "id-60b162a3c070997a"
+                },
+                "reference": {
+                  "$ref": "id-d1f44ba27efcfbcf"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-66431ad493cdb5db",
+                "_parent": {
+                  "$ref": "id-60b162a3c070997a"
+                },
+                "reference": {
+                  "$ref": "id-e01178a7658e0d9c"
+                },
+                "navigable": "unspecified"
+              }
+            }
+          ]
+        },
+        {
+          "_type": "UMLActor",
+          "_id": "id-c8edb16631444505",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "Sales operator",
+          "ownedElements": [
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-78b9f97ee693ba3b",
+              "_parent": {
+                "$ref": "id-c8edb16631444505"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-77f19e74d80136e1",
+                "_parent": {
+                  "$ref": "id-78b9f97ee693ba3b"
+                },
+                "reference": {
+                  "$ref": "id-c8edb16631444505"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-447d4dceca653e24",
+                "_parent": {
+                  "$ref": "id-78b9f97ee693ba3b"
+                },
+                "reference": {
+                  "$ref": "id-ebfdec358afd0d8e"
+                },
+                "navigable": "unspecified"
+              }
+            },
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-c7e203cb9bdc1e88",
+              "_parent": {
+                "$ref": "id-c8edb16631444505"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-08e0979cffaf72e2",
+                "_parent": {
+                  "$ref": "id-c7e203cb9bdc1e88"
+                },
+                "reference": {
+                  "$ref": "id-c8edb16631444505"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-b808881c85636105",
+                "_parent": {
+                  "$ref": "id-c7e203cb9bdc1e88"
+                },
+                "reference": {
+                  "$ref": "id-7ef3f84bc3ed2827"
+                },
+                "navigable": "unspecified"
+              }
+            }
+          ]
+        },
+        {
+          "_type": "UMLClass",
+          "_id": "id-b732dd0a6084aa0c",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "System",
+          "attributes": [],
+          "operations": [],
+          "ownedElements": [
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-724de2b34daf4105",
+              "_parent": {
+                "$ref": "id-b732dd0a6084aa0c"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-087976db14194c19",
+                "_parent": {
+                  "$ref": "id-724de2b34daf4105"
+                },
+                "reference": {
+                  "$ref": "id-b732dd0a6084aa0c"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-89ab629ed574cc25",
+                "_parent": {
+                  "$ref": "id-724de2b34daf4105"
+                },
+                "reference": {
+                  "$ref": "id-3232717ece3ee184"
+                },
+                "navigable": "unspecified"
+              }
+            },
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-feae482e9cb5b7a7",
+              "_parent": {
+                "$ref": "id-b732dd0a6084aa0c"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-577def872104291c",
+                "_parent": {
+                  "$ref": "id-feae482e9cb5b7a7"
+                },
+                "reference": {
+                  "$ref": "id-b732dd0a6084aa0c"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-0412e9dabcf37f4a",
+                "_parent": {
+                  "$ref": "id-feae482e9cb5b7a7"
+                },
+                "reference": {
+                  "$ref": "id-e01178a7658e0d9c"
+                },
+                "navigable": "unspecified"
+              }
+            },
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-a0adf22277998148",
+              "_parent": {
+                "$ref": "id-b732dd0a6084aa0c"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-6093b1fb05423373",
+                "_parent": {
+                  "$ref": "id-a0adf22277998148"
+                },
+                "reference": {
+                  "$ref": "id-b732dd0a6084aa0c"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-f7aa7fe43875dd1d",
+                "_parent": {
+                  "$ref": "id-a0adf22277998148"
+                },
+                "reference": {
+                  "$ref": "id-ebfdec358afd0d8e"
+                },
+                "navigable": "unspecified"
+              }
+            },
+            {
+              "_type": "UMLAssociation",
+              "_id": "id-e420747399295e72",
+              "_parent": {
+                "$ref": "id-b732dd0a6084aa0c"
+              },
+              "end1": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-e7c5de1c84141811",
+                "_parent": {
+                  "$ref": "id-e420747399295e72"
+                },
+                "reference": {
+                  "$ref": "id-b732dd0a6084aa0c"
+                },
+                "navigable": "unspecified"
+              },
+              "end2": {
+                "_type": "UMLAssociationEnd",
+                "_id": "id-626413eec36e684d",
+                "_parent": {
+                  "$ref": "id-e420747399295e72"
+                },
+                "reference": {
+                  "$ref": "id-7ef3f84bc3ed2827"
+                },
+                "navigable": "unspecified"
+              }
+            }
+          ]
+        },
+        {
+          "_type": "UMLUseCase",
+          "_id": "id-3232717ece3ee184",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "View dashboard KPIs",
+          "ownedElements": [
+            {
+              "_type": "UMLInclude",
+              "_id": "id-5bcba9e41e1719ba",
+              "_parent": {
+                "$ref": "id-3232717ece3ee184"
+              },
+              "source": {
+                "$ref": "id-3232717ece3ee184"
+              },
+              "target": {
+                "$ref": "id-ab7541c52889f57a"
+              }
+            }
+          ]
+        },
+        {
+          "_type": "UMLUseCase",
+          "_id": "id-e01178a7658e0d9c",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "Generate summary",
+          "ownedElements": [
+            {
+              "_type": "UMLInclude",
+              "_id": "id-5e3c6b56555db4a0",
+              "_parent": {
+                "$ref": "id-e01178a7658e0d9c"
+              },
+              "source": {
+                "$ref": "id-e01178a7658e0d9c"
+              },
+              "target": {
+                "$ref": "id-ab7541c52889f57a"
+              }
+            },
+            {
+              "_type": "UMLInclude",
+              "_id": "id-b2d48a23508b9658",
+              "_parent": {
+                "$ref": "id-e01178a7658e0d9c"
+              },
+              "source": {
+                "$ref": "id-e01178a7658e0d9c"
+              },
+              "target": {
+                "$ref": "id-3232717ece3ee184"
+              }
+            }
+          ]
+        },
+        {
+          "_type": "UMLUseCase",
+          "_id": "id-ebfdec358afd0d8e",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "View follow-up center",
+          "ownedElements": [
+            {
+              "_type": "UMLInclude",
+              "_id": "id-49782c46d6371148",
+              "_parent": {
+                "$ref": "id-ebfdec358afd0d8e"
+              },
+              "source": {
+                "$ref": "id-ebfdec358afd0d8e"
+              },
+              "target": {
+                "$ref": "id-ab7541c52889f57a"
+              }
+            },
+            {
+              "_type": "UMLInclude",
+              "_id": "id-ce1cbadaca824564",
+              "_parent": {
+                "$ref": "id-ebfdec358afd0d8e"
+              },
+              "source": {
+                "$ref": "id-ebfdec358afd0d8e"
+              },
+              "target": {
+                "$ref": "id-393f4a54b81e162b"
+              }
+            }
+          ]
+        },
+        {
+          "_type": "UMLUseCase",
+          "_id": "id-7ef3f84bc3ed2827",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "Generate follow-up message",
+          "ownedElements": [
+            {
+              "_type": "UMLInclude",
+              "_id": "id-24469d1ee93fb0e6",
+              "_parent": {
+                "$ref": "id-7ef3f84bc3ed2827"
+              },
+              "source": {
+                "$ref": "id-7ef3f84bc3ed2827"
+              },
+              "target": {
+                "$ref": "id-ab7541c52889f57a"
+              }
+            }
+          ]
+        },
+        {
+          "_type": "UMLUseCase",
+          "_id": "id-393f4a54b81e162b",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "Detect inactive leads"
+        },
+        {
+          "_type": "UMLUseCase",
+          "_id": "id-ab7541c52889f57a",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "Authenticate"
+        },
+        {
+          "_type": "UMLUseCaseDiagram",
+          "_id": "id-c68b0218c80c9dc8",
+          "_parent": {
+            "$ref": "id-b9f2699c87219a8f"
+          },
+          "name": "LeadDesk — Analytics and Smart Follow-Up",
+          "defaultDiagram": true,
+          "ownedViews": []
+        }
+      ]
+    }
+  ]
+}

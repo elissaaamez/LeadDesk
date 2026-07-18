@@ -1,6 +1,10 @@
 @startuml seq-followup
+' Robustness / Boundary-Control-Entity (BCE) sequence diagram.
+' Visual skin kept black-and-white / Times New Roman to match the report
+' (enforced by _build/restyle_seq.py); the structure follows the BCE rules.
 skinparam backgroundColor transparent
 skinparam shadowing false
+skinparam maxMessageSize 200
 skinparam defaultFontName Times New Roman
 skinparam sequence {
   ArrowColor #000000
@@ -15,23 +19,29 @@ skinparam sequence {
   DatabaseBackgroundColor #FFFFFF
   DatabaseBorderColor #333333
 }
-actor User
-participant "Web Console" as Console
-participant "Backend" as Backend
-participant "n8n" as N8N
-database "Odoo CRM" as Odoo
-participant "AI Model" as AI
+hide footbox
+autonumber
+title Smart follow-up
 
-User -> Console : open follow-up center
-Console -> Backend : request follow-ups
-Backend -> N8N : smart-follow-up webhook
-N8N -> Odoo : read opportunities
-Odoo --> N8N : opportunity records
-N8N -> N8N : detect inactive (7+ days)
-N8N -> AI : draft follow-up message
-AI --> N8N : follow-up text
-N8N -> Odoo : save message to the lead
-N8N --> Backend : follow-up results
-Backend --> Console : messages
-Console --> User : show the drafts
+actor ":SalesOperator" as Operator
+boundary ":InterfaceFollowUp" as UI
+control ":ControllerFollowUp" as FollowUp
+control ":WorkflowN8N" as N8N
+control ":ControllerAI" as AI
+database "Odoo CRM" as Odoo
+
+Operator -> UI : openFollowUpCenter()
+UI -> FollowUp : requestFollowUps()
+FollowUp -> N8N : forwardFollowUpRequest()
+N8N -> Odoo : readOpportunities()
+Odoo --> N8N : opportunities
+N8N -> N8N : detectInactiveLeads(opportunities, 7)
+loop for each inactive lead
+  N8N -> AI : draftFollowUpMessage(lead)
+  AI --> N8N : followUpMessage(text)
+  N8N -> Odoo : saveFollowUpMessage(leadId, text)
+  Odoo --> N8N : opportunityUpdated
+end
+N8N --> FollowUp : followUpResults(messages)
+FollowUp --> UI : showFollowUpDrafts(messages)
 @enduml

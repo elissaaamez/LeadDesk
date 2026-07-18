@@ -1,0 +1,46 @@
+@startuml class-analytics
+' Mini class diagram — Sprint 3 (analytics and smart follow-up).
+' Ref: server/services/analytics.service.js, server/lib/domain.js (computeKPIs, draftFollowUp, daysSince).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #EAF2F8
+  BorderColor #004389
+  FontColor #003063
+  AttributeFontColor #1A1A1A
+}
+hide circle
+
+class Opportunity {
+  - id: Number
+  - name: String
+  - email_from: String
+  - phone: String
+  - priority: String
+  - write_date: Date
+  --
+  + list(filter): Opportunity[]
+  + isInactive(): Boolean
+}
+
+class KpiSummary {
+  - total: Number
+  - withEmail: Number
+  - withPhone: Number
+  - inactive: Number
+  - newWeek: Number
+  - active: Number
+}
+
+class FollowUp {
+  - name: String
+  - email: String
+  - inactive_days: Number
+  - priority: String
+  - message: String
+}
+
+Opportunity "0..*" -- "1" KpiSummary : aggregated into
+Opportunity "1" -- "0..1" FollowUp : drafted for
+@enduml

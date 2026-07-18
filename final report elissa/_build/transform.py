@@ -128,10 +128,10 @@ seq_map = [
     ("Sequence diagram of the AI assistant workflow", ["seq-assistant.png"]),
 ]
 uc_map = [
-    ("Use case diagram of the platform foundation", ["uc-sprint1.png", "uc-sprint1.jpg", "uc-sprint1_staruml.jpg"]),
-    ("Use case diagram of the lead capture module", ["uc-sprint2.png", "uc-sprint2.jpg", "uc-sprint2_staruml.jpg"]),
-    ("Use case diagram of the analytics and follow-up module", ["uc-sprint3.png", "uc-sprint3.jpg", "uc-sprint3_staruml.jpg"]),
-    ("Use case diagram of the assistant and live integration module", ["uc-sprint4.png", "uc-sprint4.jpg", "uc-sprint4_staruml.jpg"]),
+    ("Use case diagram of the platform foundation", ["uc-platform-foundation.png", "uc-platform-foundation.jpg", "uc-sprint1.png"]),
+    ("Use case diagram of the lead capture module", ["uc-lead-capture.png", "uc-lead-capture.jpg", "uc-sprint2.png"]),
+    ("Use case diagram of the analytics and follow-up module", ["uc-analytics-followup.png", "uc-analytics-followup.jpg", "uc-sprint3.png"]),
+    ("Use case diagram of the assistant and live integration module", ["uc-assistant-live.png", "uc-assistant-live.jpg", "uc-sprint4.png"]),
 ]
 class_map = [
     ("Local data model used by NeDB (each collection is stored as a separate NeDB file)",

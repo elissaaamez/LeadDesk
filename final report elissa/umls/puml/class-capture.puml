@@ -1,0 +1,51 @@
+@startuml class-capture
+' Mini class diagram — Sprint 2 (lead capture and duplicate detection).
+' Ref: server/services/capture.service.js, server/services/opportunity.service.js, server/lib/domain.js.
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #EAF2F8
+  BorderColor #004389
+  FontColor #003063
+  AttributeFontColor #1A1A1A
+}
+hide circle
+
+class Capture {
+  - _id: String
+  - at: Date
+  - by: String
+  - message: String
+  - status: String
+  - opportunity_id: Number
+  --
+  + create(input): Capture
+  + history(): Capture[]
+  + isDuplicate(): Boolean
+}
+
+class ExtractedFields {
+  - name: String
+  - email: String
+  - phone: String
+  - interest: String
+  - intent: String
+  - priority: String
+  - recommended_action: String
+}
+
+class Opportunity {
+  - id: Number
+  - name: String
+  - email_from: String
+  - phone: String
+  - priority: String
+  --
+  + create(data): Opportunity
+  + matchDuplicate(email, phone): Opportunity
+}
+
+Capture "1" -- "1" ExtractedFields : holds
+Capture "0..*" -- "0..1" Opportunity : results in
+@enduml

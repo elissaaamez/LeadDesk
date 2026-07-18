@@ -1,6 +1,10 @@
 @startuml seq-analytics
+' Robustness / Boundary-Control-Entity (BCE) sequence diagram.
+' Visual skin kept black-and-white / Times New Roman to match the report
+' (enforced by _build/restyle_seq.py); the structure follows the BCE rules.
 skinparam backgroundColor transparent
 skinparam shadowing false
+skinparam maxMessageSize 200
 skinparam defaultFontName Times New Roman
 skinparam sequence {
   ArrowColor #000000
@@ -15,22 +19,25 @@ skinparam sequence {
   DatabaseBackgroundColor #FFFFFF
   DatabaseBorderColor #333333
 }
-actor Manager
-participant "Web Console" as Console
-participant "Backend" as Backend
-participant "n8n" as N8N
-database "Odoo CRM" as Odoo
-participant "AI Model" as AI
+hide footbox
+autonumber
+title Dashboard analytics summary
 
-Manager -> Console : open dashboard
-Console -> Backend : request summary
-Backend -> N8N : crm-summary webhook
-N8N -> Odoo : read opportunities
-Odoo --> N8N : opportunity records
-N8N -> N8N : compute indicators
-N8N -> AI : write summary from numbers
-AI --> N8N : readable summary
-N8N --> Backend : indicators and summary
-Backend --> Console : summary
-Console --> Manager : show cards and summary
+actor ":Manager" as Manager
+boundary ":InterfaceDashboard" as UI
+control ":ControllerAnalytics" as Analytics
+control ":WorkflowN8N" as N8N
+control ":ControllerAI" as AI
+database "Odoo CRM" as Odoo
+
+Manager -> UI : openDashboard()
+UI -> Analytics : requestSummary()
+Analytics -> N8N : forwardSummaryRequest()
+N8N -> Odoo : readOpportunities()
+Odoo --> N8N : opportunities
+N8N -> N8N : computeIndicators(opportunities)
+N8N -> AI : writeSummary(indicators)
+AI --> N8N : readableSummary(text)
+N8N --> Analytics : summaryResult(indicators, text)
+Analytics --> UI : showDashboard(indicators, summary)
 @enduml

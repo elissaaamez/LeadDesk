@@ -1,6 +1,10 @@
 @startuml seq-assistant
+' Robustness / Boundary-Control-Entity (BCE) sequence diagram.
+' Visual skin kept black-and-white / Times New Roman to match the report
+' (enforced by _build/restyle_seq.py); the structure follows the BCE rules.
 skinparam backgroundColor transparent
 skinparam shadowing false
+skinparam maxMessageSize 200
 skinparam defaultFontName Times New Roman
 skinparam sequence {
   ArrowColor #000000
@@ -15,23 +19,31 @@ skinparam sequence {
   DatabaseBackgroundColor #FFFFFF
   DatabaseBorderColor #333333
 }
-actor User
-participant "Web Console" as Console
-participant "Backend\n(live proxy)" as Backend
-participant "n8n agent" as N8N
-participant "AI Model" as AI
+hide footbox
+autonumber
+title AI CRM assistant
+
+actor ":User" as User
+boundary ":InterfaceAssistant" as UI
+control ":ControllerAssistant" as Assistant
+control ":WorkflowN8N" as N8N
+control ":ControllerAI" as AI
 database "Odoo CRM" as Odoo
 
-User -> Console : ask a CRM question
-Console -> Backend : live request
-Backend -> N8N : forward (with timeout)
-N8N -> AI : question and tool list
-AI --> N8N : choose a tool
-N8N -> Odoo : run tool (read or update)
-Odoo --> N8N : tool result
-N8N -> AI : tool result
-AI --> N8N : final answer
-N8N --> Backend : answer
-Backend --> Console : clean response
-Console --> User : display the answer
+User -> UI : askQuestion(question)
+UI -> Assistant : sendQuestion(question, sessionId)
+Assistant -> N8N : forwardQuestion(question)
+N8N -> AI : interpret(question, toolList)
+AI --> N8N : selectedTool(tool, args)
+alt read request
+  N8N -> Odoo : listOpportunities(args)
+  Odoo --> N8N : opportunities
+else update request
+  N8N -> Odoo : updateOpportunity(id, changes)
+  Odoo --> N8N : opportunityUpdated
+end
+N8N -> AI : composeAnswer(toolResult)
+AI --> N8N : finalAnswer(text)
+N8N --> Assistant : answer(text)
+Assistant --> UI : displayAnswer(text)
 @enduml

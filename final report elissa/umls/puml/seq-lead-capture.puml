@@ -1,6 +1,10 @@
 @startuml seq-lead-capture
+' Robustness / Boundary-Control-Entity (BCE) sequence diagram.
+' Visual skin kept black-and-white / Times New Roman to match the report
+' (enforced by _build/restyle_seq.py); the structure follows the BCE rules.
 skinparam backgroundColor transparent
 skinparam shadowing false
+skinparam maxMessageSize 200
 skinparam defaultFontName Times New Roman
 skinparam sequence {
   ArrowColor #000000
@@ -15,24 +19,32 @@ skinparam sequence {
   DatabaseBackgroundColor #FFFFFF
   DatabaseBorderColor #333333
 }
-actor User
-participant "Web Console" as Console
-participant "Backend" as Backend
-participant "n8n" as N8N
-participant "AI Model" as AI
+hide footbox
+autonumber
+title Lead capture
+
+actor ":SalesOperator" as Operator
+boundary ":InterfaceLeadCapture" as UI
+control ":ControllerCapture" as Capture
+control ":WorkflowN8N" as N8N
+control ":ControllerAI" as AI
 database "Odoo CRM" as Odoo
 
-User -> Console : paste customer message
-Console -> Backend : send message
-Backend -> N8N : lead-capture webhook
-N8N -> AI : read fields (strict prompt)
-AI --> N8N : structured fields
-N8N -> N8N : validate fields
-N8N -> Odoo : read existing opportunities
-Odoo --> N8N : current records
-N8N -> N8N : check email and phone
-N8N -> Odoo : create opportunity (if new)
-N8N --> Backend : created or duplicate
-Backend --> Console : result
-Console --> User : show lead or duplicate notice
+Operator -> UI : submitCustomerMessage(message)
+UI -> Capture : captureLead(message, source)
+Capture -> N8N : forwardLeadCapture(message)
+N8N -> AI : extractFields(message)
+AI --> N8N : extractedFields(name, email, phone, interest, priority)
+N8N -> Odoo : readOpportunities()
+Odoo --> N8N : existingOpportunities
+N8N -> N8N : checkDuplicate(email, phone)
+alt new lead
+  N8N -> Odoo : createOpportunity(fields)
+  Odoo --> N8N : opportunityCreated(id)
+  N8N --> Capture : leadCreated(opportunity)
+  Capture --> UI : showCreatedLead(opportunity)
+else duplicate found
+  N8N --> Capture : duplicateDetected(match)
+  Capture --> UI : showDuplicateNotice(match)
+end
 @enduml

@@ -1,0 +1,33 @@
+@startgantt
+' Sprint 1 task-level schedule (backlog T1.1-T1.6). Global overview: gantt-project.puml.
+skinparam backgroundColor transparent
+skinparam defaultFontName Times New Roman
+skinparam shadowing false
+<style>
+ganttDiagram {
+  task {
+    BackGroundColor #EAF2F8
+    LineColor #004389
+    FontColor #1A1A1A
+  }
+  milestone { BackGroundColor #004389 LineColor #003063 }
+  note { BackGroundColor #FBF6DD LineColor #9A8C4A }
+}
+</style>
+Project starts 2026-02-09
+saturday are closed
+sunday are closed
+
+[T1.1 Interface shell and layout] as [t11] lasts 2 days
+[T1.2 Sidebar navigation] as [t12] lasts 2 days
+[t12] starts at [t11]'s end
+[T1.3 Sign-in and sign-up screens] as [t13] lasts 2 days
+[t13] starts at [t12]'s end
+[T1.4 Local and Live environments] as [t14] lasts 2 days
+[t14] starts at [t12]'s end
+[T1.5 Interface components] as [t15] lasts 2 days
+[t15] starts at [t13]'s end
+[T1.6 Architecture and settings pages] as [t16] lasts 2 days
+[t16] starts at [t15]'s end
+[Sprint 1 review] happens at [t16]'s end
+@endgantt

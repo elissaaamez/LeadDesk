@@ -1,6 +1,10 @@
 @startuml seq-signin
+' Robustness / Boundary-Control-Entity (BCE) sequence diagram.
+' Visual skin kept black-and-white / Times New Roman to match the report
+' (enforced by _build/restyle_seq.py); the structure follows the BCE rules.
 skinparam backgroundColor transparent
 skinparam shadowing false
+skinparam maxMessageSize 200
 skinparam defaultFontName Times New Roman
 skinparam sequence {
   ArrowColor #000000
@@ -15,16 +19,23 @@ skinparam sequence {
   DatabaseBackgroundColor #FFFFFF
   DatabaseBorderColor #333333
 }
-actor User
-participant "Web Console" as Console
-participant "Backend" as Backend
+hide footbox
+autonumber
+title Sign in
+
+actor ":User" as User
+boundary ":InterfaceSignIn" as UI
+control ":ControllerAuth" as Auth
 database "Local Database" as DB
 
-User -> Console : enter email and password
-Console -> Backend : send sign-in request
-Backend -> DB : look up user by email
-DB --> Backend : stored user and hash
-Backend -> Backend : check password (scrypt)
-Backend --> Console : session token
-Console --> User : open the dashboard
+User -> UI : enterCredentials(email, password)
+UI -> Auth : signIn(email, password)
+Auth -> DB : findUserByEmail(email)
+DB --> Auth : storedUser(hash)
+Auth -> Auth : verifyPassword(password, hash)
+alt valid credentials
+  Auth --> UI : sessionOpened(token)
+else invalid credentials
+  Auth --> UI : signInRefused(reason)
+end
 @enduml

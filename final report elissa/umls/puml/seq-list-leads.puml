@@ -1,0 +1,40 @@
+@startuml seq-list-leads
+' Robustness / Boundary-Control-Entity (BCE) sequence diagram.
+' Visual skin kept black-and-white / Times New Roman to match the report
+' (enforced by _build/restyle_seq.py); the structure follows the BCE rules.
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam maxMessageSize 200
+skinparam defaultFontName Times New Roman
+skinparam sequence {
+  ArrowColor #000000
+  ArrowFontColor #000000
+  LifeLineBorderColor #333333
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #000000
+  ParticipantBorderColor #333333
+  ActorBackgroundColor #FFFFFF
+  ActorBorderColor #333333
+  DatabaseBackgroundColor #FFFFFF
+  DatabaseBorderColor #333333
+}
+hide footbox
+autonumber
+title CRM workspace
+
+actor ":SalesOperator" as Operator
+boundary ":InterfaceWorkspace" as UI
+control ":ControllerWorkspace" as Workspace
+control ":WorkflowN8N" as N8N
+database "Odoo CRM" as Odoo
+
+Operator -> UI : openWorkspace()
+UI -> Workspace : requestOpportunities()
+Workspace -> N8N : forwardListLeads()
+N8N -> Odoo : readOpportunities()
+Odoo --> N8N : opportunityRecords
+N8N -> N8N : shapeLeads(opportunityRecords)
+N8N --> Workspace : opportunityList(leads)
+Workspace --> UI : showOpportunities(leads)
+@enduml

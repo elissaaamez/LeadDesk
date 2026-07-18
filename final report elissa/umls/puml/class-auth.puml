@@ -1,0 +1,36 @@
+@startuml class-auth
+' Mini class diagram — Sprint 1 (authentication / user session).
+' Ref: server/services/auth.service.js (sessions Map, verify/login), server/repositories.js (usersRepo).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #EAF2F8
+  BorderColor #004389
+  FontColor #003063
+  AttributeFontColor #1A1A1A
+}
+hide circle
+
+class User {
+  - _id: String
+  - name: String
+  - email: String
+  - password: String
+  - role: String
+  - created_at: Date
+  --
+  + create(): User
+  + findByEmail(email): User
+  + verifyPassword(pwd): Boolean
+}
+
+class Session {
+  - token: String
+  - email: String
+  - name: String
+  - role: String
+}
+
+User "1" -- "0..*" Session : opens
+@enduml

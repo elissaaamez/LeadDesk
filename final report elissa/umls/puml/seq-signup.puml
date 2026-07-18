@@ -1,0 +1,43 @@
+@startuml seq-signup
+' Robustness / Boundary-Control-Entity (BCE) sequence diagram.
+' Visual skin kept black-and-white / Times New Roman to match the report
+' (enforced by _build/restyle_seq.py); the structure follows the BCE rules.
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam maxMessageSize 200
+skinparam defaultFontName Times New Roman
+skinparam sequence {
+  ArrowColor #000000
+  ArrowFontColor #000000
+  LifeLineBorderColor #333333
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBackgroundColor #FFFFFF
+  ParticipantFontColor #000000
+  ParticipantBorderColor #333333
+  ActorBackgroundColor #FFFFFF
+  ActorBorderColor #333333
+  DatabaseBackgroundColor #FFFFFF
+  DatabaseBorderColor #333333
+}
+hide footbox
+autonumber
+title Sign up
+
+actor ":Visitor" as Visitor
+boundary ":InterfaceSignUp" as UI
+control ":ControllerAuth" as Auth
+database "Local Database" as DB
+
+Visitor -> UI : submitSignUp(name, email, password)
+UI -> Auth : register(name, email, password)
+Auth -> DB : findUserByEmail(email)
+DB --> Auth : lookupResult
+alt email available
+  Auth -> Auth : hashPassword(password)
+  Auth -> DB : createUser(name, email, hash, roleSales)
+  DB --> Auth : createdUser(id)
+  Auth --> UI : accountCreated(token)
+else email already used
+  Auth --> UI : signUpRefused(emailTaken)
+end
+@enduml

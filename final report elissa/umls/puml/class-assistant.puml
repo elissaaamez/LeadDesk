@@ -1,0 +1,40 @@
+@startuml class-assistant
+' Mini class diagram — Sprint 4 (CRM assistant and live integration).
+' Ref: server/services/assistant.service.js, AI Assistant Webhook.json (Groq agent + Odoo tools).
+!pragma layout smetana
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #EAF2F8
+  BorderColor #004389
+  FontColor #003063
+  AttributeFontColor #1A1A1A
+}
+hide circle
+
+class Assistant {
+  - sessionId: String
+  - model: String
+  --
+  + handleQuery(message): Answer
+  + listOpportunities(): Opportunity[]
+  + getOpportunity(id): Opportunity
+  + createOpportunity(data): Opportunity
+  + updateOpportunity(id, patch): Opportunity
+  + readNotes(id): String
+}
+
+class Opportunity {
+  - id: Number
+  - name: String
+  - email_from: String
+  - phone: String
+  --
+  + list(filter): Opportunity[]
+  + get(id): Opportunity
+  + create(data): Opportunity
+  + update(id, patch): Opportunity
+}
+
+Assistant "1" -- "0..*" Opportunity : reads / updates
+@enduml

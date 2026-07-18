@@ -1,0 +1,33 @@
+@startgantt
+' Sprint 3 task-level schedule (backlog T3.1-T3.6). Global overview: gantt-project.puml.
+skinparam backgroundColor transparent
+skinparam defaultFontName Times New Roman
+skinparam shadowing false
+<style>
+ganttDiagram {
+  task {
+    BackGroundColor #EAF2F8
+    LineColor #004389
+    FontColor #1A1A1A
+  }
+  milestone { BackGroundColor #004389 LineColor #003063 }
+  note { BackGroundColor #FBF6DD LineColor #9A8C4A }
+}
+</style>
+Project starts 2026-03-09
+saturday are closed
+sunday are closed
+
+[T3.1 Compute CRM indicators] as [t31] lasts 2 days
+[T3.2 Dashboard cards and charts] as [t32] lasts 2 days
+[t32] starts at [t31]'s end
+[T3.3 Manager summary] as [t33] lasts 2 days
+[t33] starts at [t32]'s end
+[T3.4 Detect inactive leads (7 days)] as [t34] lasts 2 days
+[t34] starts at [t32]'s end
+[T3.5 Generate follow-up messages] as [t35] lasts 2 days
+[t35] starts at [t33]'s end
+[T3.6 Present follow-up results] as [t36] lasts 2 days
+[t36] starts at [t35]'s end
+[Sprint 3 review] happens at [t36]'s end
+@endgantt

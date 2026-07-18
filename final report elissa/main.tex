@@ -8,6 +8,7 @@
 \usepackage[scaled=0.92]{helvet}
 \usepackage{graphicx}
 \graphicspath{{images/}}
+\usepackage{pdfpages}
 \usepackage{eso-pic}
 \definecolor{IITBlue}{HTML}{004389}
 \definecolor{SoftBlue}{HTML}{EAF2F8}
@@ -131,7 +132,7 @@
 \lstset{style=codeStyle}
 
 \newcommand{\projecttitle}{Design and Implementation of an AI-Assisted CRM Automation Platform}
-\newcommand{\shortproject}{AI CRM Platform}
+\newcommand{\shortproject}{LeadDesk}
 \newcommand{\studentname}{Elissa Mezghani}
 \newcommand{\university}{International Institute of Technology (IIT)}
 \newcommand{\chapterintro}[1]{\vspace{0.5cm}\noindent#1\vspace{0.4cm}}
@@ -141,6 +142,17 @@
 \includegraphics[width=0.97\textwidth,height=0.78\textheight,keepaspectratio]{#1}
 \caption{#2}
 \end{figure}
+}
+% Screenshot kept together with a short interpretation paragraph right below it.
+% #1 = image file, #2 = caption, #3 = interpretation sentence(s).
+\newcommand{\shot}[3]{%
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\textwidth,height=0.66\textheight,keepaspectratio]{#1}
+\caption{#2}
+\end{figure}
+\vspace{-0.10cm}
+\noindent #3\par\vspace{0.45cm}
 }
 
 % ---- Sequence diagram styling (UML-style lifelines and messages) ----
@@ -212,7 +224,7 @@ This project was developed step by step. At the beginning, the objective was to 
 \addcontentsline{toc}{chapter}{Abstract}
 Customer relationship management is a critical activity for sales teams. However, in many organizations, leads are still collected from emails, messages, phone calls, spreadsheets, and notes. This scattered process creates several problems: duplicate records, forgotten follow-ups, slow qualification, and a lack of clear visibility for managers. The objective of this final year project is to design and implement an AI-assisted CRM automation platform that helps a sales team capture leads, structure customer information, avoid duplicates, summarize CRM activity, generate follow-up messages, and interact with CRM data through an assistant.
 
-The proposed solution is a web application called \textit{AI CRM Platform}. It combines a front-end operations console, a Node.js and Express backend, local persistence with NeDB, n8n workflows for automation, Odoo CRM as a business data source, and language models for controlled AI tasks. The platform runs in two execution contexts: a Local context, where the Node.js backend handles the logic and the persistence, and a Live context, where the backend forwards calls to n8n workflows. This separation keeps the platform easy to run while still allowing real CRM integration.
+The proposed solution is a web application called \textit{LeadDesk}. It combines a front-end operations console, a Node.js and Express backend, local persistence with NeDB, n8n workflows for automation, Odoo CRM as a business data source, and language models for controlled AI tasks. The platform runs in two execution contexts: a Local context, where the Node.js backend handles the logic and the persistence, and a Live context, where the backend forwards calls to n8n workflows. This separation keeps the platform easy to run while still allowing real CRM integration.
 
 The project includes authentication, a CRM dashboard, lead capture, duplicate detection, a lead workspace, a follow-up center, an AI assistant, architecture documentation, settings management, and a server-side live proxy. The work was organized using an agile approach and divided into four functional sprints. This report presents the project framework, the technical study of the reusable workflow pattern, the CRM workflows and their business logic, the system architecture, the implementation sprints, the tests, the validation, the limitations, and the perspectives for future improvement.
 
@@ -344,7 +356,7 @@ Three approaches are commonly used by a sales team to manage its leads before ad
 \end{itemize}
 
 \subsection{Our Solution Compared with the Existing Solutions}\label{sumlbl:c1s4ss2}
-The \textbf{proposed AI CRM Platform} is the solution built in this project. It is an operations console that adds AI-assisted lead capture, duplicate control, analytics, and a CRM assistant on top of Odoo CRM and n8n workflows. The aim is not to replace a CRM, but to add an operational layer that the existing solutions do not provide on their own.
+The \textbf{proposed LeadDesk} is the solution built in this project. It is an operations console that adds AI-assisted lead capture, duplicate control, analytics, and a CRM assistant on top of Odoo CRM and n8n workflows. The aim is not to replace a CRM, but to add an operational layer that the existing solutions do not provide on their own.
 
 The table below compares the proposed platform with the three existing solutions on the points that matter most for daily CRM work.
 
@@ -414,7 +426,7 @@ US-07 & Live Integration & As a user, I want the platform to call real n8n workf
 \caption{Backlog of main user stories}
 \end{table}
 \section{Proposed Solution}\label{sumlbl:c1s6}
-The proposed solution is an operations console named AI CRM Platform. It is designed as a bridge between the sales user and the CRM automation system. The user interacts with a simple web interface. The interface runs locally through the Node.js backend and connects to the live n8n workflows when real CRM actions are needed. The workflows then communicate with Odoo CRM and AI models.
+The proposed solution is an operations console named LeadDesk. It is designed as a bridge between the sales operator and the CRM automation system. The user interacts with a simple web interface. The interface runs locally through the Node.js backend and connects to the live n8n workflows when real CRM actions are needed. The workflows then communicate with Odoo CRM and AI models.
 
 The solution is organized into three layers. The presentation layer contains the web interface and the user experience. The backend layer exposes API routes, manages authentication, stores local data, and proxies live calls. The automation and CRM layer contains n8n workflows, Odoo CRM records, and the language models. This separation improves maintainability because each layer has a clear responsibility.
 
@@ -486,7 +498,7 @@ Ollama / Groq
 
 \end{tikzpicture}%
 }
-\caption{Simplified architecture of the proposed AI CRM Platform}
+\caption{Simplified architecture of the proposed LeadDesk}
 \label{fig:global-architecture}
 \end{figure}
 
@@ -840,9 +852,16 @@ The figure below shows its official logo.
 
 A web browser was used to test the platform interface during development. It allowed me to check the pages, test user actions, verify API responses, and validate the final result.
 
-\subsubsection{Prism}
+\subsubsection{Python}
 
-Prism was used to write and organize the final year project report. It helped structure the chapters, tables, figures, and LaTeX content in a clean academic format.
+Python was used for small development and testing scripts around the platform. It helped prepare sample lead datasets for the demo mode, send quick test requests to the n8n webhooks, and check the AI extraction output before it was connected to the workflows. Its simple syntax made it convenient for these one-off utility tasks during development.
+
+\begin{figure}[H]
+\centering
+\includegraphics[height=4cm]{images/python.png}
+\caption{Official logo of Python}
+\label{fig:python_logo}
+\end{figure}
 
 \section{Workflow Study and Conceptual Design}\label{sumlbl:c2s2}
 
@@ -860,19 +879,31 @@ The figure below shows this workflow as built in n8n.
 
 \begin{figure}[H]
 \centering
-\resizebox{\textwidth}{!}{%
-\begin{tikzpicture}[start chain=going right, node distance=6mm, >={Latex[length=2.2mm]}, every join/.style={wfarr}]
-\node[wfnode, on chain] {Webhook};
-\node[wfnode, on chain, join] {Basic LLM\\Chain};
-\node[wfnode, on chain, join] {Set};
-\node[wfnode, on chain, join] {Code\\(JavaScript)};
-\node[wfnode, on chain, join] {Get items\\(Odoo)};
-\node[wfnode, on chain, join] {Check\\Duplicate};
-\node[wfnode, on chain, join] {If: new\\or duplicate};
-\node[wfnode, on chain, join] {Create item\\(Odoo)};
-\node[wfnode, on chain, join] {Respond to\\Webhook};
-\end{tikzpicture}%
-}
+\begin{tikzpicture}[node distance=1.5cm and 1.4cm, >={Latex[length=2.6mm]},
+   wf/.style={draw=IITBlue, fill=SoftBlue, rounded corners=2pt, align=center,
+              font=\small, minimum height=1.15cm, text width=2.8cm, inner sep=3pt}]
+% Row 1 (left to right)
+\node[wf] (n1) {Webhook};
+\node[wf, right=of n1] (n2) {Basic LLM\\Chain};
+\node[wf, right=of n2] (n3) {Set};
+% Row 2 (right to left)
+\node[wf, below=of n3] (n4) {Code\\(JavaScript)};
+\node[wf, left=of n4] (n5) {Get items\\(Odoo)};
+\node[wf, left=of n5] (n6) {Check\\Duplicate};
+% Row 3 (left to right)
+\node[wf, below=of n6] (n7) {If: new\\or duplicate};
+\node[wf, right=of n7] (n8) {Create item\\(Odoo)};
+\node[wf, right=of n8] (n9) {Respond to\\Webhook};
+% flow arrows (serpentine)
+\draw[wfarr] (n1)--(n2);
+\draw[wfarr] (n2)--(n3);
+\draw[wfarr] (n3)--(n4);
+\draw[wfarr] (n4)--(n5);
+\draw[wfarr] (n5)--(n6);
+\draw[wfarr] (n6)--(n7);
+\draw[wfarr] (n7)--(n8);
+\draw[wfarr] (n8)--(n9);
+\end{tikzpicture}
 \caption{Lead Capture workflow}
 \label{fig:lead-capture-workflow}
 \end{figure}
@@ -1062,6 +1093,13 @@ The main use cases of the platform are:
 \item \textbf{Manage live connection:} allows the platform to communicate with n8n workflows and Odoo CRM.
 \end{itemize}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-global.png}
+\caption{Global use case diagram of LeadDesk}
+\label{fig:uc-global}
+\end{figure}
+
 
 % ===== Sequence-diagram helper macros =====
 \newcommand{\lifeline}[2]{\draw[lifeline] (#1.south) -- (#1 |- 0,#2);}
@@ -1093,7 +1131,7 @@ This chapter presents the workflows that carry the business logic of the platfor
 The platform uses six workflows. Five of them are reached through a webhook and are used by the web console. The sixth one is a chat-based version of the assistant that was used during development.
 
 \section{Lead Capture Workflow}\label{sumlbl:c3s2}
-The lead capture workflow is the entry point for new customers. It receives a free-text message written by a sales user, asks the language model to read the message and return clean fields, and then checks whether the customer already exists. The fields are the name, the email, the phone, the interest, the intent, and a priority. A short piece of logic compares the new email and phone with the opportunities already stored in Odoo. When the customer is new, the workflow creates the opportunity. When the customer already exists, it returns a duplicate result instead of creating a second record. The model is used only to read the message; the duplicate decision is made by code so that the result stays predictable.
+The lead capture workflow is the entry point for new customers. It receives a free-text message written by a sales operator, asks the language model to read the message and return clean fields, and then checks whether the customer already exists. The fields are the name, the email, the phone, the interest, the intent, and a priority. A short piece of logic compares the new email and phone with the opportunities already stored in Odoo. When the customer is new, the workflow creates the opportunity. When the customer already exists, it returns a duplicate result instead of creating a second record. The model is used only to read the message; the duplicate decision is made by code so that the result stays predictable.
 
 \section{CRM Analytics Summary Workflow}\label{sumlbl:c3s3}
 The analytics workflow gives the manager a quick view of the pipeline. It reads the opportunities from Odoo and computes five indicators: the total number of opportunities, the opportunities that have an email, the opportunities that have a phone, the inactive opportunities, and the opportunities created during the current week. The numbers are calculated by code first. Only after that, the model receives the finished numbers and writes a short readable summary. The prompt forbids the model from inventing values, so the summary always matches the real data.
@@ -1159,7 +1197,7 @@ This chapter described the role of each workflow in plain terms. Lead capture cr
 \clearpage
 
 \section{Introduction}\label{sumlbl:c4s1}
-This chapter presents the technologies and the architecture used to build the AI CRM Platform. The stack was chosen to stay clear for a student project while remaining realistic for a business application. The platform combines simple web technologies, a structured backend, and a workflow automation layer, so each part has one clear job.
+This chapter presents the technologies and the architecture used to build LeadDesk. The stack was chosen to stay clear for a student project while remaining realistic for a business application. The platform combines simple web technologies, a structured backend, and a workflow automation layer, so each part has one clear job.
 
 \section{Development Environment}\label{sumlbl:c4s2}
 The development environment was kept light. The application runs locally with Node.js, and the automation layer connects to n8n and Odoo when real CRM tests are needed. This setup made it possible to build the platform step by step and to test each feature on a normal laptop.
@@ -1240,12 +1278,28 @@ For the local version, the platform uses NeDB, a small embedded database that st
 
 The CRM system of record for the live integration is Odoo. The workflows then work on the crm.lead model and treat the records marked as opportunities. The local database and Odoo are not meant to replace each other. The local store keeps the application easy to run, while Odoo provides the real CRM integration.
 
-The figure below shows the local data model stored by NeDB.
+The local data model is presented below in three complementary views: a class diagram, an entity--association view, and a database view. All three share the same central \emph{Database} that stores the four collections (users, opportunities, captures, and settings).
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth,height=0.6\textheight,keepaspectratio]{umls/img/class-domain.png}
-\caption{Local data model used by NeDB (each collection is stored as a separate NeDB file)}
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{umls/img/class-domain.png}
+\caption{Class diagram of the local data model used by NeDB}
+\end{figure}
+
+The entity--association view highlights the entities and the associations between them together with their cardinalities.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{umls/img/entity-association.png}
+\caption{Entity--association view of the local data model}
+\end{figure}
+
+The database view presents the four collections as they are physically stored, with their primary keys and the foreign-key references between them.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{umls/img/database.png}
+\caption{Database view of the local data model (collections, keys, and references)}
 \end{figure}
 
 \section{Automation and CRM Tools}\label{sumlbl:c4s6}
@@ -1302,7 +1356,8 @@ This chapter presented the tools, the architecture, and the development setup of
 \chsummarysub{5.3.1}{Use Case Diagram}{sumlbl:c5s3ss1}
 \chsummarysub{5.3.2}{Use Case Descriptions}{sumlbl:c5s3ss2}
 \chsummaryitem{5.4}{Conceptual Modeling}{sumlbl:c5s4}
-\chsummarysub{5.4.1}{Sequence Diagram}{sumlbl:c5s4ss1}
+\chsummarysub{5.4.1}{Class Diagram}{sumlbl:c5s4ssC}
+\chsummarysub{5.4.2}{Sequence Diagram}{sumlbl:c5s4ss1}
 \chsummaryitem{5.5}{Realization}{sumlbl:c5s5}
 \chsummarysub{5.5.1}{Screenshots}{sumlbl:c5s5ss1}
 \chsummaryitem{5.6}{Conclusion}{sumlbl:c5s6}
@@ -1314,7 +1369,7 @@ The first sprint built the foundation of the platform. Before adding any CRM aut
 
 \section{Objectives and Task Identification}\label{sumlbl:c5s2}
 \subsection{Sprint Objective}\label{sumlbl:c5s2ss1}
-The main goal of Sprint 1 was to turn the project from a set of workflows into a usable application. A workflow on its own is not easy for a sales user to operate. The user needs buttons, forms, dashboards, and clear feedback. The platform therefore needed a web console that could present the automation results in a clean and readable way. A second goal was to give the application a consistent structure, so the CRM features could be added later without rebuilding the interface.
+The main goal of Sprint 1 was to turn the project from a set of workflows into a usable application. A workflow on its own is not easy for a sales operator to operate. The user needs buttons, forms, dashboards, and clear feedback. The platform therefore needed a web console that could present the automation results in a clean and readable way. A second goal was to give the application a consistent structure, so the CRM features could be added later without rebuilding the interface.
 
 \subsection{Sprint Backlog}\label{sumlbl:c5s2ss2}
 The table below lists the tasks planned for this sprint.
@@ -1330,9 +1385,9 @@ T1.1 & Create the main interface shell and layout & Critical & Done \\
 \hline
 T1.2 & Build the sidebar navigation and page switching & Critical & Done \\
 \hline
-T1.3 & Add the sign-in and sign-up screens & High & Done \\
-\hline
 T1.4 & Set up the Local and Live execution environments & Critical & Done \\
+\hline
+T1.3 & Add the sign-in and sign-up screens & High & Done \\
 \hline
 T1.5 & Add the interface components for cards, charts, and tables & High & Done \\
 \hline
@@ -1342,6 +1397,13 @@ T1.6 & Prepare the architecture page and the settings page & Medium & Done \\
 \caption{Sprint 1 backlog}
 \end{table}
 
+The Gantt chart below shows the schedule of the tasks planned for this sprint.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{umls/img/gantt-sprint1.png}
+\caption{Sprint 1 schedule (Gantt chart)}
+\end{figure}
+
 \section{Functional Analysis}\label{sumlbl:c5s3}
 The main actor in this sprint is the platform user, who can be a sales employee or a manager. The user signs in, lands on the dashboard, moves between the pages, chooses the execution environment, and opens the settings page. The application can run in two environments: a Local one, where the Node.js backend handles the logic and the data, and a Live one, where the backend forwards the request to the n8n workflows. The same interface is used in both, so the experience stays consistent.
 
@@ -1350,33 +1412,35 @@ The figure below presents the use case diagram of this sprint.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=0.7cm]
-\node[font=\small\bfseries] (ttl) {Platform Foundation};
-\node[uc, below=0.45cm of ttl] (signup) {Sign up};
-\node[uc, below=of signup] (signin) {Sign in};
-\node[uc, below=of signin] (nav) {Navigate pages};
-\node[uc, below=of nav] (env) {Select environment};
-\node[uc, below=of env] (cfg) {Configure endpoints};
-\node[ucsys, fit=(ttl)(signup)(signin)(nav)(env)(cfg)] (sys) {};
-\umlactor{u}{$(sys.west)+(-2.2,0)$}{User}
-\foreach \x in {signup,signin,nav,env,cfg}{\draw[ucedge] (u) -- (\x);}
-\end{tikzpicture}
+\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-platform-foundation.png}
 \caption{Use case diagram of the platform foundation}
 \end{figure}
 
+The two roles, the manager and the sales operator, are generalized into a single \emph{User} actor, because they sign in and use the platform the same way. The authentication use cases are grouped in their own diagram below.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-authentication.png}
+\caption{Use case diagram of the authentication module}
+\end{figure}
+
+A self-service account management area is also planned, so that each user can view their profile and change their username, password, or picture, or delete their account. The diagram below models this planned feature.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-account-management.png}
+\caption{Use case diagram of the planned account management module}
+\end{figure}
+
 \subsection{Use Case Descriptions}\label{sumlbl:c5s3ss2}
-The table below describes the use cases shown in the diagram above.
+The table below describes the use cases shown in the three diagrams above. Here the \emph{User} actor stands for both roles (manager and sales operator), which are generalized into it. The account management use cases are planned and not yet implemented.
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabularx}{\textwidth}{|p{3.4cm}|p{2.2cm}|X|}
+\begin{tabularx}{\textwidth}{|p{3.9cm}|p{2.2cm}|X|}
 \hline\rowcolor{TabHead}
 \textbf{Use case} & \textbf{Actor} & \textbf{Description} \\
-\hline
-Sign up & User & Create an account with a name, an email, and a password; the account gets the Sales role. \\
-\hline
-Sign in & User & Authenticate with email and password to open a session and reach the dashboard. \\
 \hline
 Navigate pages & User & Move between the dashboard, capture, workspace, follow-up, assistant, and system pages. \\
 \hline
@@ -1384,11 +1448,40 @@ Select environment & User & Choose the Local or Live execution context used by t
 \hline
 Configure endpoints & User & Open the settings page to set and check the workflow endpoints. \\
 \hline
+Create account & User & Register with a name, an email, and a password; the account gets the Sales role. \\
+\hline
+Sign in & User & Authenticate with an email and a password to open a session and reach the dashboard. \\
+\hline
+Sign out & User & Close the current session and return to the sign-in screen. \\
+\hline
+View session & User & Read the currently signed-in account to restore the session on reload. \\
+\hline
+Authenticate & System & Guard every protected page and request through the backend session check; included by the protected use cases. \\
+\hline
+View profile \emph{(planned)} & User & See the current account details. \\
+\hline
+Change username \emph{(planned)} & User & Update the account name. \\
+\hline
+Change password \emph{(planned)} & User & Update the account password. \\
+\hline
+Change profile picture \emph{(planned)} & User & Update the account picture. \\
+\hline
+Delete account \emph{(planned)} & User & Permanently remove the account. \\
+\hline
 \end{tabularx}
-\caption{Use case descriptions for the platform foundation}
+\caption{Use case descriptions for the platform foundation, authentication, and account management}
 \end{table}
 
 \section{Conceptual Modeling}\label{sumlbl:c5s4}
+\subsection{Class Diagram}\label{sumlbl:c5s4ssC}
+The class diagram below shows the classes involved in this sprint: the user account and the session opened when the user signs in.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth,height=0.5\textheight,keepaspectratio]{umls/img/class-auth.png}
+\caption{Class diagram of the authentication module}
+\end{figure}
+
 \subsection{Sequence Diagram}\label{sumlbl:c5s4ss1}
 The sign-in flow is the first exchange between the user and the system. The user sends the email and the password to the interface, the interface forwards them to the backend, and the backend checks the stored password before opening a session.
 
@@ -1400,18 +1493,26 @@ The figure below presents the sequence diagram of the sign-in workflow.
 \caption{Sequence diagram of the sign-in workflow}
 \end{figure}
 
+The sequence below shows the sign-up flow, where a visitor creates a new account before signing in for the first time.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-signup.png}
+\caption{Sequence diagram of the sign-up (account creation) workflow}
+\end{figure}
+
 
 \section{Realization}\label{sumlbl:c5s5}
 The interface follows a modular organization even without a large framework. The constants, the data, and the backend calls sit in the Model. The rendering functions sit in the View. The events and the user actions are handled by the Controller. The visual design uses a professional style with cards, tables, badges, and charts, so the result looks like an operations console rather than a generic landing page. On the backend side, the passwords are hashed with scrypt and the sessions use bearer tokens.
 
 \subsection{Screenshots}\label{sumlbl:c5s5ss1}
-The screenshots below show the first results of Sprint 1. The landing page introduces the project, the sign-in screens let the user create an account or log in, and the dashboard becomes the main entry point of the application.
+The screenshots below show the first results of Sprint 1: the landing page, the sign-in screen, and the main dashboard that becomes the entry point of the application.
 
-\screenshot{01-landing.png}{01 Landing}
-\screenshot{02-signup.png}{02 Signup}
-\screenshot{03-login.png}{03 Login}
-\screenshot{04-dashboard.png}{04 Dashboard}
-\screenshot{05-dashboard-analytics.png}{05 Dashboard-Analytics}
+\shot{01-landing.png}{Landing page}{This screenshot showcases the landing page. It introduces the platform and its main promise, turning a customer message into a qualified opportunity, and gives the user a clear entry point into the console.}
+
+\shot{03-login.png}{Sign-in screen}{This screenshot showcases the sign-in screen. The user enters an email and a password to open the console, and the demo accounts shown below make the platform easy to test.}
+
+\shot{04-dashboard.png}{Main dashboard (entry point after sign-in)}{This screenshot showcases the main dashboard, which the user reaches right after signing in. The sidebar gives access to every module, and the central area is the working space where the CRM results are displayed.}
 
 \section{Conclusion}\label{sumlbl:c5s6}
 Sprint 1 delivered the foundation of the application: the interface, the navigation, the sign-in, and the system pages. These elements made it possible to add the CRM modules in the next sprints without rebuilding the structure.
@@ -1431,7 +1532,8 @@ Sprint 1 delivered the foundation of the application: the interface, the navigat
 \chsummarysub{6.3.1}{Use Case Diagram}{sumlbl:c6s3ss1}
 \chsummarysub{6.3.2}{Use Case Descriptions}{sumlbl:c6s3ss2}
 \chsummaryitem{6.4}{Conceptual Modeling}{sumlbl:c6s4}
-\chsummarysub{6.4.1}{Sequence Diagram}{sumlbl:c6s4ss1}
+\chsummarysub{6.4.1}{Class Diagram}{sumlbl:c6s4ssC}
+\chsummarysub{6.4.2}{Sequence Diagram}{sumlbl:c6s4ss1}
 \chsummaryitem{6.5}{Realization}{sumlbl:c6s5}
 \chsummarysub{6.5.1}{Screenshots}{sumlbl:c6s5ss1}
 \chsummaryitem{6.6}{Conclusion}{sumlbl:c6s6}
@@ -1439,7 +1541,7 @@ Sprint 1 delivered the foundation of the application: the interface, the navigat
 \clearpage
 
 \section{Introduction}\label{sumlbl:c6s1}
-The second sprint built one of the most important features of the platform: lead capture. The goal was to let a sales user type a normal customer message and turn it into clean CRM data. This feature is central because it shows the practical value of AI in the project.
+The second sprint built one of the most important features of the platform: lead capture. The goal was to let a sales operator type a normal customer message and turn it into clean CRM data. This feature is central because it shows the practical value of AI in the project.
 
 \section{Objectives and Task Identification}\label{sumlbl:c6s2}
 \subsection{Sprint Objective}\label{sumlbl:c6s2ss1}
@@ -1457,13 +1559,13 @@ The table below lists the tasks planned for this sprint.
 \hline
 T2.1 & Build the lead capture form in the interface & Critical & Done \\
 \hline
-T2.2 & Implement the local field extraction logic & High & Done \\
-\hline
 T2.3 & Create the backend capture service and the capture history & Critical & Done \\
 \hline
 T2.4 & Set up the n8n lead capture workflow & Critical & Done \\
 \hline
 T2.5 & Add duplicate detection by email and phone & Critical & Done \\
+\hline
+T2.2 & Implement the local field extraction logic & High & Done \\
 \hline
 T2.6 & Show the created or duplicate result clearly & High & Done \\
 \hline
@@ -1471,25 +1573,22 @@ T2.6 & Show the created or duplicate result clearly & High & Done \\
 \caption{Sprint 2 backlog}
 \end{table}
 
+The Gantt chart below shows the schedule of the tasks planned for this sprint.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{umls/img/gantt-sprint2.png}
+\caption{Sprint 2 schedule (Gantt chart)}
+\end{figure}
+
 \section{Functional Analysis}\label{sumlbl:c6s3}
-The capture process starts when the sales user receives a customer message. The message can be informal and may hold the information in any order. The system reads a name when possible, an email, a phone number, an interest, an intent, a priority, and a recommended action, then shows the result to the user. The duplicate check is essential: a CRM with repeated opportunities becomes hard to manage. The workflow compares the new email and phone with the opportunities already in Odoo, returns a duplicate result when a match is found, and creates a new opportunity when there is none.
+The capture process starts when the sales operator receives a customer message. The message can be informal and may hold the information in any order. The system reads a name when possible, an email, a phone number, an interest, an intent, a priority, and a recommended action, then shows the result to the user. The duplicate check is essential: a CRM with repeated opportunities becomes hard to manage. The workflow compares the new email and phone with the opportunities already in Odoo, returns a duplicate result when a match is found, and creates a new opportunity when there is none.
 
 \subsection{Use Case Diagram}\label{sumlbl:c6s3ss1}
 The figure below presents the use case diagram of this sprint.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=0.7cm]
-\node[font=\small\bfseries] (ttl) {Lead Capture Module};
-\node[uc, below=0.45cm of ttl] (submit) {Submit customer\\message};
-\node[uc, below=of submit] (view) {View extracted\\fields};
-\node[uc, below=of view] (create) {Create opportunity};
-\node[uc, below=of create] (dup) {Detect duplicate};
-\node[uc, below=of dup] (hist) {View capture history};
-\node[ucsys, fit=(ttl)(submit)(view)(create)(dup)(hist)] (sys) {};
-\umlactor{u}{$(sys.west)+(-2.4,0)$}{Sales user}
-\foreach \x in {submit,view,create,dup,hist}{\draw[ucedge] (u) -- (\x);}
-\end{tikzpicture}
+\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-lead-capture.png}
 \caption{Use case diagram of the lead capture module}
 \end{figure}
 
@@ -1503,21 +1602,32 @@ The table below describes the use cases shown in the diagram above.
 \hline\rowcolor{TabHead}
 \textbf{Use case} & \textbf{Actor} & \textbf{Description} \\
 \hline
-Submit customer message & Sales user & Paste a free-text customer message into the capture form. \\
+Submit customer message & Sales operator & Paste a free-text customer message into the capture form. \\
 \hline
-View extracted fields & Sales user & See the name, email, phone, interest, intent, and priority read from the message. \\
+View extracted fields & Sales operator & See the name, email, phone, interest, intent, and priority read from the message. \\
 \hline
 Create opportunity & System & Save a new opportunity in the CRM when the lead is new. \\
 \hline
 Detect duplicate & System & Compare the email and phone with existing records and avoid repeated opportunities. \\
 \hline
-View capture history & Sales user & Browse the list of past captures and their results. \\
+View capture history & Sales operator & Browse the list of past captures and their results. \\
+\hline
+Authenticate & System & Guard every capture action through the backend session check; included by the use cases above. \\
 \hline
 \end{tabularx}
 \caption{Use case descriptions for the lead capture module}
 \end{table}
 
 \section{Conceptual Modeling}\label{sumlbl:c6s4}
+\subsection{Class Diagram}\label{sumlbl:c6s4ssC}
+The class diagram below shows the classes involved in lead capture: the capture record, the fields extracted from the customer message, and the opportunity it can create.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth,height=0.5\textheight,keepaspectratio]{umls/img/class-capture.png}
+\caption{Class diagram of the lead capture module}
+\end{figure}
+
 \subsection{Sequence Diagram}\label{sumlbl:c6s4ss1}
 The sequence diagram below shows the full exchange, from the customer message to the created or duplicate result. The model reads the fields, a code step validates them, and the duplicate decision is made by code rather than by the model.
 
@@ -1527,15 +1637,26 @@ The sequence diagram below shows the full exchange, from the customer message to
 \caption{Sequence diagram of the lead capture and duplicate detection workflow}
 \end{figure}
 
+The workspace also lists the existing opportunities. The sequence below shows the read-only lead listing flow that feeds the workspace.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-list-leads.png}
+\caption{Sequence diagram of the workspace lead listing workflow}
+\end{figure}
+
 
 \section{Realization}\label{sumlbl:c6s5}
 The local environment offers the same feature. The capture service receives a message, reads the useful fields, prepares an opportunity, calls the opportunity service, and writes a capture record for the history. This means the user can test lead capture even when n8n or Odoo is not running. The front end shows the extracted fields and the final status: a created lead with its structured data, or a clear duplicate notice that explains why no new record was created.
 
 \subsection{Screenshots}\label{sumlbl:c6s5ss1}
-A successful capture shows the created lead and the detected fields. A second submission with the same email or phone shows the duplicate protection. These two cases show both the normal path and the data-quality path.
+The screenshots below show the two capture cases and the workspace where the captured leads are listed.
 
-\screenshot{06-capture-created.png}{06 Capture-Created}
-\screenshot{07-capture-duplicate.png}{07 Capture-Duplicate}
+\shot{06-capture-created.png}{Lead capture: opportunity created}{This screenshot showcases a successful capture. The operator pastes a raw customer message, the AI extraction fills the structured fields, and the panel confirms that a new opportunity was created in the CRM.}
+
+\shot{07-capture-duplicate.png}{Lead capture: duplicate detected}{This screenshot showcases the duplicate protection. When the email or the phone already exists, the system stops the creation and shows a clear duplicate notice instead of adding a repeated record.}
+
+\shot{08-workspace.png}{Lead workspace}{This screenshot showcases the lead workspace, where the captured opportunities are listed. The operator can browse the leads and open one of them to read its detailed information.}
 
 \section{Conclusion}\label{sumlbl:c6s6}
 Sprint 2 delivered the lead capture feature and the duplicate detection. This sprint showed that AI can reduce manual entry while code protects the integrity of the CRM data. The next sprint focuses on analytics and follow-up.
@@ -1555,7 +1676,8 @@ Sprint 2 delivered the lead capture feature and the duplicate detection. This sp
 \chsummarysub{7.3.1}{Use Case Diagram}{sumlbl:c7s3ss1}
 \chsummarysub{7.3.2}{Use Case Descriptions}{sumlbl:c7s3ss2}
 \chsummaryitem{7.4}{Conceptual Modeling}{sumlbl:c7s4}
-\chsummarysub{7.4.1}{Sequence Diagrams}{sumlbl:c7s4ss1}
+\chsummarysub{7.4.1}{Class Diagram}{sumlbl:c7s4ssC}
+\chsummarysub{7.4.2}{Sequence Diagrams}{sumlbl:c7s4ss1}
 \chsummaryitem{7.5}{Realization}{sumlbl:c7s5}
 \chsummarysub{7.5.1}{Screenshots}{sumlbl:c7s5ss1}
 \chsummaryitem{7.6}{Conclusion}{sumlbl:c7s6}
@@ -1581,11 +1703,11 @@ The table below lists the tasks planned for this sprint.
 \hline
 T3.1 & Compute the CRM indicators from the opportunity records & Critical & Done \\
 \hline
+T3.4 & Detect inactive opportunities after seven days & Critical & Done \\
+\hline
 T3.2 & Create the dashboard cards and charts & High & Done \\
 \hline
 T3.3 & Generate a readable manager summary & High & Done \\
-\hline
-T3.4 & Detect inactive opportunities after seven days & Critical & Done \\
 \hline
 T3.5 & Generate follow-up messages & High & Done \\
 \hline
@@ -1595,30 +1717,22 @@ T3.6 & Present the follow-up results in the interface & High & Done \\
 \caption{Sprint 3 backlog}
 \end{table}
 
+The Gantt chart below shows the schedule of the tasks planned for this sprint.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{umls/img/gantt-sprint3.png}
+\caption{Sprint 3 schedule (Gantt chart)}
+\end{figure}
+
 \section{Functional Analysis}\label{sumlbl:c7s3}
-This sprint serves two actors. The manager opens the dashboard, reads the indicators, and asks for a written summary of the pipeline. The sales user opens the follow-up center, where the system detects the inactive leads and drafts a message for each one. The indicators are computed by code, and the model is used only to turn the finished numbers into a readable summary and to draft the follow-up messages.
+This sprint serves two actors. The manager opens the dashboard, reads the indicators, and asks for a written summary of the pipeline. The sales operator opens the follow-up center, where the system detects the inactive leads and drafts a message for each one. The indicators are computed by code, and the model is used only to turn the finished numbers into a readable summary and to draft the follow-up messages.
 
 \subsection{Use Case Diagram}\label{sumlbl:c7s3ss1}
 The figure below presents the use case diagram of this sprint.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=0.7cm]
-\node[font=\small\bfseries] (ttl) {Analytics and Follow-Up};
-\node[uc, below=0.45cm of ttl] (kpi) {View dashboard\\KPIs};
-\node[uc, below=of kpi] (sum) {Generate summary};
-\node[uc, below=of sum] (inact) {Detect inactive\\leads};
-\node[uc, below=of inact] (draft) {Generate follow-up\\message};
-\node[uc, below=of draft] (center) {View follow-up\\center};
-\node[ucsys, fit=(ttl)(kpi)(sum)(inact)(draft)(center)] (sys) {};
-\umlactor{mgr}{$(sys.west)+(-2.4,0)$}{Manager}
-\umlactor{sales}{$(sys.east)+(2.4,0)$}{Sales user}
-\draw[ucedge] (mgr) -- (kpi);
-\draw[ucedge] (mgr) -- (sum);
-\draw[ucedge] (sales) -- (inact);
-\draw[ucedge] (sales) -- (draft);
-\draw[ucedge] (sales) -- (center);
-\end{tikzpicture}
+\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-analytics-followup.png}
 \caption{Use case diagram of the analytics and follow-up module}
 \end{figure}
 
@@ -1638,15 +1752,26 @@ Generate summary & Manager & Ask for a short written summary based on the comput
 \hline
 Detect inactive leads & System & Find opportunities whose last update is seven days old or more. \\
 \hline
-Generate follow-up message & Sales user & Draft a polite message for each inactive lead. \\
+Generate follow-up message & Sales operator & Draft a polite message for each inactive lead. \\
 \hline
-View follow-up center & Sales user & Review the inactive leads and their drafted messages. \\
+View follow-up center & Sales operator & Review the inactive leads and their drafted messages. \\
+\hline
+Authenticate & System & Guard every analytics and follow-up action through the backend session check; included by the use cases above. \\
 \hline
 \end{tabularx}
 \caption{Use case descriptions for the analytics and follow-up module}
 \end{table}
 
 \section{Conceptual Modeling}\label{sumlbl:c7s4}
+\subsection{Class Diagram}\label{sumlbl:c7s4ssC}
+The class diagram below shows the classes involved in analytics and follow-up: the opportunity, the KPI summary computed from the pipeline, and the follow-up drafted for an inactive lead.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth,height=0.5\textheight,keepaspectratio]{umls/img/class-analytics.png}
+\caption{Class diagram of the analytics and follow-up module}
+\end{figure}
+
 \subsection{Sequence Diagrams}\label{sumlbl:c7s4ss1}
 The first sequence diagram shows how the analytics summary is produced when the dashboard is opened: the numbers are computed by code, and the model only writes the summary.
 
@@ -1669,10 +1794,11 @@ The second sequence diagram shows the smart follow-up, from the user request to 
 The dashboard and the follow-up center were built in the interface. The dashboard shows the indicator cards and the charts. The follow-up center shows the inactive leads and the drafted messages. In the local environment, the backend computes the result; in the live environment, the matching n8n workflows are called through the backend proxy. The work also needed careful date handling, because the inactive days depend on the difference between the current date and the last update date.
 
 \subsection{Screenshots}\label{sumlbl:c7s5ss1}
-The dashboard gives a fast view of the CRM state, and the follow-up center turns quiet records into ready-to-send messages.
+The screenshots below show the analytics dashboard and the follow-up center delivered in this sprint.
 
-\screenshot{05-dashboard-analytics.png}{05 Dashboard-Analytics}
-\screenshot{10-followup.png}{10 Followup}
+\shot{05-dashboard-analytics.png}{Analytics dashboard with AI summary}{This screenshot showcases the analytics dashboard. The cards and charts summarize the pipeline, and the AI analytics summary turns the computed indicators into a short readable review for the manager.}
+
+\shot{10-followup.png}{Follow-up center}{This screenshot showcases the follow-up center. The system detects the inactive leads and drafts a ready-to-send message for each one, so the sales team can re-engage quiet contacts quickly.}
 
 \section{Conclusion}\label{sumlbl:c7s6}
 Sprint 3 added value for both managers and sales employees. Managers receive readable summaries, and sales employees receive ready follow-up drafts. The next sprint focuses on the CRM assistant and the live integration.
@@ -1692,7 +1818,8 @@ Sprint 3 added value for both managers and sales employees. Managers receive rea
 \chsummarysub{8.3.1}{Use Case Diagram}{sumlbl:c8s3ss1}
 \chsummarysub{8.3.2}{Use Case Descriptions}{sumlbl:c8s3ss2}
 \chsummaryitem{8.4}{Conceptual Modeling}{sumlbl:c8s4}
-\chsummarysub{8.4.1}{Sequence Diagram}{sumlbl:c8s4ss1}
+\chsummarysub{8.4.1}{Class Diagram}{sumlbl:c8s4ssC}
+\chsummarysub{8.4.2}{Sequence Diagram}{sumlbl:c8s4ss1}
 \chsummaryitem{8.5}{Realization}{sumlbl:c8s5}
 \chsummarysub{8.5.1}{Screenshots}{sumlbl:c8s5ss1}
 \chsummaryitem{8.6}{Conclusion}{sumlbl:c8s6}
@@ -1716,13 +1843,13 @@ The table below lists the tasks planned for this sprint.
 \hline\rowcolor{TabHead}
 \textbf{ID} & \textbf{Task} & \textbf{Priority} & \textbf{Status} \\
 \hline
-T4.1 & Implement the local assistant responses & High & Done \\
-\hline
 T4.2 & Set up the tool-based assistant workflow in n8n & Critical & Done \\
 \hline
 T4.3 & Add the Odoo tools for list, get, create, and update & Critical & Done \\
 \hline
 T4.4 & Add the backend live proxy with a timeout & Critical & Done \\
+\hline
+T4.1 & Implement the local assistant responses & High & Done \\
 \hline
 T4.5 & Add the settings page for the workflow endpoints & High & Done \\
 \hline
@@ -1732,6 +1859,13 @@ T4.6 & Add safe connection testing with a ping guard & High & Done \\
 \caption{Sprint 4 backlog}
 \end{table}
 
+The Gantt chart below shows the schedule of the tasks planned for this sprint.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{umls/img/gantt-sprint4.png}
+\caption{Sprint 4 schedule (Gantt chart)}
+\end{figure}
+
 \section{Functional Analysis}\label{sumlbl:c8s3}
 The assistant answers CRM questions and performs controlled actions through tools. It does not get free access to the system. It is connected to a fixed set of Odoo tools, each with a clear description: list the opportunities, read one opportunity, create an opportunity, read the CRM notes, and update a name, a phone, or an email. The assistant also follows strict output rules, so the answer is clean for the interface. The user can also configure the workflow endpoints and test the connection from the settings page.
 
@@ -1740,18 +1874,7 @@ The figure below presents the use case diagram of this sprint.
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=0.62cm]
-\node[font=\small\bfseries] (ttl) {Assistant and Live Integration};
-\node[uc, below=0.45cm of ttl] (ask) {Ask the assistant};
-\node[uc, below=of ask] (list) {List opportunities};
-\node[uc, below=of list] (get) {Get an opportunity};
-\node[uc, below=of get] (upd) {Update an opportunity};
-\node[uc, below=of upd] (cfg) {Configure endpoints};
-\node[uc, below=of cfg] (test) {Test connection};
-\node[ucsys, fit=(ttl)(ask)(list)(get)(upd)(cfg)(test)] (sys) {};
-\umlactor{u}{$(sys.west)+(-2.2,0)$}{User}
-\foreach \x in {ask,list,get,upd,cfg,test}{\draw[ucedge] (u) -- (\x);}
-\end{tikzpicture}
+\includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-assistant-live.png}
 \caption{Use case diagram of the assistant and live integration module}
 \end{figure}
 
@@ -1767,15 +1890,19 @@ The table below describes the use cases shown in the diagram above.
 \hline
 Ask the assistant & User & Send a CRM question in natural language and read a clean answer. \\
 \hline
-List opportunities & User & Ask the assistant to return the opportunities as cards. \\
+List opportunities & User & Ask the assistant to return the opportunities as cards (all of them, or a single record looked up by name or identifier). \\
 \hline
-Get an opportunity & User & Ask for a single record by name or identifier. \\
+Create an opportunity & User & Ask the assistant to add a new opportunity to the CRM when no duplicate exists. \\
 \hline
 Update an opportunity & User & Ask the assistant to change a name, a phone, or an email. \\
+\hline
+Read CRM notes & User & Ask the assistant to summarize the CRM notes of an opportunity. \\
 \hline
 Configure endpoints & User & Set the workflow endpoints used by the live integration. \\
 \hline
 Test connection & User & Run a safe read-only check that does not change CRM data. \\
+\hline
+Authenticate & System & Guard the assistant and settings actions through the backend session check. \\
 \hline
 \end{tabularx}
 \caption{Use case descriptions for the assistant and live integration module}
@@ -1809,6 +1936,15 @@ The assistant is built around an agent connected to a small set of controlled to
 \end{figure}
 
 \section{Conceptual Modeling}\label{sumlbl:c8s4}
+\subsection{Class Diagram}\label{sumlbl:c8s4ssC}
+The class diagram below shows the classes involved in the assistant: the assistant with its controlled tools, and the opportunity records it reads and updates.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth,height=0.5\textheight,keepaspectratio]{umls/img/class-assistant.png}
+\caption{Class diagram of the CRM assistant module}
+\end{figure}
+
 \subsection{Sequence Diagram}\label{sumlbl:c8s4ss1}
 The sequence diagram below shows a full question, from the user to the displayed answer, including the live proxy and a tool call.
 
@@ -1818,16 +1954,26 @@ The sequence diagram below shows a full question, from the user to the displayed
 \caption{Sequence diagram of the AI assistant workflow}
 \end{figure}
 
+The settings page can also test the live connection. The sequence below shows the safe connection test, which uses the ping guard and a server-side timeout and does not modify any CRM data.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-test-connection.png}
+\caption{Sequence diagram of the connection test workflow}
+\end{figure}
+
 
 \section{Realization}\label{sumlbl:c8s5}
 The live proxy is one of the most important reliability improvements in the project. Instead of letting the browser call n8n directly, the browser calls the backend on the same origin, and the backend forwards the request to n8n. This removes the CORS problems and lets the backend control the timeout, so the user gets a clear error message instead of an endless loading state. The proxy also accepts a custom endpoint only when it uses HTTP or HTTPS and belongs to the configured n8n host, which stops it from becoming an open request tool. The settings page lets the user set the endpoints and test the connection with a safe read-only ping that never writes to Odoo.
 
 \subsection{Screenshots}\label{sumlbl:c8s5ss1}
-The assistant lets the user ask CRM questions, the architecture page explains the layers of the system, and the settings page gives control over the live endpoints.
+The screenshots below show the CRM assistant, the architecture page, and the settings that control the live integration.
 
-\screenshot{11-assistant.png}{11 Assistant}
-\screenshot{12-architecture.png}{12 Architecture}
-\screenshot{13-settings.png}{13 Settings}
+\shot{11-assistant.png}{CRM assistant}{This screenshot showcases the CRM assistant. The user asks a question in natural language, and the assistant answers by reading the CRM data through its connected tools.}
+
+\shot{12-architecture.png}{Architecture page}{This screenshot showcases the built-in architecture page, which explains the layers of the platform and how a request travels from the interface to the backend, the workflows, and the CRM.}
+
+\shot{13-settings.png}{Settings and live endpoints}{This screenshot showcases the settings page. The user configures the live workflow endpoints and runs a safe read-only connection test that never writes to the CRM.}
 
 \section{Conclusion}\label{sumlbl:c8s6}
 Sprint 4 completed the main scope of the platform. The assistant improved the usability, and the backend proxy made the live integration more stable and more secure. The next chapter presents the global testing strategy, the deployment steps, the limitations, and the validation of the final version.
@@ -1852,7 +1998,7 @@ Sprint 4 completed the main scope of the platform. The assistant improved the us
 \clearpage
 
 \section{Introduction}\label{sumlbl:c9s1}
-Testing and validation are essential for a final year project. A system can hold good ideas and still fail if it is not stable in real use. This chapter presents the testing strategy used to validate the AI CRM Platform, the deployment procedure, the limitations of the current version, and the possible improvements.
+Testing and validation are essential for a final year project. A system can hold good ideas and still fail if it is not stable in real use. This chapter presents the testing strategy used to validate LeadDesk, the deployment procedure, the limitations of the current version, and the possible improvements.
 
 \section{Testing Strategy}\label{sumlbl:c9s2}
 The testing strategy mixes manual testing, workflow execution tests, and local backend tests. Since the project is a prototype and not an industrial product, the most important goal was to validate the complete user journey. The tests therefore followed realistic actions: sign in, capture a lead, detect a duplicate, read the dashboard, generate follow-ups, and ask the assistant.
@@ -1955,25 +2101,16 @@ The work produced a functional platform with a set of modules: authentication, d
 
 One of the main lessons of the project is that AI must be controlled when it is used in business software. The model is useful for reading information, writing summaries, drafting messages, and answering questions. Code, however, stays necessary for the calculations, the duplicate detection, the date comparisons, and the validation. The project therefore combines AI with code-based rules instead of depending only on prompts.
 
-In conclusion, the AI CRM Platform shows how web development, backend architecture, workflow automation, CRM integration, and artificial intelligence can be combined into one coherent software product. The current version is a solid prototype that can be extended with stronger security, production database storage, email sending, richer analytics, and a more capable assistant.
+In conclusion, LeadDesk shows how web development, backend architecture, workflow automation, CRM integration, and artificial intelligence can be combined into one coherent software product. The current version is a solid prototype that can be extended with stronger security, production database storage, email sending, richer analytics, and a more capable assistant.
 
 
 \appendix
-\chapter{Full Interface Screenshots}
-This appendix groups the main interface screenshots of the platform. They are included so the report is easy to evaluate visually and to show the realization of the main pages.
-\screenshot{01-landing.png}{01 Landing}
-\screenshot{02-signup.png}{02 Signup}
-\screenshot{03-login.png}{03 Login}
-\screenshot{04-dashboard.png}{04 Dashboard}
-\screenshot{05-dashboard-analytics.png}{05 Dashboard-Analytics}
-\screenshot{06-capture-created.png}{06 Capture-Created}
-\screenshot{07-capture-duplicate.png}{07 Capture-Duplicate}
-\screenshot{08-workspace.png}{08 Workspace}
-\screenshot{09-workspace-detail.png}{09 Workspace-Detail}
-\screenshot{10-followup.png}{10 Followup}
-\screenshot{11-assistant.png}{11 Assistant}
-\screenshot{12-architecture.png}{12 Architecture}
-\screenshot{13-settings.png}{13 Settings}
+\chapter{Additional Interface Screenshots}
+This appendix gathers the interface screens that were not shown inside the sprint chapters. It keeps the visual reference complete without repeating the screenshots already presented earlier.
+
+\shot{02-signup.png}{Sign-up screen}{This screenshot showcases the sign-up screen, where a new user creates an account with a name, an email, and a password before entering the console.}
+
+\shot{09-workspace-detail.png}{Lead workspace: opportunity detail}{This screenshot showcases the detailed view of a single opportunity in the lead workspace, where the full captured information and the drafted follow-up are shown together.}
 
 \chapter{User Guide}
 This appendix explains how to run the platform and what each main page does. It is written in a practical way so the application can be used without confusion.
@@ -2110,7 +2247,9 @@ TR-25 & Architecture page & Open the architecture section & The explanation and 
 \end{longtable}
 \normalsize
 
-\chapter{Bibliography}
+\chapter*{Bibliography}
+\addcontentsline{toc}{chapter}{Bibliography}
+\markboth{BIBLIOGRAPHY}{BIBLIOGRAPHY}
 \begin{enumerate}[label={\textup{[\arabic*]}}, leftmargin=1.2cm]
 \item Odoo Documentation, CRM and developer documentation.
 \item n8n Documentation, Workflow automation, webhook nodes, and integrations.
@@ -2124,5 +2263,7 @@ TR-25 & Architecture page & Open the architecture section & The explanation and 
 \item Scrum.org, ``What is Scrum?'' module, \url{https://www.scrum.org/resources/what-scrum-module}.
 \item International Institute of Technology academic guidelines for final year project reporting.
 \end{enumerate}
+
+\includepdf[pages=1,fitpaper=true]{backpage-filled.pdf}
 
 \end{document}

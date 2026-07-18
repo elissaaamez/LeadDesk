@@ -1,0 +1,33 @@
+@startgantt
+' Sprint 2 task-level schedule (backlog T2.1-T2.6). Global overview: gantt-project.puml.
+skinparam backgroundColor transparent
+skinparam defaultFontName Times New Roman
+skinparam shadowing false
+<style>
+ganttDiagram {
+  task {
+    BackGroundColor #EAF2F8
+    LineColor #004389
+    FontColor #1A1A1A
+  }
+  milestone { BackGroundColor #004389 LineColor #003063 }
+  note { BackGroundColor #FBF6DD LineColor #9A8C4A }
+}
+</style>
+Project starts 2026-02-23
+saturday are closed
+sunday are closed
+
+[T2.1 Lead capture form] as [t21] lasts 2 days
+[T2.2 Field extraction logic] as [t22] lasts 2 days
+[t22] starts at [t21]'s end
+[T2.3 Backend capture service and history] as [t23] lasts 2 days
+[t23] starts at [t22]'s end
+[T2.4 n8n lead capture workflow] as [t24] lasts 2 days
+[t24] starts at [t22]'s end
+[T2.5 Duplicate detection (email and phone)] as [t25] lasts 2 days
+[t25] starts at [t23]'s end
+[T2.6 Show created or duplicate result] as [t26] lasts 2 days
+[t26] starts at [t25]'s end
+[Sprint 2 review] happens at [t26]'s end
+@endgantt

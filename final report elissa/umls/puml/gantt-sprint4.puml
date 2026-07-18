@@ -1,0 +1,33 @@
+@startgantt
+' Sprint 4 task-level schedule (backlog T4.1-T4.6). Global overview: gantt-project.puml.
+skinparam backgroundColor transparent
+skinparam defaultFontName Times New Roman
+skinparam shadowing false
+<style>
+ganttDiagram {
+  task {
+    BackGroundColor #EAF2F8
+    LineColor #004389
+    FontColor #1A1A1A
+  }
+  milestone { BackGroundColor #004389 LineColor #003063 }
+  note { BackGroundColor #FBF6DD LineColor #9A8C4A }
+}
+</style>
+Project starts 2026-03-23
+saturday are closed
+sunday are closed
+
+[T4.1 Local assistant responses] as [t41] lasts 2 days
+[T4.2 Tool-based assistant workflow (n8n)] as [t42] lasts 2 days
+[t42] starts at [t41]'s end
+[T4.3 Odoo tools (list, get, create, update)] as [t43] lasts 2 days
+[t43] starts at [t42]'s end
+[T4.4 Backend live proxy with timeout] as [t44] lasts 2 days
+[t44] starts at [t42]'s end
+[T4.5 Settings page for endpoints] as [t45] lasts 2 days
+[t45] starts at [t43]'s end
+[T4.6 Safe connection testing (ping guard)] as [t46] lasts 2 days
+[t46] starts at [t45]'s end
+[Sprint 4 review] happens at [t46]'s end
+@endgantt

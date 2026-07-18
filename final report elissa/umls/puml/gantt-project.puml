@@ -1,4 +1,6 @@
 @startgantt
+' Global project schedule (sprint-level overview only).
+' Task-level detail lives in the per-sprint Gantts: gantt-sprint1..4.puml.
 skinparam backgroundColor transparent
 skinparam defaultFontName Times New Roman
 skinparam shadowing false
@@ -13,20 +15,21 @@ ganttDiagram {
   note { BackGroundColor #FBF6DD LineColor #9A8C4A }
 }
 </style>
+printscale weekly
 Project starts 2026-02-02
 saturday are closed
 sunday are closed
 
-[Sprint 0: Setup and Planning] as [S0] lasts 5 days
-[Sprint 1: Platform Foundation and UI] as [S1] lasts 10 days
+[Sprint 0: Setup and Planning (1 week)] as [S0] lasts 5 days
+[Sprint 1: Platform Foundation and UI (2 weeks)] as [S1] lasts 10 days
 [S1] starts at [S0]'s end
-[Sprint 2: Lead Capture and Duplicate Detection] as [S2] lasts 10 days
+[Sprint 2: Lead Capture and Duplicate Detection (2 weeks)] as [S2] lasts 10 days
 [S2] starts at [S1]'s end
-[Sprint 3: Analytics and Smart Follow-Up] as [S3] lasts 10 days
+[Sprint 3: Analytics and Smart Follow-Up (2 weeks)] as [S3] lasts 10 days
 [S3] starts at [S2]'s end
-[Sprint 4: CRM Assistant and Live Integration] as [S4] lasts 10 days
+[Sprint 4: CRM Assistant and Live Integration (2 weeks)] as [S4] lasts 10 days
 [S4] starts at [S3]'s end
-[Testing, Deployment and Report] as [TR] lasts 8 days
+[Testing, Deployment and Report (8 days)] as [TR] lasts 8 days
 [TR] starts at [S4]'s end
 
 [S0] is colored in #D6E4F0/#004389
