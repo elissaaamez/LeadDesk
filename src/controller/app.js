@@ -192,7 +192,7 @@ function wireCapture(){
       } else {
         await new Promise(r=>setTimeout(r,600));
         const ex=localExtract(finalMsg);
-        const dispName=name|| (finalMsg.match(/my name is ([^.,\n]+)/i)?.[1]?.trim()) || (ex.email?ex.email.split('@')[0]:'New lead');
+        const dispName=name||ex.name||(ex.email?ex.email.split('@')[0]:'New lead');
         const e1=(email||ex.email||'').toLowerCase(), p1=(phone||ex.phone||'').replace(/\s/g,'');
         const dup=allLeads().find(l=>l.type==='opportunity' && ((e1 && (l.email_from||'').toLowerCase()===e1) || (p1 && (l.phone||'').replace(/\s/g,'')===p1)));
         if(dup){

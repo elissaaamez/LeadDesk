@@ -46,6 +46,7 @@ const api = {
   me:            ()                      => apiFetch("/auth/me"),
   logout:        ()                      => apiFetch("/auth/logout", { method: "POST" }).catch(() => {}),
   opportunities: (q, filter)             => apiFetch("/opportunities?q=" + encodeURIComponent(q || "") + "&filter=" + encodeURIComponent(filter || "all")),
+  updateOpportunity: (id, patch)         => apiFetch("/opportunities/" + encodeURIComponent(id), { method: "PATCH", body: patch }),
   capture:       (payload)               => apiFetch("/captures", { method: "POST", body: payload }),
   analytics:     ()                      => apiFetch("/analytics/summary"),
   followups:     ()                      => apiFetch("/followups/run", { method: "POST" }),

@@ -26,7 +26,7 @@ function viewLanding(){
   ];
   const steps=[
     {ic:'message', t:'Message in',     d:'A customer reaches out on any channel.'},
-    {ic:'cpu',     t:'Extract & score', d:'The local model structures and prioritises it.'},
+    {ic:'cpu',     t:'Extract & score', d:'The active workflow structures and prioritises it.'},
     {ic:'shield',  t:'Duplicate check', d:'Existing records are matched on email & phone.'},
     {ic:'database',t:'Created in Odoo', d:'A clean opportunity lands in your CRM.'}
   ];
@@ -54,12 +54,12 @@ function viewLanding(){
         <div>
           <span class="inline-flex items-center gap-2 text-[11.5px] font-extrabold tracking-[.14em] uppercase text-[#9BD3DC]">${I('sparkles',14)} Lead operations, automated</span>
           <h1 class="font-display font-medium text-[clamp(36px,5vw,60px)] leading-[1.02] tracking-[-.4px] mt-4 mb-5">Turn every customer message into a <span class="text-[#9BD3DC]">qualified opportunity</span>.</h1>
-          <p class="max-w-[520px] text-[#CBD6D6] text-[17px] leading-[1.65] m-0">Capture leads from any channel, block duplicates before they reach your CRM, draft tailored follow-ups, and read your pipeline at a glance — orchestrated by n8n, reasoned by a local Ollama model, stored in Odoo.</p>
+          <p class="max-w-[520px] text-[#CBD6D6] text-[17px] leading-[1.65] m-0">Capture leads from any channel, block duplicates before they reach your CRM, draft tailored follow-ups, and read your pipeline at a glance — orchestrated by n8n and grounded in Odoo CRM data.</p>
           <div class="flex gap-3 mt-8 flex-wrap">
             <button class="${UI.btnAccent}" data-go="signup">${I('arrow',16)} Get started</button>
             <button class="${ghostDark}" data-go="login">Sign in to console</button>
           </div>
-          <div class="flex items-center gap-2 mt-8 text-[12.5px] text-[#9FB0B1]">${I('shield',14)} Runs locally · n8n · Ollama · Odoo CRM</div>
+          <div class="flex items-center gap-2 mt-8 text-[12.5px] text-[#9FB0B1]">${I('shield',14)} Demo · Local · Live · n8n · Odoo CRM</div>
         </div>
         <div class="relative">
           <div class="bg-white/[.06] border border-white/[.12] rounded-[20px] p-5 backdrop-blur-md shadow-[0_30px_70px_rgba(0,0,0,.3)]">
@@ -102,7 +102,7 @@ function viewLanding(){
     </section>
 
     <section class="${sectionPad} grid grid-cols-2 max-[900px]:grid-cols-1 gap-6">
-      <div class="${UI.card}"><div class="${UI.ti} mb-3">${I('shield',18)}</div><b class="font-display font-semibold text-[17px] block mb-2">Private by design</b><p class="text-muted text-[14px] leading-[1.65] m-0">The language model runs locally through Ollama. Customer data is processed on your own infrastructure and never sent to a third-party AI service.</p></div>
+      <div class="${UI.card}"><div class="${UI.ti} mb-3">${I('shield',18)}</div><b class="font-display font-semibold text-[17px] block mb-2">Controlled by mode</b><p class="text-muted text-[14px] leading-[1.65] m-0">Demo and Local stay on the machine. Live calls only the configured n8n workflows, through the authenticated server-side proxy.</p></div>
       <div class="${UI.card}"><div class="${UI.ti} mb-3">${I('check',18)}</div><b class="font-display font-semibold text-[17px] block mb-2">Honest by default</b><p class="text-muted text-[14px] leading-[1.65] m-0">Demo mode is clearly labelled and computed from a local sample. The console never fabricates live CRM data or shows results it cannot back up.</p></div>
     </section>
 
@@ -120,7 +120,7 @@ function viewLanding(){
       </div>
     </section>
 
-    <footer class="border-t border-[color:var(--line)]"><div class="max-w-[1180px] mx-auto px-6 py-7 flex items-center justify-between gap-4 flex-wrap text-[12.5px] text-faint"><span>AI CRM Platform — internal sales operations console</span><span>Final-year engineering project · n8n · Ollama · Odoo CRM</span></div></footer>
+    <footer class="border-t border-[color:var(--line)]"><div class="max-w-[1180px] mx-auto px-6 py-7 flex items-center justify-between gap-4 flex-wrap text-[12.5px] text-faint"><span>AI CRM Platform — internal sales operations console</span><span>Final-year engineering project · n8n · Groq / Ollama · Odoo CRM</span></div></footer>
   </div>`;
 }
 
@@ -136,14 +136,14 @@ function viewLogin(){
         <div><b class="font-display font-semibold text-[20px] tracking-[.2px] block leading-[1.05]">AI CRM Platform</b><span class="text-[12.5px] text-[#BCCBCB] tracking-[.16em] uppercase">Sales Operations</span></div></div>
       <div class="relative z-[1]">
         <h1 class="font-display font-medium text-[clamp(34px,4.6vw,56px)] leading-[1.02] tracking-[-.2px] m-0 mb-[18px]">One console for sales <em class="italic text-[#BCCBCB]">lead operations</em>.</h1>
-        <p class="max-w-[430px] text-[#CBD6D6] text-[16px] leading-[1.65] m-0">Capture leads, block duplicates, draft follow-ups, and read the pipeline — orchestrated by n8n, processed by a local Ollama model, and stored in Odoo CRM.</p>
+        <p class="max-w-[430px] text-[#CBD6D6] text-[16px] leading-[1.65] m-0">Capture leads, block duplicates, draft follow-ups, and read the pipeline — orchestrated by n8n and grounded in Odoo CRM data.</p>
       </div>
       <div class="relative z-[1] grid gap-[14px] mt-[6px]">
         <div class="flex gap-[13px] items-start text-[#E2EAEA]"><span class="mt-[3px] shrink-0 w-[26px] h-[26px] rounded-[8px] grid place-items-center bg-white/[.08] border border-white/[.12]">${I('zap',15)}</span><div><b class="font-bold">Capture &amp; classify</b><small class="block text-[#AEBFC0] text-[13px] mt-px">Free-text messages become structured, prioritised opportunities.</small></div></div>
         <div class="flex gap-[13px] items-start text-[#E2EAEA]"><span class="mt-[3px] shrink-0 w-[26px] h-[26px] rounded-[8px] grid place-items-center bg-white/[.08] border border-white/[.12]">${I('shield',15)}</span><div><b class="font-bold">No duplicates</b><small class="block text-[#AEBFC0] text-[13px] mt-px">Email &amp; phone matching before anything is written to CRM.</small></div></div>
         <div class="flex gap-[13px] items-start text-[#E2EAEA]"><span class="mt-[3px] shrink-0 w-[26px] h-[26px] rounded-[8px] grid place-items-center bg-white/[.08] border border-white/[.12]">${I('refresh',15)}</span><div><b class="font-bold">Always following up</b><small class="block text-[#AEBFC0] text-[13px] mt-px">Inactive opportunities get a tailored message, automatically.</small></div></div>
       </div>
-      <div class="relative z-[1] text-[12.5px] text-[#9FB0B1] tracking-[.04em]">Final-year engineering project · n8n · Ollama · Odoo CRM</div>
+      <div class="relative z-[1] text-[12.5px] text-[#9FB0B1] tracking-[.04em]">Final-year engineering project · n8n · Groq / Ollama · Odoo CRM</div>
     </aside>
     <main class="grid place-items-center p-10">
       <div class="w-[min(420px,100%)] reveal">
@@ -186,13 +186,13 @@ function viewSignup(){
         <div><b class="font-display font-semibold text-[20px] tracking-[.2px] block leading-[1.05]">AI CRM Platform</b><span class="text-[12.5px] text-[#BCCBCB] tracking-[.16em] uppercase">Sales Operations</span></div></div>
       <div class="relative z-[1]">
         <h1 class="font-display font-medium text-[clamp(34px,4.6vw,56px)] leading-[1.02] tracking-[-.2px] m-0 mb-[18px]">Set up in seconds, work your <em class="italic text-[#BCCBCB]">pipeline in minutes</em>.</h1>
-        <p class="max-w-[430px] text-[#CBD6D6] text-[16px] leading-[1.65] m-0">One console for capturing leads, blocking duplicates, drafting follow-ups, and reading the pipeline — backed by n8n, a local Ollama model, and Odoo CRM.</p>
+        <p class="max-w-[430px] text-[#CBD6D6] text-[16px] leading-[1.65] m-0">One console for capturing leads, blocking duplicates, drafting follow-ups, and reading the pipeline — backed by n8n and Odoo CRM.</p>
       </div>
       <div class="relative z-[1] grid gap-[14px] mt-[6px]">
         <div class="flex gap-[13px] items-start text-[#E2EAEA]"><span class="mt-[3px] shrink-0 w-[26px] h-[26px] rounded-[8px] grid place-items-center bg-white/[.08] border border-white/[.12]">${I('zap',15)}</span><div><b class="font-bold">Fast to start</b><small class="block text-[#AEBFC0] text-[13px] mt-px">No setup needed for the demo — explore every feature offline.</small></div></div>
-        <div class="flex gap-[13px] items-start text-[#E2EAEA]"><span class="mt-[3px] shrink-0 w-[26px] h-[26px] rounded-[8px] grid place-items-center bg-white/[.08] border border-white/[.12]">${I('shield',15)}</span><div><b class="font-bold">Private &amp; local</b><small class="block text-[#AEBFC0] text-[13px] mt-px">The model runs on-prem; customer data never leaves your infrastructure.</small></div></div>
+        <div class="flex gap-[13px] items-start text-[#E2EAEA]"><span class="mt-[3px] shrink-0 w-[26px] h-[26px] rounded-[8px] grid place-items-center bg-white/[.08] border border-white/[.12]">${I('shield',15)}</span><div><b class="font-bold">Mode-aware</b><small class="block text-[#AEBFC0] text-[13px] mt-px">Demo and Local stay on-device; Live uses only the configured integrations.</small></div></div>
       </div>
-      <div class="relative z-[1] text-[12.5px] text-[#9FB0B1] tracking-[.04em]">Final-year engineering project · n8n · Ollama · Odoo CRM</div>
+      <div class="relative z-[1] text-[12.5px] text-[#9FB0B1] tracking-[.04em]">Final-year engineering project · n8n · Groq / Ollama · Odoo CRM</div>
     </aside>
     <main class="grid place-items-center p-10">
       <div class="w-[min(440px,100%)] reveal">
@@ -214,7 +214,7 @@ function viewSignup(){
           <div id="su_err"></div>
           <button class="${UI.btnPrimary} w-full" type="submit">${I('arrow',17)} Create account</button>
         </form>
-        <div class="${UI.notice} ${UI.noticeSoft} mt-4">${I('alert',16)}<span>This is a demonstration project — sign-up does not create a real account. You'll be taken to sign-in, where a demo account gets you into the console.</span></div>
+        <div class="${UI.notice} ${UI.noticeSoft} mt-4">${I('alert',16)}<span>With the local backend running, sign-up creates a local account for this console. When the front end is opened by itself, use one of the clearly labelled demo accounts instead.</span></div>
         <p class="text-center text-[13px] text-muted mt-6">Already have an account? <button class="font-bold text-accent-deep hover:underline" data-go="login">Sign in</button></p>
       </div>
     </main>
@@ -504,9 +504,35 @@ function renderWsDetail(id){
         <div class="${UI.cell}"><span class="${UI.cellSpan}">Expected revenue</span><b class="text-[14px] break-words font-semibold">${fmtMoney(l.expected_revenue)}</b></div>
         <div class="${UI.cell}"><span class="${UI.cellSpan}">Interest</span><b class="text-[14px] break-words font-medium">${esc(l.interest||'—')}</b></div>
       </div>
+      <div class="grid grid-cols-[1fr_1fr_auto] max-[720px]:grid-cols-1 gap-[10px] items-end mb-3">
+        <div><label class="block text-[12px] font-bold text-ink-soft mb-[6px]">Priority</label>
+          <select class="${UI.input}" id="ws_priority">${['hot','warm','cold'].map(p=>`<option value="${p}" ${l.priority===p?'selected':''}>${p[0].toUpperCase()+p.slice(1)}</option>`).join('')}</select></div>
+        <div><label class="block text-[12px] font-bold text-ink-soft mb-[6px]">Expected revenue (TND)</label>
+          <input class="${UI.input}" id="ws_revenue" type="number" min="0" step="100" value="${Number(l.expected_revenue)||0}"/></div>
+        <button class="${UI.btnPrimary}" id="ws_save">${I('check',16)} Save changes</button>
+      </div>
       <button class="${UI.btnAccent} w-full" id="ws_draft">${I('pencil',16)} Draft follow-up message</button>
       <div id="ws_mail"></div>
     </div>`;
+  $('#ws_save').addEventListener('click', async ()=>{
+    const b=$('#ws_save');
+    const patch={ priority:$('#ws_priority').value, expected_revenue:Math.max(0,Number($('#ws_revenue').value)||0) };
+    b.disabled=true; b.innerHTML=`${I('refresh',16)} Saving…`;
+    try{
+      if(state.mode==='local'){
+        await api.updateOpportunity(l.id,patch); await loadServerOpps();
+      } else if(state.mode==='live'){
+        const msg=`Update opportunity ${l.id}. Set priority to ${patch.priority} and expected revenue to ${patch.expected_revenue} TND. Return a brief confirmation.`;
+        const res=await api.live('assistant',{message:msg,chatInput:msg,sessionId:'workspace-update',source:'workspace'});
+        if(!res.ok) throw new Error(res.data?.text||('Update returned HTTP '+res.status));
+        Object.assign(l,patch,{write_date:new Date().toISOString()});
+      } else {
+        Object.assign(l,patch,{write_date:new Date().toISOString()});
+        if(state.captured.includes(l)) LS.set('acp_captured',state.captured.slice(0,40));
+      }
+      toast('Opportunity updated','check'); renderWsList(); renderWsDetail(l.id);
+    }catch(e){ toast('Could not update opportunity: '+e.message,'alert'); b.disabled=false; b.innerHTML=`${I('check',16)} Save changes`; }
+  });
   $('#ws_draft').addEventListener('click', async ()=>{
     const b=$('#ws_draft'); b.disabled=true; b.innerHTML=`${I('refresh',16)} Drafting…`;
     let text;
@@ -575,6 +601,14 @@ function viewAssistant(){
       : 'Ask in plain language. In Demo mode the assistant answers from the local dataset — it never pretends to read Odoo.')}
   <div class="${UI.cardLg} reveal">
     <div class="flex flex-col h-[min(640px,72vh)]">
+      <div class="assistant-welcome">
+        <img class="assistant-leah" src="src/assets/leah-support.png" alt="Leah wearing a customer support headset"/>
+        <div class="relative z-[1] min-w-0">
+          <span class="font-mono text-[11px] font-semibold tracking-[.12em] uppercase text-accent-deep">Leah · CRM support</span>
+          <b class="block text-[16px] mt-[2px]">Ask about opportunities, pipeline activity, or the next follow-up.</b>
+          <small class="text-muted text-[12.5px]">Answers stay grounded in the active Demo, Local, or Live data source.</small>
+        </div>
+      </div>
       <div class="flex-1 overflow-auto flex flex-col gap-[14px] px-1 pt-[6px] pb-3" id="chatLog"></div>
       <div class="flex gap-2 flex-wrap my-3" id="chatQuick">
         ${['List all opportunities','How many leads do we have?','List inactive leads','Show hot leads'].map(q=>`<button class="qchip text-[12.5px] font-bold text-accent-deep bg-[rgba(111,169,180,.1)] border border-[rgba(111,169,180,.18)] rounded-full px-[13px] py-[7px] transition hover:bg-[rgba(111,169,180,.18)] hover:-translate-y-px">${q}</button>`).join('')}
@@ -589,7 +623,7 @@ function viewAssistant(){
 function renderChat(){
   const log=$('#chatLog'); if(!log) return;
   log.innerHTML=state.chat.map(m=>{
-    if(m.typing) return `<div class="max-w-[78%] flex gap-[10px] self-start"><div class="w-[32px] h-[32px] rounded-[9px] shrink-0 grid place-items-center bg-gradient-to-br from-mist to-accent text-[#0F1E22]">${I('bot',16)}</div><div class="rounded-[16px] px-[15px] py-3 bg-card border border-[color:var(--line)] rounded-bl-[5px]"><div class="typing inline-flex gap-1 items-center py-1"><i class="w-[7px] h-[7px] rounded-full bg-accent inline-block"></i><i class="w-[7px] h-[7px] rounded-full bg-accent inline-block"></i><i class="w-[7px] h-[7px] rounded-full bg-accent inline-block"></i></div></div></div>`;
+    if(m.typing) return `<div class="max-w-[78%] flex gap-[10px] self-start"><img class="leah-chat-avatar shrink-0" src="src/assets/leah-support.png" alt=""/><div class="rounded-[16px] px-[15px] py-3 bg-card border border-[color:var(--line)] rounded-bl-[5px]"><div class="typing inline-flex gap-1 items-center py-1"><i class="w-[7px] h-[7px] rounded-full bg-accent inline-block"></i><i class="w-[7px] h-[7px] rounded-full bg-accent inline-block"></i><i class="w-[7px] h-[7px] rounded-full bg-accent inline-block"></i></div></div></div>`;
     const isUser=m.role==='user';
     const av = isUser?I('user',16):I('bot',16);
     const wrap = `max-w-[78%] flex gap-[10px] ${isUser?'self-end flex-row-reverse':'self-start'}`;
@@ -597,7 +631,8 @@ function renderChat(){
     const bub = `rounded-[16px] px-[15px] py-3 text-[14.5px] leading-[1.6] ${isUser?'bg-ink text-paper-2 rounded-br-[5px]':'bg-card border border-[color:var(--line)] rounded-bl-[5px]'}`;
     let body = `<p class="m-0">${esc(m.text||'')}</p>`;
     if(m.records&&m.records.length){ body += m.records.map(r=>`<div class="bg-card-2 border border-[color:var(--line)] rounded-[11px] px-[13px] py-[11px] mt-2 first:mt-0"><span class="font-mono text-[11px] text-accent-deep font-semibold">ID ${esc(r.id)}</span><b class="block text-[14px] my-[2px]">${esc(r.name)}</b><small class="block text-muted text-[12.5px] font-mono">${esc(r.email)} · ${esc(r.phone)}</small></div>`).join(''); }
-    return `<div class="${wrap}"><div class="${ava}">${av}</div><div class="${bub}">${body}</div></div>`;
+    const avatar = isUser ? `<div class="${ava}">${av}</div>` : `<img class="leah-chat-avatar shrink-0" src="src/assets/leah-support.png" alt=""/>`;
+    return `<div class="${wrap}">${avatar}<div class="${bub}">${body}</div></div>`;
   }).join('');
   log.scrollTop=log.scrollHeight;
 }
@@ -607,7 +642,7 @@ function renderChat(){
    ========================================================================= */
 function viewArchitecture(){
   return `
-  ${pageHead('System design','How AI CRM Platform is built','The console is the front end of an event-driven automation system. Four n8n workflows do the heavy lifting; a local Ollama model provides the reasoning; Odoo is the system of record.')}
+  ${pageHead('System design','How AI CRM Platform is built','The console is the front end of an event-driven automation system. n8n coordinates the workflows, Groq powers the live assistant, local models remain available for local tasks, and Odoo is the system of record.')}
   <div class="reveal relative bg-[linear-gradient(160deg,#16262A,#1C2E33)] rounded-[26px] p-[30px] text-[#E8EEEE] overflow-hidden">
     <div class="absolute inset-0 bg-[radial-gradient(600px_360px_at_85%_0%,rgba(111,169,180,.2),transparent_60%),radial-gradient(520px_380px_at_0%_100%,rgba(111,169,180,.22),transparent_60%)]"></div>
     <div class="relative z-[1]">
@@ -618,7 +653,7 @@ function viewArchitecture(){
         </div>
         <div><h4 class="font-display font-semibold text-[14px] tracking-[.1em] uppercase text-[#9DB8BC] m-0 mb-3">Orchestration &amp; AI</h4>
           <div class="bg-white/[.05] border border-white/[.1] rounded-[14px] p-[14px] mb-[11px] backdrop-blur-[6px]"><div class="flex items-center gap-[10px] mb-[6px]">${I('workflow',18)}<b class="text-[14.5px]">n8n</b></div><small class="text-[#B4C4C5] text-[12.5px] leading-[1.5] block">Receives webhooks, branches logic, calls tools, talks to Odoo and the model.</small><span class="font-mono text-[11px] text-[#9BD3DC] mt-2 block">webhook · code · if · agent</span></div>
-          <div class="bg-white/[.05] border border-white/[.1] rounded-[14px] p-[14px] mb-[11px] backdrop-blur-[6px]"><div class="flex items-center gap-[10px] mb-[6px]">${I('cpu',18)}<b class="text-[14.5px]">Ollama · llama3.2</b></div><small class="text-[#B4C4C5] text-[12.5px] leading-[1.5] block">Local LLM for extraction, summaries, follow-up writing and the agent.</small><span class="font-mono text-[11px] text-[#9BD3DC] mt-2 block">temperature 0 · on-prem</span></div>
+          <div class="bg-white/[.05] border border-white/[.1] rounded-[14px] p-[14px] mb-[11px] backdrop-blur-[6px]"><div class="flex items-center gap-[10px] mb-[6px]">${I('cpu',18)}<b class="text-[14.5px]">Groq · Ollama</b></div><small class="text-[#B4C4C5] text-[12.5px] leading-[1.5] block">Groq serves the tool-using live assistant; local models remain available for local workflow steps.</small><span class="font-mono text-[11px] text-[#9BD3DC] mt-2 block">live agent · local models</span></div>
         </div>
         <div><h4 class="font-display font-semibold text-[14px] tracking-[.1em] uppercase text-[#9DB8BC] m-0 mb-3">Data</h4>
           <div class="bg-white/[.05] border border-white/[.1] rounded-[14px] p-[14px] mb-[11px] backdrop-blur-[6px]"><div class="flex items-center gap-[10px] mb-[6px]">${I('database',18)}<b class="text-[14.5px]">Odoo CRM</b></div><small class="text-[#B4C4C5] text-[12.5px] leading-[1.5] block">System of record. Opportunities (crm.lead) are read, deduplicated, created and updated.</small><span class="font-mono text-[11px] text-[#9BD3DC] mt-2 block">crm.lead · type = opportunity</span></div>
@@ -651,7 +686,7 @@ function viewArchitecture(){
     <div class="${UI.cardTitle}"><span class="${UI.ti}">${I('shield',18)}</span> Design principles</div>
     <div class="grid grid-cols-3 max-[560px]:grid-cols-1 gap-4 mt-[6px]">
       <div><b class="block mb-[5px]">Honest by default</b><p class="text-muted text-[13.5px] m-0 leading-[1.6]">The UI never fabricates live CRM data. If a webhook is not connected, it says so and falls back to a clearly-labelled demo dataset.</p></div>
-      <div><b class="block mb-[5px]">Privacy-first AI</b><p class="text-muted text-[13.5px] m-0 leading-[1.6]">The model runs locally via Ollama — customer data never leaves the company's infrastructure.</p></div>
+      <div><b class="block mb-[5px]">Mode-aware AI</b><p class="text-muted text-[13.5px] m-0 leading-[1.6]">Demo and Local stay on-device. Live AI calls are explicit and routed through the authenticated backend proxy.</p></div>
       <div><b class="block mb-[5px]">Deterministic output</b><p class="text-muted text-[13.5px] m-0 leading-[1.6]">temperature 0 plus strict JSON contracts make the AI's behaviour repeatable and safe to automate.</p></div>
     </div>
   </div>`;
@@ -670,7 +705,7 @@ function viewSettings(){
     {k:'assistant', label:'AI Assistant', icon:'bot'}
   ];
   return `
-  ${pageHead('Configuration','Settings','Point the console at your running n8n instance. URLs are stored locally in this browser only.')}
+  ${pageHead('Configuration','Settings','Point the console at your running n8n instance. URLs are saved locally and mirrored to the authenticated proxy.')}
   <div class="${UI.cardLg} reveal max-w-[840px]">
     <div class="${UI.cardTitle}"><span class="${UI.ti}">${I('broadcast',18)}</span> n8n webhook endpoints</div>
     <p class="${UI.cardSub}">Default to <code style="font-family:var(--font-mono);font-size:12px">localhost:5678</code>. Switch to <b>Live</b> mode in the sidebar to use these.</p>
@@ -686,7 +721,7 @@ function viewSettings(){
       <button class="${UI.btnGhost}" id="testCfg">${I('activity',16)} Test connections</button>
       <button class="${UI.btnGhost}" id="resetCfg">${I('refresh',16)} Reset to defaults</button>
     </div>
-    <div class="${UI.notice} ${UI.noticeInfo} mt-4">${I('alert',16)}<span>Connection tests exercise only <b>crm-summary</b> (it has no Odoo write step, so it is always safe). <b>Lead Capture</b>, <b>Smart Follow-Up</b>, and the <b>AI Assistant</b> show “not tested — would modify Odoo,” because a test must never create or change CRM data. Import the workflow <b>ping-guard</b> to enable a safe <code style="font-family:var(--font-mono);font-size:12px">{"ping":true}</code> test for all four. A browser <b>CORS</b> block can make a reachable webhook look offline — harmless if your live demo otherwise runs.</span></div>
+    <div class="${UI.notice} ${UI.noticeInfo} mt-4">${I('alert',16)}<span>Connection tests use the authenticated server-side proxy. The lead list and analytics workflows are read-only; the assistant is probed with <code style="font-family:var(--font-mono);font-size:12px">{"ping":true}</code>. <b>Lead Capture</b> and <b>Smart Follow-Up</b> are intentionally not tested because their normal workflows may modify Odoo.</span></div>
   </div>
 
   <div class="${UI.cardLg} reveal max-w-[840px] mt-[18px]">

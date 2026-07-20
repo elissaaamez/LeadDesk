@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AI CRM Platform · Sales Operations Console</title>
-<meta name="description" content="Internal CRM operations console for lead capture, duplicate checks, follow-up drafting, analytics, and an Odoo-connected assistant, built on n8n and Ollama." />
+<meta name="description" content="Internal CRM operations console for lead capture, duplicate checks, follow-up drafting, analytics, and an Odoo-connected assistant, built on n8n with Groq and local-model support." />
 
 <!-- Type pairing: IBM Plex Sans (UI display + body) + IBM Plex Mono (data). -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -106,6 +106,30 @@ body::after{
 .typing i{animation:tb 1.2s infinite}
 .typing i:nth-child(2){animation-delay:.18s}
 .typing i:nth-child(3){animation-delay:.36s}
+
+/* Leah appears only inside the CRM Assistant, as a restrained support mascot. */
+.assistant-welcome{
+  position:relative;display:flex;align-items:center;gap:16px;min-height:92px;
+  margin:0 0 14px;padding:13px 18px 13px 108px;border:1px solid rgba(111,169,180,.22);
+  border-radius:18px;background:linear-gradient(105deg,rgba(111,169,180,.10),rgba(255,252,247,.94) 58%,rgba(230,215,193,.20));
+  overflow:hidden;
+}
+.assistant-welcome::after{
+  content:"";position:absolute;right:-52px;top:-70px;width:190px;height:190px;border-radius:50%;
+  border:1px solid rgba(111,169,180,.16);box-shadow:0 0 0 22px rgba(111,169,180,.04);
+}
+.assistant-leah{
+  position:absolute;left:12px;bottom:-11px;width:88px;height:88px;object-fit:cover;border-radius:50%;
+  border:3px solid var(--card);box-shadow:0 8px 22px rgba(22,38,42,.16);background:var(--paper-2);
+}
+.leah-chat-avatar{
+  width:32px;height:32px;border-radius:9px;object-fit:cover;background:var(--paper-2);
+  border:1px solid rgba(111,169,180,.28);box-shadow:0 3px 10px rgba(22,38,42,.10);
+}
+@media(max-width:620px){
+  .assistant-welcome{padding-left:84px;align-items:flex-start}
+  .assistant-leah{width:66px;height:66px;bottom:10px}
+}
 
 /* Pulse ring shared by the live mode pill + the "testing" status dot */
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(92,138,102,.45)}70%{box-shadow:0 0 0 6px rgba(92,138,102,0)}100%{box-shadow:0 0 0 0 rgba(92,138,102,0)}}

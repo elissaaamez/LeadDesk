@@ -13,8 +13,9 @@ function extract(message){
   const text = String(message || "");
   const m = text.toLowerCase();
   const email = (text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/) || [""])[0];
-  const phone = (text.match(/(\+?\d[\d\s().-]{6,}\d)/) || [""])[0].trim();
-  const nameMatch = text.match(/my name is ([^.,\n]+)/i);
+  const phoneSource = email ? text.replace(email, " ") : text;
+  const phone = (phoneSource.match(/(\+\d[\d\s().-]{6,}\d|\b\d[\d\s().-]{6,}\d\b)/) || [""])[0].trim();
+  const nameMatch = text.match(/my name is ([^.,\n]+)/i) || text.match(/\b(?:i am|i'm)\s+([a-z][a-z' -]{1,40}?)(?=\s+from\b|[,.])/i);
   let intent = "irrelevant";
   if(/price|pricing|quote|cost|demo|meeting|buy|purchase|interested|seats|subscription/.test(m)) intent = "sales_inquiry";
   else if(/partner|integration|reseller|collaborat/.test(m)) intent = "partnership";

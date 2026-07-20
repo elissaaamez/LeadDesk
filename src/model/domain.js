@@ -11,7 +11,9 @@
 function localExtract(message){
   const m=(message||'').toLowerCase();
   const email=(message.match(/[\w.+-]+@[\w-]+\.[\w.-]+/)||[''])[0];
-  const phone=(message.match(/(\+?\d[\d\s().-]{6,}\d)/)||[''])[0].trim();
+  const phoneSource=email?message.replace(email,' '):message;
+  const phone=(phoneSource.match(/(\+\d[\d\s().-]{6,}\d|\b\d[\d\s().-]{6,}\d\b)/)||[''])[0].trim();
+  const nameMatch=message.match(/my name is ([^.,\n]+)/i)||message.match(/\b(?:i am|i'm)\s+([a-z][a-z' -]{1,40}?)(?=\s+from\b|[,.])/i);
   let intent='irrelevant';
   if(/price|pricing|quote|cost|demo|meeting|buy|purchase|interested|seats|subscription/.test(m)) intent='sales_inquiry';
   else if(/partner|integration|reseller|collaborat/.test(m)) intent='partnership';
@@ -27,7 +29,7 @@ function localExtract(message){
     support_request:'Assign to support queue and confirm receipt by email.',
     irrelevant:'No action — keep for nurturing list.'
   };
-  return { email, phone, intent, priority, interest:message.trim().slice(0,90), recommended_action:actionMap[intent] };
+  return { name:nameMatch?nameMatch[1].trim():'', email, phone, intent, priority, interest:message.trim().slice(0,90), recommended_action:actionMap[intent] };
 }
 
 /* Simple inactivity-aware follow-up draft (used by Demo mode). */

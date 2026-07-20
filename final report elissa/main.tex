@@ -39,7 +39,8 @@
 \pgfplotsset{compat=1.18}
 \usepackage{hyperref}
 \hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=Accent}
-\setcounter{tocdepth}{2}
+% Keep the table of contents concise: chapters and sections only.
+\setcounter{tocdepth}{1}
 \setcounter{secnumdepth}{3}
 \setlength{\parindent}{0.65cm}
 \setlength{\parskip}{0.20em}
@@ -136,6 +137,9 @@
 \newcommand{\studentname}{Elissa Mezghani}
 \newcommand{\university}{International Institute of Technology (IIT)}
 \newcommand{\chapterintro}[1]{\vspace{0.5cm}\noindent#1\vspace{0.4cm}}
+\newcommand{\figdesc}[1]{%
+\vspace{-0.05cm}\noindent\small\textit{Description:} #1\par\normalsize\vspace{0.30cm}%
+}
 \newcommand{\screenshot}[2]{%
 \begin{figure}[p]
 \centering
@@ -195,16 +199,7 @@
 
 
 \begin{document}
-\hypersetup{pageanchor=false}
-\pagenumbering{gobble}
-
-
-\thispagestyle{empty}
-\titlebackground{title-cover.jpg}
-\null\clearpage
-\cleardoublepage
 \pagenumbering{roman}
-\hypersetup{pageanchor=true}
 
 \chapter*{Dedication}
 \addcontentsline{toc}{chapter}{Dedication}
@@ -314,17 +309,14 @@ This report is organized as a final year project book. The first chapter present
 \vspace{3pt}{\color{black}\hrule height 0.6pt}\vspace{0.30cm}
 {\small
 \chsummaryitem{1.1}{Introduction}{sumlbl:c1s1}
-\chsummaryitem{1.2}{Problem Statement}{sumlbl:c1s2}
-\chsummaryitem{1.3}{Existing Situation}{sumlbl:c1s3}
-\chsummaryitem{1.4}{Comparative Study}{sumlbl:c1s4}
-\chsummarysub{1.4.1}{Existing Solutions}{sumlbl:c1s4ss1}
-\chsummarysub{1.4.2}{Our Solution Compared with the Existing Solutions}{sumlbl:c1s4ss2}
-\chsummaryitem{1.5}{Needs Analysis: EPICs and User Stories}{sumlbl:c1s5}
-\chsummaryitem{1.6}{Proposed Solution}{sumlbl:c1s6}
-\chsummaryitem{1.7}{Adopted Methodology: Scrum}{sumlbl:c1s7}
-\chsummarysub{1.7.1}{Scrum Presentation}{sumlbl:c1s7ss1}
-\chsummarysub{1.7.2}{Agile Project Breakdown}{sumlbl:c1s7ss2}
-\chsummaryitem{1.8}{Conclusion}{sumlbl:c1s8}
+\chsummaryitem{1.2}{Host Company: Connexant}{sumlbl:c1company}
+\chsummaryitem{1.3}{Problem Statement}{sumlbl:c1s2}
+\chsummaryitem{1.4}{Existing Situation}{sumlbl:c1s3}
+\chsummaryitem{1.5}{Comparative Study}{sumlbl:c1s4}
+\chsummaryitem{1.6}{Needs Analysis: EPICs and User Stories}{sumlbl:c1s5}
+\chsummaryitem{1.7}{Proposed Solution}{sumlbl:c1s6}
+\chsummaryitem{1.8}{Adopted Methodology: Scrum}{sumlbl:c1s7}
+\chsummaryitem{1.9}{Conclusion}{sumlbl:c1s8}
 }
 \clearpage
 
@@ -333,11 +325,27 @@ This report is organized as a final year project book. The first chapter present
 \section{Introduction}\label{sumlbl:c1s1}
 Understanding the general framework of a project is necessary before presenting the technical implementation. This chapter explains the context in which the project was developed, the problems observed in classical CRM management, and the reasons that motivated the creation of an AI-assisted platform. It also introduces the methodology, the user needs, and the proposed solution at a functional level.
 
+\section{Host Company: Connexant}\label{sumlbl:c1company}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.50\textwidth]{connexant-logo.png}
+\caption{Connexant company logo}
+\label{fig:connexant-logo}
+\end{figure}
+\figdesc{The logo identifies Connexant, the host company whose IT consulting and infrastructure environment frames this project.}
+
+Connexant is an information technology company operating in the computer networking products sector. Its activities combine software-solution development with consulting in IT infrastructure, which provides a relevant professional setting for a CRM automation project. The company profile highlights more than ten years of experience in IT and project leadership across energy, healthcare, finance, agriculture, and cybersecurity.
+
+The profile also reflects a strong emphasis on professional standards and infrastructure expertise. It includes ISO 27001 auditor and IRCA credentials, certifications related to Linux, Cisco, and Novell products, and Project Management Professional (PMP) certification. It further notes third-party auditing work for SGS concerning the ISO 9001 and ISO 27001 standards. This combination of technical consulting, project management, and information-security experience makes process reliability, traceability, and controlled automation particularly important in the company's work.
+
+Within this context, the project contributes an operational layer for CRM work. It focuses on structured lead capture, duplicate prevention, opportunity monitoring, follow-up preparation, and reliable access to CRM information. These functions align with Connexant's technology-oriented environment and with the need to manage business relationships through clear, repeatable processes. The company's website is listed in the Webography at the end of the report.
+
 \section{Problem Statement}\label{sumlbl:c1s2}
 In the current sales process, a lead can arrive as a simple message, a phone call note, an email, a form submission, or as an officially routed prospect through the Odoo Partner Program, but the useful information is not always ready to be used inside the CRM. The sales employee has to read the message, understand what the customer wants, copy the name, phone number, email, and interest, then check manually if this person already exists before creating a new opportunity. This daily work may seem simple, but it easily becomes a source of mistakes: a phone number can be written incorrectly, a customer can be added twice, an old lead can be forgotten, and the manager may not have a clear view of which opportunities need attention first. These small problems directly affect the quality of follow-up and can make the company lose time and potential customers. The problem addressed in this project is therefore the lack of a simple and reliable layer that helps the sales team structure incoming lead information, avoid repeated records, detect inactive opportunities, and make CRM data easier to understand and use.
 
 \section{Existing Situation}\label{sumlbl:c1s3}
-Today, a sales team handles its leads either by hand or with a standard CRM. This project is built on Odoo CRM. According to the official Odoo documentation~\href{https://www.odoo.com/documentation/19.0/applications/sales/crm.html}{[Odoo CRM documentation]}, Odoo CRM helps a team organize its sales activities: it tracks leads, closes opportunities, gives accurate forecasts, and keeps opportunities organized in a pipeline with meetings and next activities. Odoo is therefore a solid system of record for the customer data.
+Today, a sales team handles its leads either by hand or with a standard CRM. This project is built on Odoo CRM. According to the official Odoo documentation~\textup{[W1]}, Odoo CRM helps a team organize its sales activities: it tracks leads, closes opportunities, gives accurate forecasts, and keeps opportunities organized in a pipeline with meetings and next activities. Odoo is therefore a solid system of record for the customer data.
 
 However, Odoo on its own does not read a free-text customer message, does not draft a follow-up, and does not answer questions in natural language; these steps stay manual. The same limit applies to the other tools a team might use instead. To position the project clearly, the next section defines the main existing solutions and compares them with the proposed platform.
 
@@ -350,9 +358,9 @@ Before comparing the proposed solution with the existing approaches, this sectio
 Three approaches are commonly used by a sales team to manage its leads before adopting a dedicated tool like the one built in this project.
 
 \begin{itemize}
-\item \textbf{Spreadsheet.} Spreadsheets are simple online tools that help you organize information in basic rows and columns. Google Sheets is a great example of a spreadsheet, and a popular tool that most people have used.~\href{https://www.salesforce.com/blog/small-business/spreadsheet-vs-crm/}{[1]}
-\item \textbf{Standard CRM.} CRM stands for customer relationship management, which is a system for managing all of your company's interactions with current and potential customers.~\href{https://www.salesforce.com/crm/what-is-crm/}{[2]}
-\item \textbf{Automation-only tool.} An automation tool is software that takes over repetitive tasks, connects systems, and ensures that a flow is carried out the same way every time. In practice, it involves everything from creating cases, moving data between systems, and sending notifications, to performing checks against regulations, flagging deviations, and triggering the next step in processes.~\href{https://www.multisoft.se/en/kunskapsbank/what-is-an-automation-tool-and-how-do-you-choose-the-right-one/}{[3]}
+\item \textbf{Spreadsheet.} Spreadsheets are simple online tools that help users organize information in rows and columns. Google Sheets is a common example used to maintain basic sales records.~\textup{[W2]}
+\item \textbf{Standard CRM.} CRM stands for customer relationship management, which is a system for managing an organization's interactions with current and potential customers.~\textup{[W3]}
+\item \textbf{Automation-only tool.} An automation tool is software that takes over repetitive tasks, connects systems, and ensures that a flow is carried out consistently. It can create records, move data between systems, send notifications, perform rule-based checks, flag deviations, and trigger the next step in a process.~\textup{[W4]}
 \end{itemize}
 
 \subsection{Our Solution Compared with the Existing Solutions}\label{sumlbl:c1s4ss2}
@@ -387,13 +395,6 @@ Natural-language assistant & No & Rare or paid & No & Yes, tool-based assistant 
 \end{tabularx}
 \caption{Comparison between the existing approaches and the proposed solution}
 \end{table}
-
-\paragraph{Webography.}
-\begin{enumerate}[label={[\textbf{W\arabic*}]}, leftmargin=1.5cm]
-\item Microsoft Excel, \url{https://www.microsoft.com/en-us/microsoft-365/excel}; Google Sheets, \url{https://workspace.google.com/products/sheets/}.
-\item Salesforce, ``What is CRM?'', \url{https://www.salesforce.com/crm/what-is-crm/}; Odoo CRM, \url{https://www.odoo.com/app/crm}.
-\item n8n, \url{https://n8n.io/}; Zapier, \url{https://zapier.com/}; Make, \url{https://www.make.com/}.
-\end{enumerate}
 
 \section{Needs Analysis: EPICs and User Stories}\label{sumlbl:c1s5}
 The needs were divided into EPICs and user stories in order to make the project easier to plan and validate. The EPICs represent large functional areas, while user stories describe concrete needs from the point of view of a user or the system. This structure also makes the report closer to a professional software engineering document.
@@ -501,13 +502,14 @@ Ollama / Groq
 \caption{Simplified architecture of the proposed LeadDesk}
 \label{fig:global-architecture}
 \end{figure}
+\figdesc{The diagram shows how the web console sends requests to the backend, which uses NeDB for local operations or n8n, Odoo CRM, and AI models for live operations.}
 
 
 \section{Adopted Methodology: Scrum}\label{sumlbl:c1s7}
 \subsection{Scrum Presentation}\label{sumlbl:c1s7ss1}
 It starts with understanding the Scrum framework which is defined in The Scrum Guide and was first introduced to the world in 1995 as a better way of team collaboration for solving complex problems.  The Scrum framework is fairly simple being made up of a Scrum Team consisting of a Product Owner, a Scrum Master and Developers, each of which have specific accountabilities. The Scrum Team takes part in five events and produces three artifacts. Scrum co-creators Ken Schwaber and Jeff Sutherland wrote and maintain The Scrum Guide, which explains Scrum clearly and succinctly.  The guide contains the definition of Scrum,  describing the Scrum accountabilities, events, artifacts and the guidance that binds them together.
 
-Scrum is an empirical process, where decisions are based on observation, experience and experimentation. Scrum has three pillars: transparency, inspection and adaptation. This supports the concept of working iteratively. Think of Empiricism as working through small experiments, learning from that work and adapting both what you are doing and how you are doing it as needed. \href{https://www.scrum.org/resources/what-scrum-module}{[1]}.
+Scrum is an empirical process, where decisions are based on observation, experience and experimentation. Scrum has three pillars: transparency, inspection and adaptation. This supports the concept of working iteratively. Empiricism means working through small experiments, learning from that work, and adapting both the work itself and the way it is performed.~\textup{[W5]}
 
 The figure below illustrates the Scrum framework and its main elements.
 
@@ -535,6 +537,7 @@ The figure below illustrates the Scrum framework and its main elements.
 \caption{Scrum framework}
 \label{fig}
 \end{figure}
+\figdesc{The diagram presents the recurring Scrum cycle from backlog planning through the sprint, product increment, review, and retrospective.}
 
 
 \subsection{Agile Project Breakdown}\label{sumlbl:c1s7ss2}
@@ -566,6 +569,7 @@ The Gantt chart below shows the planned schedule of the project across the sprin
 \caption{Project schedule (Gantt chart)}
 \label{fig:gantt}
 \end{figure}
+\figdesc{The Gantt chart places the project activities on a shared timeline and shows how the four sprints follow one another.}
 
 
 The work breakdown structure below decomposes the project into its main work packages.
@@ -575,6 +579,7 @@ The work breakdown structure below decomposes the project into its main work pac
 \caption{Work breakdown structure of the project}
 \label{fig:wbs}
 \end{figure}
+\figdesc{The work breakdown structure decomposes the project into manageable work packages covering preparation, implementation, integration, testing, and documentation.}
 
 \section{Conclusion}\label{sumlbl:c1s8}
 This chapter introduced the project context, the main problems, the methodology, the needs, and the proposed solution. The next chapter focuses on a specific aspect of the project that is very important in workflow-based systems: repeated nodes and reusable patterns. Studying these nodes separately helps make the workflow architecture clearer and avoids explaining the same mechanisms many times in later chapters.
@@ -627,7 +632,7 @@ The software environment was built around tools that helped me develop the appli
 \subsubsection{Visual Studio Code}
 
 Visual Studio Code was used as the main code editor during the development of the project.
-Visual Studio Code is a free code editor offered by Microsoft that you can use to write and manage code. Visual Studio (VS) Code offers many features to make it easier and faster to work with code and is a lightweight, standalone code editor. Visual Studio Code makes it easier to write code with tools like the Intellisense code completion tool, which can help you learn more about your code and provide suggestions about how to finish the code you've typed. \href{https://www.coursera.org/articles/visual-studio-code}{[2]}.
+Visual Studio Code is a free code editor offered by Microsoft that can be used to write and manage code. It is a lightweight, standalone editor with features such as IntelliSense code completion, which provides contextual suggestions while code is being written.~\textup{[W6]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -636,12 +641,13 @@ The figure below shows its official logo.
 \caption{Official logo of Visual Studio Code}
 \label{fig:vscode_logo}
 \end{figure}
+\figdesc{This logo identifies Visual Studio Code, the editor used to write, inspect, and organize the project source files.}
 
 \subsubsection{Git}
 
 Git was used to follow the evolution of the source code during development. 
 Git is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency.
-\href{https://git-scm.com/}{[2]}.
+\textup{[W7]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -650,10 +656,11 @@ The figure below shows its official logo.
 \caption{Official logo of Git}
 \label{fig:git_logo}
 \end{figure}
+\figdesc{This logo identifies Git, the version-control tool used to track changes during development.}
 
 \subsubsection{Node.js}
 
-Node.js was used to run the backend part of the platform. Node.js is a free, open-source, cross-platform JavaScript runtime environment that lets developers create servers, web apps, command line tools and scripts. \href{https://nodejs.org/enhttps://nodejs.org/en}{[5]}.
+Node.js was used to run the backend part of the platform. Node.js is a free, open-source, cross-platform JavaScript runtime environment that lets developers create servers, web applications, command-line tools, and scripts.~\textup{[W8]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -662,12 +669,13 @@ The figure below shows its official logo.
 \caption{Official logo of Node.js}
 \label{fig:nodejs_logo}
 \end{figure}
+\figdesc{This logo identifies Node.js, the runtime used to execute the platform backend.}
 
 \subsubsection{Express.js}
 
 This section introduces Express.js .
 Express.js is the most popular Node.js web application framework, designed for building web applications and APIs.
-Express provides a thin layer of fundamental web application features without obscuring Node.js features.\href{https://www.w3schools.com/nodejs/nodejs_express.asp}{[6]}
+Express provides a thin layer of fundamental web application features without obscuring Node.js features.~\textup{[W9]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -676,10 +684,11 @@ The figure below shows its official logo.
 \caption{Official logo of Express.js}
 \label{fig:expressjs_logo}
 \end{figure}
+\figdesc{This logo identifies Express.js, the framework that structures the backend routes and HTTP services.}
 
 \subsubsection{React}
 
-React was used to build the user interface of the platform. React lets you build user interfaces out of individual pieces called components. Create your own React components like Thumbnail, LikeButton, and Video. Then combine them into entire screens, pages, and apps. \href{https://react.dev/}{[7]}
+React was used to build the user interface of the platform. It supports the construction of interfaces from reusable components that can be combined into complete screens and pages.~\textup{[W10]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -688,10 +697,11 @@ The figure below shows its official logo.
 \caption{Official logo of React}
 \label{fig:react_logo}
 \end{figure}
+\figdesc{This logo identifies React, the component-based library presented as part of the front-end environment.}
 
 \subsubsection{Vite}
 
-Vite was used as the front-end development tool. Vite is a blazing fast frontend build tool powering the next generation of web applications. \href{https://vite.dev/}{[8]}
+Vite was used as the front-end development tool. It provides a fast development server and a production build process for modern web applications.~\textup{[W11]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -700,12 +710,13 @@ The figure below shows its official logo.
 \caption{Official logo of Vite}
 \label{fig:vite_logo}
 \end{figure}
+\figdesc{This logo identifies Vite, the development and build tool used for the front-end workflow.}
 
 \subsubsection{HTML}
 
 HTML was used to structure the web pages of the platform, 
 HTML (HyperText Markup Language) is the most basic building block of the Web. It defines the meaning and structure of web content.
-\href{https://developer.mozilla.org/en-US/docs/Web/HTML}{[8]}
+\textup{[W12]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -714,12 +725,13 @@ The figure below shows its official logo.
 \caption{Official logo of HTML}
 \label{fig:HTML_logo}
 \end{figure}
+\figdesc{This logo identifies HTML, which defines the semantic structure of the platform pages.}
 
 \subsubsection{CSS}
 
 CSS was used to improve the visual design. 
 Cascading Style Sheets (CSS) is a stylesheet language used to describe the presentation of a document written in HTML or XML (including XML dialects such as SVG, MathML or XHTML). CSS describes how elements should be rendered on screen, on paper, in speech, or on other media.
-\href{https://developer.mozilla.org/en-US/docs/Web/CSS}{[8]}
+\textup{[W13]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -728,11 +740,12 @@ The figure below shows its official logo.
 \caption{Official logo of CSS}
 \label{fig:CSS_logo}
 \end{figure}
+\figdesc{This logo identifies CSS, which controls the visual presentation and responsive layout of the interface.}
 
 
 \subsubsection{JavaScript}
 
-JavaScript was the main programming language used in the project. JavaScript is a versatile, dynamically typed programming language that brings life to web pages by making them interactive. It is used for building interactive web applications and supports both client-side and server-side development. \href{https://www.geeksforgeeks.org/javascript/introduction-to-javascript/}{[11]}
+JavaScript was the main programming language used in the project. It is a versatile, dynamically typed language used to build interactive web applications and supports both client-side and server-side development.~\textup{[W14]}
 
 The figure below shows its official logo.
 
@@ -742,12 +755,13 @@ The figure below shows its official logo.
 \caption{Official logo of JavaScript}
 \label{fig:javascript_logo}
 \end{figure}
+\figdesc{This logo identifies JavaScript, the main language used for client-side interaction and server-side behavior.}
 
 \subsubsection{n8n}
 
 n8n was used as the workflow automation tool. 
 n8n is an open-source workflow automation platform, enables users to visually create workflows with a node-based interface. Unlike typical no-code tools, it supports developers with JavaScript, API calls and self-hosting. With over 200 integrations like Google Sheets, Slack, GitHub, etc.
-\href{https://www.geeksforgeeks.org/artificial-intelligence/what-is-n8n/}{[12]}
+\textup{[W15]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -756,11 +770,12 @@ The figure below shows its official logo.
 \caption{Official logo of n8n}
 \label{fig:n8n_logo}
 \end{figure}
+\figdesc{This logo identifies n8n, the automation layer that coordinates webhook requests and CRM workflow steps.}
 
 \subsubsection{Odoo CRM}
 
 Odoo CRM was used as the CRM system connected to the platform. Odoo CRM helps businesses manage leads, track sales, and automate customer interactions. It integrates with other Odoo applications, allowing businesses to handle CRM alongside sales, marketing, and operations. This article explores Odoo CRM's core features, how it compares to dedicated CRMs, and how it connects with other business areas.
-\href{https://muchconsulting.com/blog/odoo-2/odoo-crm-66}{[13]}
+\textup{[W1]}
 
 The figure below shows its official logo.
 
@@ -770,11 +785,12 @@ The figure below shows its official logo.
 \caption{Official logo of Odoo}
 \label{fig:odoo_logo}
 \end{figure}
+\figdesc{This logo identifies Odoo CRM, the live system of record for leads and opportunities.}
 
 \subsubsection{PostgreSQL}
 
 PostgreSQL was used with Odoo as the database system. PostgreSQL is a powerful, open source object-relational database system that uses and extends the SQL language combined with many features that safely store and scale the most complicated data workloads.
-\href{https://www.postgresql.org/about/}{[14]}
+\textup{[W16]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -783,10 +799,11 @@ The figure below shows its official logo.
 \caption{Official logo of PostgreSQL}
 \label{fig:postsql_logo}
 \end{figure}
+\figdesc{This logo identifies PostgreSQL, the relational database used by the Odoo environment.}
 
 \subsubsection{Docker Desktop}
 
-Docker Desktop was used to run services such as Odoo, PostgreSQL, and n8n in a local environment. Docker Desktop is a powerful application that enables developers to build, ship, and run containerized applications on their local machines. It's available for both Windows and macOS operating systems and provides an intuitive graphical user interface (GUI) for managing Docker containers and images. \href{https://dev.to/meghasharmaaaa/overview-of-docker-desktop-5147}{[15]}
+Docker Desktop was used to run services such as Odoo, PostgreSQL, and n8n in a local environment. It enables developers to build, ship, and run containerized applications locally and provides a graphical interface for managing containers and images.~\textup{[W17]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -795,21 +812,22 @@ The figure below shows its official logo.
 \caption{Official logo of Docker}
 \label{fig:docker_logo}
 \end{figure}
+\figdesc{This logo identifies Docker, which packages and runs the local service environment in containers.}
 
 \subsubsection{NeDB}
 
 NeDB was used as a local embedded database for the platform. NeDB is a lightweight embedded document DBMS written in JavaScript. It supports Node.js, nw.js, Electron, and web browser environments. It is designed to be partially compatible with MongoDB's JSON-based query API. NeDB is useful for storing small amounts of data in memory. When the amount of data exceeds the bounds of what NeDB can hold effectively, switching to MongoDB is intended to be straightforward because it uses the same API.
-\href{https://dev.to/meghasharmaaaa/overview-of-docker-desktop-5147}{[16]}
+\textup{[W18]}
 
 \subsubsection{REST APIs}
 
 REST APIs were used to connect the front end with the backend and to communicate with the automation workflows. A REST API (Representational State Transfer API) enables communication between client and server over HTTP. It exchanges data typically in JSON format using standard web protocols.
-\href{https://www.geeksforgeeks.org/node-js/rest-api-introduction/}{[17]}
+\textup{[W19]}
 
 \subsubsection{JSON}
 
 JSON was used as the main data format exchanged between the web application, the backend, and the workflows. JSON is a text format that is completely language independent but uses conventions that are familiar to programmers of the C-family of languages, including C, C++, C\#, Java, JavaScript, Perl, Python, and many others. These properties make JSON an ideal data-interchange language.
-\href{https://www.json.org/json-en.html}{[18]}
+\textup{[W20]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -818,12 +836,12 @@ The figure below shows its official logo.
 \caption{Official logo of JSON}
 \label{fig:json_logo}
 \end{figure}
+\figdesc{This logo identifies JSON, the data format exchanged between the interface, backend, workflows, and CRM services.}
 
 \subsubsection{Ollama}
 
 Ollama was used for AI-related tasks in the project.
-Ollama stands for (Omni-Layer Learning Language Acquisition Model), At its core, Ollama is a groundbreaking platform that democratizes access to large language models (LLMs) by enabling users to run them locally on their machines. Developed with a vision to empower individuals and organizations, Ollama provides a user-friendly interface and provides access to various models through a single point of contact.
-\href{https://www.geeksforgeeks.org/artificial-intelligence/what-is-ollama/}{[18]}
+Ollama is a platform for running large language models locally. It provides a command-line interface and local API through which applications can download, manage, and invoke supported models.~\textup{[W21]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -832,13 +850,11 @@ The figure below shows its official logo.
 \caption{Official logo of Ollama}
 \label{fig:ollama_logo}
 \end{figure}
+\figdesc{This logo identifies Ollama, the local runtime used to execute supported language models.}
 
 \subsubsection{Groq}
 
-Groq was used for AI-related tasks in the project.
-GROQ (Graph-Relational Object Queries) is Sanity's powerful query language designed to help you describe exactly what information your application needs.
-
-\href{https://www.sanity.io/docs/content-lake/groq-introduction}{[18]}
+Groq was used for hosted AI inference in the project. Its API gives applications access to supported language models and is integrated into the live assistant workflow for fast response generation.~\textup{[W22]}
 The figure below shows its official logo.
 
 \begin{figure}[H]
@@ -847,6 +863,7 @@ The figure below shows its official logo.
 \caption{Official logo of Groq}
 \label{fig:groq_logo}
 \end{figure}
+\figdesc{This logo identifies Groq, the hosted inference service used by the live CRM assistant workflow.}
 
 \subsubsection{Web Browser}
 
@@ -862,6 +879,7 @@ Python was used for small development and testing scripts around the platform. I
 \caption{Official logo of Python}
 \label{fig:python_logo}
 \end{figure}
+\figdesc{This logo identifies Python, which supported small preparation and validation scripts during development.}
 
 \section{Workflow Study and Conceptual Design}\label{sumlbl:c2s2}
 
@@ -907,6 +925,7 @@ The figure below shows this workflow as built in n8n.
 \caption{Lead Capture workflow}
 \label{fig:lead-capture-workflow}
 \end{figure}
+\figdesc{The workflow receives a customer message, extracts structured fields, checks Odoo for duplicates, and returns either a duplicate result or a newly created opportunity.}
 
 
 The main nodes used in this workflow are:
@@ -945,6 +964,7 @@ The figure below shows this workflow as built in n8n.
 \caption{CRM Analytics Summary workflow}
 \label{fig:crm analytics workflow}
 \end{figure}
+\figdesc{The workflow reads CRM opportunities, calculates reliable indicators, and converts the completed metrics into a concise management summary.}
 
 The main nodes used in this workflow are:
 
@@ -981,6 +1001,7 @@ The figure below shows this workflow as built in n8n.
 \caption{Smart Follow-Up workflow}
 \label{fig:smart followup workflow}
 \end{figure}
+\figdesc{The workflow finds inactive opportunities, prepares a follow-up draft for each one, and returns the reviewable results to the platform.}
 
 
 The main nodes used in this workflow are:
@@ -1019,6 +1040,7 @@ The figure below shows this workflow as built in n8n.
 \caption{AI Assistant workflow}
 \label{fig:ai assistant workflow}
 \end{figure}
+\figdesc{The workflow sends the user's question to a controlled agent, lets the agent select approved CRM tools, and returns a clean answer to the interface.}
 
 
 The main nodes used in this workflow are:
@@ -1058,6 +1080,7 @@ The figure below shows this workflow as built in n8n.
 \caption{CRM List Leads workflow}
 \label{fig:crm list leads workflow}
 \end{figure}
+\figdesc{The workflow performs a read-only retrieval of CRM opportunities, reshapes the records, and returns a consistent list for the workspace.}
 
 
 The main nodes used in this workflow are:
@@ -1099,6 +1122,14 @@ The main use cases of the platform are:
 \caption{Global use case diagram of LeadDesk}
 \label{fig:uc-global}
 \end{figure}
+\figdesc{The diagram consolidates the principal actions available across the platform and the automated services that support them.}
+
+\noindent\textbf{Actor responsibilities.}
+\begin{itemize}
+\item \textbf{Manager:} supervises CRM activity by viewing the dashboard and opportunities, running follow-ups, using the assistant, updating records, and managing the live connection.
+\item \textbf{Sales operator:} performs daily sales work by creating an account, signing in, capturing leads, consulting and updating opportunities, viewing the dashboard, and asking the assistant for CRM information.
+\item \textbf{System:} represents the backend automation composed of the server, n8n workflows, Odoo CRM, and language models; it authenticates requests, processes CRM data, detects duplicates and inactivity, and executes approved operations.
+\end{itemize}
 
 
 % ===== Sequence-diagram helper macros =====
@@ -1251,6 +1282,7 @@ The figure below shows the front-end organization based on the Model-View-Contro
 \end{tikzpicture}
 \caption{Front-end organization based on a simple Model-View-Controller separation}
 \end{figure}
+\figdesc{The diagram separates stored state and API access in the model, interface rendering in the view, and user-action coordination in the controller.}
 
 \section{Backend Technologies}\label{sumlbl:c4s4}
 The backend is built with Node.js and Express. It serves the web application, exposes the API, handles authentication, stores the local data, computes local summaries, runs the local assistant behaviour, and forwards live requests to n8n. The backend keeps three clear layers. The routes receive the requests and check the input. The services hold the business logic. The repositories are the only part that reads and writes the local database. This separation avoids mixing the web code, the logic, and the data access in the same place, and it makes the project easier to explain.
@@ -1285,6 +1317,7 @@ The local data model is presented below in three complementary views: a class di
 \includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{umls/img/class-domain.png}
 \caption{Class diagram of the local data model used by NeDB}
 \end{figure}
+\figdesc{The class diagram presents the main local entities, their attributes, and the relationships used to persist accounts, sessions, opportunities, and capture records.}
 
 The entity--association view highlights the entities and the associations between them together with their cardinalities.
 
@@ -1293,6 +1326,7 @@ The entity--association view highlights the entities and the associations betwee
 \includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{umls/img/entity-association.png}
 \caption{Entity--association view of the local data model}
 \end{figure}
+\figdesc{The entity--association view emphasizes how the local entities connect and shows the cardinality of each relationship.}
 
 The database view presents the four collections as they are physically stored, with their primary keys and the foreign-key references between them.
 
@@ -1301,6 +1335,7 @@ The database view presents the four collections as they are physically stored, w
 \includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{umls/img/database.png}
 \caption{Database view of the local data model (collections, keys, and references)}
 \end{figure}
+\figdesc{The database view translates the conceptual model into NeDB collections and identifies the keys and references used to connect stored documents.}
 
 \section{Automation and CRM Tools}\label{sumlbl:c4s6}
 The automation layer is built with n8n. This tool was chosen because it gives a visual and readable way to connect webhooks, code steps, CRM actions, and AI steps. Each workflow can be opened and checked step by step, which helps during debugging and during the oral presentation. Odoo CRM holds the real records. The workflows act on crm.lead opportunities, so the project stays compatible with a standard CRM structure.
@@ -1403,6 +1438,7 @@ The Gantt chart below shows the schedule of the tasks planned for this sprint.
 \includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{umls/img/gantt-sprint1.png}
 \caption{Sprint 1 schedule (Gantt chart)}
 \end{figure}
+\figdesc{The chart schedules the foundation work, including interface setup, authentication, navigation, local data, and initial validation.}
 
 \section{Functional Analysis}\label{sumlbl:c5s3}
 The main actor in this sprint is the platform user, who can be a sales employee or a manager. The user signs in, lands on the dashboard, moves between the pages, chooses the execution environment, and opens the settings page. The application can run in two environments: a Local one, where the Node.js backend handles the logic and the data, and a Live one, where the backend forwards the request to the n8n workflows. The same interface is used in both, so the experience stays consistent.
@@ -1415,6 +1451,14 @@ The figure below presents the use case diagram of this sprint.
 \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-platform-foundation.png}
 \caption{Use case diagram of the platform foundation}
 \end{figure}
+\figdesc{The diagram groups the common platform actions that both operational roles inherit through the general User actor.}
+
+\noindent\textbf{Actor responsibilities.}
+\begin{itemize}
+\item \textbf{User:} performs the shared actions of navigating pages, selecting the execution environment, and configuring workflow endpoints.
+\item \textbf{Manager:} specializes the User role and uses the common foundation while supervising dashboard, follow-up, and configuration activities.
+\item \textbf{Sales operator:} specializes the User role and uses the same foundation while carrying out lead capture and daily CRM operations.
+\end{itemize}
 
 The two roles, the manager and the sales operator, are generalized into a single \emph{User} actor, because they sign in and use the platform the same way. The authentication use cases are grouped in their own diagram below.
 
@@ -1423,6 +1467,14 @@ The two roles, the manager and the sales operator, are generalized into a single
 \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-authentication.png}
 \caption{Use case diagram of the authentication module}
 \end{figure}
+\figdesc{The diagram shows the account and session actions that control access to protected platform functions.}
+
+\noindent\textbf{Actor responsibilities.}
+\begin{itemize}
+\item \textbf{User:} creates an account, signs in, signs out, and restores the active session when the application reloads.
+\item \textbf{Manager:} inherits the User authentication behavior before accessing management functions.
+\item \textbf{Sales operator:} inherits the User authentication behavior before accessing operational sales functions.
+\end{itemize}
 
 A self-service account management area is also planned, so that each user can view their profile and change their username, password, or picture, or delete their account. The diagram below models this planned feature.
 
@@ -1431,6 +1483,14 @@ A self-service account management area is also planned, so that each user can vi
 \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-account-management.png}
 \caption{Use case diagram of the planned account management module}
 \end{figure}
+\figdesc{The diagram models the planned self-service actions through which an authenticated user will maintain or remove an account.}
+
+\noindent\textbf{Actor responsibilities.}
+\begin{itemize}
+\item \textbf{User:} views the profile and requests changes to the username, password, profile picture, or account status.
+\item \textbf{Manager:} inherits the User account-management actions for the manager's own profile.
+\item \textbf{Sales operator:} inherits the User account-management actions for the sales operator's own profile.
+\end{itemize}
 
 \subsection{Use Case Descriptions}\label{sumlbl:c5s3ss2}
 The table below describes the use cases shown in the three diagrams above. Here the \emph{User} actor stands for both roles (manager and sales operator), which are generalized into it. The account management use cases are planned and not yet implemented.
@@ -1481,6 +1541,7 @@ The class diagram below shows the classes involved in this sprint: the user acco
 \includegraphics[width=0.8\textwidth,height=0.5\textheight,keepaspectratio]{umls/img/class-auth.png}
 \caption{Class diagram of the authentication module}
 \end{figure}
+\figdesc{The diagram relates the user account to its authenticated session and shows the data required to identify the user and maintain access.}
 
 \subsection{Sequence Diagram}\label{sumlbl:c5s4ss1}
 The sign-in flow is the first exchange between the user and the system. The user sends the email and the password to the interface, the interface forwards them to the backend, and the backend checks the stored password before opening a session.
@@ -1492,6 +1553,7 @@ The figure below presents the sequence diagram of the sign-in workflow.
 \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-signin.png}
 \caption{Sequence diagram of the sign-in workflow}
 \end{figure}
+\figdesc{The sequence follows credentials from the interface to the backend, through password verification, and back as either a valid session or an authentication error.}
 
 The sequence below shows the sign-up flow, where a visitor creates a new account before signing in for the first time.
 
@@ -1500,6 +1562,7 @@ The sequence below shows the sign-up flow, where a visitor creates a new account
 \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-signup.png}
 \caption{Sequence diagram of the sign-up (account creation) workflow}
 \end{figure}
+\figdesc{The sequence shows how registration data is validated, securely stored, and returned as a newly created sales account.}
 
 
 \section{Realization}\label{sumlbl:c5s5}
@@ -1579,6 +1642,7 @@ The Gantt chart below shows the schedule of the tasks planned for this sprint.
 \includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{umls/img/gantt-sprint2.png}
 \caption{Sprint 2 schedule (Gantt chart)}
 \end{figure}
+\figdesc{The chart organizes the lead-capture sprint from message extraction and duplicate detection through opportunity creation, workspace listing, and tests.}
 
 \section{Functional Analysis}\label{sumlbl:c6s3}
 The capture process starts when the sales operator receives a customer message. The message can be informal and may hold the information in any order. The system reads a name when possible, an email, a phone number, an interest, an intent, a priority, and a recommended action, then shows the result to the user. The duplicate check is essential: a CRM with repeated opportunities becomes hard to manage. The workflow compares the new email and phone with the opportunities already in Odoo, returns a duplicate result when a match is found, and creates a new opportunity when there is none.
@@ -1591,6 +1655,13 @@ The figure below presents the use case diagram of this sprint.
 \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-lead-capture.png}
 \caption{Use case diagram of the lead capture module}
 \end{figure}
+\figdesc{The diagram connects the sales operator's capture actions with the automated CRM processing performed by the system.}
+
+\noindent\textbf{Actor responsibilities.}
+\begin{itemize}
+\item \textbf{Sales operator:} submits the customer message, reviews the extracted information, and consults the capture history and result.
+\item \textbf{System:} authenticates the request, extracts structured fields, compares the lead with existing CRM records, and creates the opportunity only when no duplicate exists.
+\end{itemize}
 
 \subsection{Use Case Descriptions}\label{sumlbl:c6s3ss2}
 The table below describes the use cases shown in the diagram above.
@@ -1627,6 +1698,7 @@ The class diagram below shows the classes involved in lead capture: the capture 
 \includegraphics[width=0.8\textwidth,height=0.5\textheight,keepaspectratio]{umls/img/class-capture.png}
 \caption{Class diagram of the lead capture module}
 \end{figure}
+\figdesc{The diagram links the original capture record to its extracted fields and to the CRM opportunity produced when validation succeeds.}
 
 \subsection{Sequence Diagram}\label{sumlbl:c6s4ss1}
 The sequence diagram below shows the full exchange, from the customer message to the created or duplicate result. The model reads the fields, a code step validates them, and the duplicate decision is made by code rather than by the model.
@@ -1636,6 +1708,7 @@ The sequence diagram below shows the full exchange, from the customer message to
 \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-lead-capture.png}
 \caption{Sequence diagram of the lead capture and duplicate detection workflow}
 \end{figure}
+\figdesc{The sequence traces a customer message through extraction, duplicate comparison, conditional CRM creation, and the final status returned to the operator.}
 
 The workspace also lists the existing opportunities. The sequence below shows the read-only lead listing flow that feeds the workspace.
 
@@ -1644,6 +1717,7 @@ The workspace also lists the existing opportunities. The sequence below shows th
 \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-list-leads.png}
 \caption{Sequence diagram of the workspace lead listing workflow}
 \end{figure}
+\figdesc{The sequence shows the authenticated, read-only request used to retrieve, shape, and display opportunities in the workspace.}
 
 
 \section{Realization}\label{sumlbl:c6s5}
@@ -1723,6 +1797,7 @@ The Gantt chart below shows the schedule of the tasks planned for this sprint.
 \includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{umls/img/gantt-sprint3.png}
 \caption{Sprint 3 schedule (Gantt chart)}
 \end{figure}
+\figdesc{The chart schedules dashboard indicators, analytical summaries, inactivity detection, follow-up drafting, and their integration tests.}
 
 \section{Functional Analysis}\label{sumlbl:c7s3}
 This sprint serves two actors. The manager opens the dashboard, reads the indicators, and asks for a written summary of the pipeline. The sales operator opens the follow-up center, where the system detects the inactive leads and drafts a message for each one. The indicators are computed by code, and the model is used only to turn the finished numbers into a readable summary and to draft the follow-up messages.
@@ -1735,6 +1810,14 @@ The figure below presents the use case diagram of this sprint.
 \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-analytics-followup.png}
 \caption{Use case diagram of the analytics and follow-up module}
 \end{figure}
+\figdesc{The diagram separates the manager's analytical tasks from the sales operator's follow-up tasks while showing the automation that supports both roles.}
+
+\noindent\textbf{Actor responsibilities.}
+\begin{itemize}
+\item \textbf{Manager:} views pipeline KPIs and requests a written summary to supervise CRM activity and identify priorities.
+\item \textbf{Sales operator:} opens the follow-up center, reviews inactive opportunities, and uses the generated messages to prepare renewed contact.
+\item \textbf{System:} authenticates requests, computes indicators, detects leads inactive for at least seven days, and drafts the summaries and follow-up messages returned to users.
+\end{itemize}
 
 \subsection{Use Case Descriptions}\label{sumlbl:c7s3ss2}
 The table below describes the use cases shown in the diagram above.
@@ -1771,6 +1854,7 @@ The class diagram below shows the classes involved in analytics and follow-up: t
 \includegraphics[width=0.8\textwidth,height=0.5\textheight,keepaspectratio]{umls/img/class-analytics.png}
 \caption{Class diagram of the analytics and follow-up module}
 \end{figure}
+\figdesc{The diagram connects opportunities to the computed KPI summary and to follow-up drafts created for records that meet the inactivity rule.}
 
 \subsection{Sequence Diagrams}\label{sumlbl:c7s4ss1}
 The first sequence diagram shows how the analytics summary is produced when the dashboard is opened: the numbers are computed by code, and the model only writes the summary.
@@ -1780,6 +1864,7 @@ The first sequence diagram shows how the analytics summary is produced when the 
 \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-analytics.png}
 \caption{Sequence diagram of the CRM analytics summary workflow}
 \end{figure}
+\figdesc{The sequence shows CRM records being retrieved, converted into deterministic indicators, summarized in readable text, and returned to the manager.}
 
 The second sequence diagram shows the smart follow-up, from the user request to the saved message.
 
@@ -1788,6 +1873,7 @@ The second sequence diagram shows the smart follow-up, from the user request to 
 \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-followup.png}
 \caption{Sequence diagram of the smart follow-up workflow}
 \end{figure}
+\figdesc{The sequence follows inactive-lead detection, message generation, optional CRM update, and presentation of the drafts to the sales operator.}
 
 
 \section{Realization}\label{sumlbl:c7s5}
@@ -1865,6 +1951,7 @@ The Gantt chart below shows the schedule of the tasks planned for this sprint.
 \includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{umls/img/gantt-sprint4.png}
 \caption{Sprint 4 schedule (Gantt chart)}
 \end{figure}
+\figdesc{The chart organizes assistant integration, controlled CRM tools, live endpoint configuration, safe connection testing, and final validation.}
 
 \section{Functional Analysis}\label{sumlbl:c8s3}
 The assistant answers CRM questions and performs controlled actions through tools. It does not get free access to the system. It is connected to a fixed set of Odoo tools, each with a clear description: list the opportunities, read one opportunity, create an opportunity, read the CRM notes, and update a name, a phone, or an email. The assistant also follows strict output rules, so the answer is clean for the interface. The user can also configure the workflow endpoints and test the connection from the settings page.
@@ -1877,6 +1964,15 @@ The figure below presents the use case diagram of this sprint.
 \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{umls/img/uc-assistant-live.png}
 \caption{Use case diagram of the assistant and live integration module}
 \end{figure}
+\figdesc{The diagram presents the questions and configuration actions initiated by the user and the controlled CRM services executed by the system.}
+
+\noindent\textbf{Actor responsibilities.}
+\begin{itemize}
+\item \textbf{User:} asks CRM questions, requests supported opportunity operations, configures live endpoints, and starts the safe connection test.
+\item \textbf{Manager:} specializes the User role and uses the assistant and live settings while supervising CRM activity and integration availability.
+\item \textbf{Sales operator:} specializes the User role and uses the assistant to retrieve or maintain opportunity information during daily sales work.
+\item \textbf{System:} authenticates the request, routes it through the live proxy and n8n, lets the assistant invoke only approved Odoo tools, and returns the formatted result or a clear error.
+\end{itemize}
 
 \subsection{Use Case Descriptions}\label{sumlbl:c8s3ss2}
 The table below describes the use cases shown in the diagram above.
@@ -1934,6 +2030,7 @@ The assistant is built around an agent connected to a small set of controlled to
 \end{tikzpicture}
 \caption{Tool-based CRM assistant architecture}
 \end{figure}
+\figdesc{The architecture constrains the assistant to a defined set of CRM tools so that each read or write action remains explicit, traceable, and limited in scope.}
 
 \section{Conceptual Modeling}\label{sumlbl:c8s4}
 \subsection{Class Diagram}\label{sumlbl:c8s4ssC}
@@ -1944,6 +2041,7 @@ The class diagram below shows the classes involved in the assistant: the assista
 \includegraphics[width=0.8\textwidth,height=0.5\textheight,keepaspectratio]{umls/img/class-assistant.png}
 \caption{Class diagram of the CRM assistant module}
 \end{figure}
+\figdesc{The diagram models the assistant session, user message, generated response, and controlled tool calls used to access CRM information.}
 
 \subsection{Sequence Diagram}\label{sumlbl:c8s4ss1}
 The sequence diagram below shows a full question, from the user to the displayed answer, including the live proxy and a tool call.
@@ -1953,6 +2051,7 @@ The sequence diagram below shows a full question, from the user to the displayed
 \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-assistant.png}
 \caption{Sequence diagram of the AI assistant workflow}
 \end{figure}
+\figdesc{The sequence traces a natural-language question through authentication, proxy forwarding, agent reasoning, approved Odoo tool use, and response formatting.}
 
 The settings page can also test the live connection. The sequence below shows the safe connection test, which uses the ping guard and a server-side timeout and does not modify any CRM data.
 
@@ -1961,6 +2060,7 @@ The settings page can also test the live connection. The sequence below shows th
 \includegraphics[width=0.92\textwidth,height=0.62\textheight,keepaspectratio]{umls/img/seq-test-connection.png}
 \caption{Sequence diagram of the connection test workflow}
 \end{figure}
+\figdesc{The sequence shows a read-safe health check passing through the backend proxy and workflow ping guard, with a timeout preventing an indefinite wait.}
 
 
 \section{Realization}\label{sumlbl:c8s5}
@@ -2070,6 +2170,7 @@ The figure below shows the integration path followed by a live request.
 \end{tikzpicture}
 \caption{Integration path of a live request}
 \end{figure}
+\figdesc{The diagram follows a live request from the browser through the same-origin backend proxy to n8n and Odoo, then returns the normalized response along the same path.}
 
 \section{Security and Reliability Tests}\label{sumlbl:c9s5}
 Security testing focused on simple but important points. The passwords are never stored in clear text; they are hashed with scrypt. The backend uses bearer tokens for the sessions, and the protected routes require a valid token. The live proxy checks custom endpoints so that only the n8n host is accepted.
@@ -2260,8 +2361,42 @@ TR-25 & Architecture page & Open the architecture section & The explanation and 
 \item Ollama Documentation, local large language model runtime.
 \item Groq Documentation, hosted language model API and supported models.
 \item Ken Schwaber and Jeff Sutherland, The Scrum Guide.
-\item Scrum.org, ``What is Scrum?'' module, \url{https://www.scrum.org/resources/what-scrum-module}.
+\item Scrum.org, ``What is Scrum?'' learning module.
 \item International Institute of Technology academic guidelines for final year project reporting.
+\end{enumerate}
+
+\clearpage
+\chapter*{Webography}
+\addcontentsline{toc}{chapter}{Webography}
+\markboth{WEBOGRAPHY}{WEBOGRAPHY}
+\begin{enumerate}[label={\textup{[W\arabic*]}}, leftmargin=1.5cm]
+\item Odoo, ``CRM documentation,'' \url{https://www.odoo.com/documentation/19.0/applications/sales/crm.html}.
+\item Google, ``Google Sheets,'' \url{https://workspace.google.com/products/sheets/}.
+\item Salesforce, ``What is CRM?'', \url{https://www.salesforce.com/crm/what-is-crm/}.
+\item Multisoft, ``What is an automation tool and how do you choose the right one?'', \url{https://www.multisoft.se/en/kunskapsbank/what-is-an-automation-tool-and-how-do-you-choose-the-right-one/}.
+\item Scrum.org, ``What is Scrum?'', \url{https://www.scrum.org/resources/what-scrum-module}.
+\item Microsoft, ``Visual Studio Code documentation,'' \url{https://code.visualstudio.com/docs}.
+\item Git, ``Git documentation,'' \url{https://git-scm.com/doc}.
+\item OpenJS Foundation, ``Node.js,'' \url{https://nodejs.org/en}.
+\item Express, ``Express web framework,'' \url{https://expressjs.com/}.
+\item Meta Open Source, ``React,'' \url{https://react.dev/}.
+\item Vite, ``Vite guide,'' \url{https://vite.dev/guide/}.
+\item MDN Web Docs, ``HTML: HyperText Markup Language,'' \url{https://developer.mozilla.org/en-US/docs/Web/HTML}.
+\item MDN Web Docs, ``CSS: Cascading Style Sheets,'' \url{https://developer.mozilla.org/en-US/docs/Web/CSS}.
+\item MDN Web Docs, ``JavaScript,'' \url{https://developer.mozilla.org/en-US/docs/Web/JavaScript}.
+\item n8n, ``Workflow automation documentation,'' \url{https://docs.n8n.io/}.
+\item PostgreSQL Global Development Group, ``About PostgreSQL,'' \url{https://www.postgresql.org/about/}.
+\item Docker, ``Docker Desktop documentation,'' \url{https://docs.docker.com/desktop/}.
+\item NeDB project repository, \url{https://github.com/louischatriot/nedb}.
+\item MDN Web Docs, ``REST,'' \url{https://developer.mozilla.org/en-US/docs/Glossary/REST}.
+\item JSON.org, ``Introducing JSON,'' \url{https://www.json.org/json-en.html}.
+\item Ollama, ``Ollama documentation,'' \url{https://docs.ollama.com/}.
+\item Groq, ``Groq developer documentation,'' \url{https://console.groq.com/docs/overview}.
+\item Connexant, company website, \url{http://connexant.net/}.
+\item Microsoft, ``Microsoft Excel,'' \url{https://www.microsoft.com/en-us/microsoft-365/excel}.
+\item Odoo, ``Odoo CRM,'' \url{https://www.odoo.com/app/crm}.
+\item Zapier, company website, \url{https://zapier.com/}.
+\item Make, company website, \url{https://www.make.com/}.
 \end{enumerate}
 
 \includepdf[pages=1,fitpaper=true]{backpage-filled.pdf}
